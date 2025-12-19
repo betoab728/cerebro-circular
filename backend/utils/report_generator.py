@@ -13,14 +13,19 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     story = []
 
     # Logo Logic
-    # Backend is in /backend, logo is in /static
-    # Calculate absolute path to backend directory
-    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
-    logo_path = os.path.join(backend_dir, "..", "static", "logoazul.png")
+    # File structure:
+    # project_root/
+    #   backend/utils/report_generator.py
+    #   static/logoazul.png
     
-    # Resolve to absolute path to avoid relative path issues
-    logo_path = os.path.abspath(logo_path)
-    print(f"DEBUG: Logo Path Resolved: {logo_path}")
+    current_dir = os.path.dirname(os.path.abspath(__file__)) # utils
+    backend_dir = os.path.dirname(current_dir) # backend
+    project_root = os.path.dirname(backend_dir) # project_root
+    
+    logo_path = os.path.join(project_root, "static", "logoazul.png")
+    
+    print(f"DEBUG: Calculated Logo Path: {logo_path}")
+    print(f"DEBUG: File Exists? {os.path.exists(logo_path)}")
 
     if os.path.exists(logo_path):
         im = Image(logo_path, width=150, height=50) 
