@@ -66,7 +66,7 @@ async def analyze_waste(file: UploadFile = File(...), type: str = Form("technica
         "category": "String",
         "confidence": Number (0-100),
         "physicochemical": [ {"name": "String", "value": "String", "method": "String"} ],
-        "elemental": [ {"label": "String ("C"|"H", etc)", "value": Number, "trace": Boolean} ],
+        "elemental": [ {"label": "String (e.g., 'C (Carbono)')", "value": Number, "trace": Boolean} ],
         "engineeringContext": { "structure": "String", "processability": "String", "impurities": "String" },
         "valorizationRoutes": [ {"role": "String", "method": "String", "output": "String", "score": Number (0-100)} ]
     }
