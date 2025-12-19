@@ -33,6 +33,7 @@ class PhysicochemicalProp(BaseModel):
 class ElementalComp(BaseModel):
     label: str
     value: float
+    description: str | None = None
     trace: bool = False
 
 class EngineeringContext(BaseModel):

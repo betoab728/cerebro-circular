@@ -251,6 +251,9 @@
                     <div class="text-xl font-bold {el.value > 0 ? 'text-gray-800' : 'text-gray-300'}">
                       {el.value}%
                     </div>
+                    {#if el.description}
+                        <div class="text-[10px] text-gray-400 mt-1 leading-tight">{el.description}</div>
+                    {/if}
                   </div>
                 {/each}
               </div>
