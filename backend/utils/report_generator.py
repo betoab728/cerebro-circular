@@ -54,10 +54,14 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     
     table_data = [["Propiedad", "Valor", "Método"]]
     
-    # Define a style for table cells (e.g. Normal, but maybe smaller font if needed, we'll use Normal for now)
-    cell_style = styles['BodyText']
-    cell_style.fontSize = 9
-    cell_style.leading = 11
+    # Define a custom style for table cells
+    cell_style = ParagraphStyle(
+        'CellStyle',
+        parent=styles['BodyText'],
+        fontSize=9,
+        leading=11,
+        spaceAfter=0,
+    )
 
     for prop in data.physicochemical:
         # Wrap each cell content in a Paragraph to allow multiline
@@ -74,10 +78,15 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
     ]))
     story.append(t)
     story.append(Spacer(1, 12))
