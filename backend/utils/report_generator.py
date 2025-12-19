@@ -14,11 +14,16 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
 
     # Logo Logic
     # Backend is in /backend, logo is in /static
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # go up one level from utils
-    logo_path = os.path.join(base_dir, "..", "static", "logoazul.png")
+    # Calculate absolute path to backend directory
+    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
+    logo_path = os.path.join(backend_dir, "..", "static", "logoazul.png")
     
+    # Resolve to absolute path to avoid relative path issues
+    logo_path = os.path.abspath(logo_path)
+    print(f"DEBUG: Logo Path Resolved: {logo_path}")
+
     if os.path.exists(logo_path):
-        im = Image(logo_path, width=150, height=50) # Adjust size as needed, using aspect ratio if possible
+        im = Image(logo_path, width=150, height=50) 
         im.hAlign = 'LEFT'
         story.append(im)
         story.append(Spacer(1, 12))
@@ -29,6 +34,13 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     title_style = styles['Title']
     heading_style = styles['Heading2']
     normal_style = styles['BodyText']
+    
+    # Define italics style for summary
+    italic_style = ParagraphStyle(
+        'ItalicStyle',
+        parent=styles['BodyText'],
+        fontName='Helvetica-Oblique'
+    )
 
     # Title
     story.append(Paragraph("Informe Técnico de Caracterización", title_style))
@@ -95,6 +107,12 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     story.append(Paragraph("Composición Elemental", heading_style))
     elem_text = ", ".join([f"{el.label}: {el.value}%" for el in data.elemental])
     story.append(Paragraph(elem_text, normal_style))
+    
+    # Add Elemental Summary
+    if data.elementalSummary:
+        story.append(Spacer(1, 6))
+        story.append(Paragraph(f"<b>Resumen:</b> {data.elementalSummary}", italic_style))
+
     story.append(Spacer(1, 12))
 
     # Valorization Routes
