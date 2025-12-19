@@ -53,5 +53,6 @@ class AnalysisResult(BaseModel):
     confidence: float
     physicochemical: List[PhysicochemicalProp]
     elemental: List[ElementalComp]
+    elementalSummary: str | None = None
     engineeringContext: EngineeringContext
     valorizationRoutes: List[ValorizationRoute]
