@@ -53,9 +53,22 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     story.append(Paragraph("Propiedades Físico-Químicas", heading_style))
     
     table_data = [["Propiedad", "Valor", "Método"]]
-    for prop in data.physicochemical:
-        table_data.append([prop.name, prop.value, prop.method])
+    
+    # Define a style for table cells (e.g. Normal, but maybe smaller font if needed, we'll use Normal for now)
+    cell_style = styles['BodyText']
+    cell_style.fontSize = 9
+    cell_style.leading = 11
 
+    for prop in data.physicochemical:
+        # Wrap each cell content in a Paragraph to allow multiline
+        row = [
+            Paragraph(prop.name, cell_style),
+            Paragraph(prop.value, cell_style),
+            Paragraph(prop.method, cell_style)
+        ]
+        table_data.append(row)
+
+    # Allow row heights to be automatic based on content
     t = Table(table_data, colWidths=[200, 150, 100])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
