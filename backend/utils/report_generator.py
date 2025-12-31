@@ -143,9 +143,17 @@ def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
     story = []
 
     # --- Header & Logo ---
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(os.path.dirname(current_dir))
-    logo_path = os.path.join(project_root, "static", "logoazul.png")
+    # Logo is expected to be in the 'backend' folder (copied from static)
+    current_dir = os.path.dirname(os.path.abspath(__file__)) # utils
+    backend_dir = os.path.dirname(current_dir) # backend
+    
+    # Try finding logo in backend dir first (deployment safe)
+    logo_path = os.path.join(backend_dir, "logoazul.png")
+    
+    # Fallback to project root static for local dev if not found
+    if not os.path.exists(logo_path):
+         project_root = os.path.dirname(backend_dir)
+         logo_path = os.path.join(project_root, "static", "logoazul.png")
     
     if os.path.exists(logo_path):
         im = Image(logo_path, width=150, height=50) 
