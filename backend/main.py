@@ -154,7 +154,7 @@ async def analyze_waste(file: UploadFile = File(...), type: str = Form("technica
         raise HTTPException(status_code=500, detail=f"AI Processing Failed: {str(e)}")
 
 
-@app.post("/predictive-analysis")
+@app.post("/predictive-analysis", response_model=PredictiveAnalysisResult)
 async def predictive_analysis(
     image: UploadFile = File(...),
     document: UploadFile = File(...)
@@ -228,7 +228,7 @@ async def predictive_analysis(
              "justification": "String"
           }
         }
-        Translate fields to Spanish. Return ONLY valid JSON.
+        Translate fields to Spanish. Return ONLY valid JSON. Ensure all keys are present.
         """
 
         generation_parts = [
@@ -255,7 +255,18 @@ async def predictive_analysis(
         if result_text.startswith("```"): result_text = result_text[3:]
         if result_text.endswith("```"): result_text = result_text[:-3]
 
-        return json.loads(result_text.strip())
+        parsed_json = json.loads(result_text.strip())
+        
+        # Explicit validation (although response_model does it too, this helps debug)
+        if "environmentalImpact" not in parsed_json:
+             print("WARNING: Gemini missed 'environmentalImpact' key. Adding placeholder.")
+             parsed_json["environmentalImpact"] = {
+                 "carbonFootprintLevel": "Medium",
+                 "recycledContentPotential": "Unknown",
+                 "hazardLevel": "Unknown"
+             }
+
+        return parsed_json
 
     except Exception as e:
         print(f"Predictive Analysis Failed: {str(e)}")
