@@ -197,6 +197,8 @@ def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
     plt.close()
     
     story.append(Image(img_buffer, width=400, height=100))
+    story.append(Paragraph("<i>* 0-30: Bajo (Un uso) | 31-70: Medio (Reciclable) | 71-100: Alto (Reutilizable/Durable)</i>", styles['Normal']))
+    story.append(Spacer(1, 6))
     story.append(Paragraph(f"<i>Disposición: {data.lifecycleMetrics.disposalStage}</i>", styles['Normal']))
     story.append(Spacer(1, 12))
 
