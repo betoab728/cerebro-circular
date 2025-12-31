@@ -14,7 +14,19 @@ from routers import auth
 from utils.report_generator import generate_pdf_report, generate_predictive_report
 from models import AnalysisResult, PredictiveAnalysisResult
 
-# ... (existing code)
+# Load environment variables
+load_dotenv()
+
+app = FastAPI(title="CEREBRO CIRCULAR API", version="1.0.0")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/report")
 async def get_report(data: AnalysisResult):
@@ -41,20 +53,6 @@ async def get_predictive_report(data: PredictiveAnalysisResult):
     except Exception as e:
         print(f"Predictive Report Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Report Generation Failed: {str(e)}")
-
-# Load environment variables
-load_dotenv()
-
-app = FastAPI(title="CEREBRO CIRCULAR API", version="1.0.0")
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173", "*"], 
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Initialize Database
 @app.on_event("startup")
