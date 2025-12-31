@@ -260,16 +260,6 @@ async def predictive_analysis(
         if result_text.endswith("```"): result_text = result_text[:-3]
 
         parsed_json = json.loads(result_text.strip())
-        
-        # Explicit validation (although response_model does it too, this helps debug)
-        if "environmentalImpact" not in parsed_json:
-             print("WARNING: Gemini missed 'environmentalImpact' key. Adding placeholder.")
-             parsed_json["environmentalImpact"] = {
-                 "carbonFootprintLevel": "Medium",
-                 "recycledContentPotential": "Unknown",
-                 "hazardLevel": "Unknown"
-             }
-
         return parsed_json
 
     except Exception as e:

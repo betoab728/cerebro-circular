@@ -59,32 +59,32 @@ class AnalysisResult(BaseModel):
 
 # Predictive Analysis Models
 class ProductOverview(BaseModel):
-    productName: str
-    detectedPackaging: str
-    detectedContent: str
+    productName: str = "Producto Desconocido"
+    detectedPackaging: str = "No identificado"
+    detectedContent: str = "No identificado"
 
 class LifecycleMetrics(BaseModel):
-    estimatedLifespan: str
-    durabilityScore: float
-    disposalStage: str
+    estimatedLifespan: str = "Desconocido"
+    durabilityScore: float = 0.0
+    disposalStage: str = "Desconocido"
 
 class EnvironmentalImpact(BaseModel):
-    carbonFootprintLevel: str
-    recycledContentPotential: str
-    hazardLevel: str
+    carbonFootprintLevel: str = "Desconocido"
+    recycledContentPotential: str = "Desconocido"
+    hazardLevel: str = "Desconocido"
 
 class EconomicAnalysis(BaseModel):
-    recyclingViability: str
-    estimatedRecyclingValue: str
-    costBenefitAction: str
+    recyclingViability: str = "Desconocido"
+    estimatedRecyclingValue: str = "S/. 0.00"
+    costBenefitAction: str = "Sin recomendación"
 
 class CircularStrategy(BaseModel):
-    recommendedRoute: str
-    justification: str
+    recommendedRoute: str = "Reciclaje General"
+    justification: str = "Falta información suficiente para una estrategia específica."
 
 class PredictiveAnalysisResult(BaseModel):
-    productOverview: ProductOverview
-    lifecycleMetrics: LifecycleMetrics
-    environmentalImpact: EnvironmentalImpact
-    economicAnalysis: EconomicAnalysis
-    circularStrategy: CircularStrategy
+    productOverview: ProductOverview = Field(default_factory=ProductOverview)
+    lifecycleMetrics: LifecycleMetrics = Field(default_factory=LifecycleMetrics)
+    environmentalImpact: EnvironmentalImpact = Field(default_factory=EnvironmentalImpact)
+    economicAnalysis: EconomicAnalysis = Field(default_factory=EconomicAnalysis)
+    circularStrategy: CircularStrategy = Field(default_factory=CircularStrategy)
