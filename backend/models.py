@@ -56,3 +56,35 @@ class AnalysisResult(BaseModel):
     elementalSummary: str | None = None
     engineeringContext: EngineeringContext
     valorizationRoutes: List[ValorizationRoute]
+
+# Predictive Analysis Models
+class ProductOverview(BaseModel):
+    productName: str
+    detectedPackaging: str
+    detectedContent: str
+
+class LifecycleMetrics(BaseModel):
+    estimatedLifespan: str
+    durabilityScore: float
+    disposalStage: str
+
+class EnvironmentalImpact(BaseModel):
+    carbonFootprintLevel: str
+    recycledContentPotential: str
+    hazardLevel: str
+
+class EconomicAnalysis(BaseModel):
+    recyclingViability: str
+    estimatedRecyclingValue: str
+    costBenefitAction: str
+
+class CircularStrategy(BaseModel):
+    recommendedRoute: str
+    justification: str
+
+class PredictiveAnalysisResult(BaseModel):
+    productOverview: ProductOverview
+    lifecycleMetrics: LifecycleMetrics
+    environmentalImpact: EnvironmentalImpact
+    economicAnalysis: EconomicAnalysis
+    circularStrategy: CircularStrategy

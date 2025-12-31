@@ -130,3 +130,109 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     doc.build(story)
     buffer.seek(0)
     return buffer
+
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg') # Non-interactive backend
+from models import PredictiveAnalysisResult
+
+def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    story = []
+
+    # --- Header & Logo ---
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(current_dir))
+    logo_path = os.path.join(project_root, "static", "logoazul.png")
+    
+    if os.path.exists(logo_path):
+        im = Image(logo_path, width=150, height=50) 
+        im.hAlign = 'LEFT'
+        story.append(im)
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph(f"Informe de Predicción Inteligente: {data.productOverview.productName}", styles['Title']))
+    story.append(Paragraph("Evaluación de Ciclo de Vida y Economía Circular", styles['Italic']))
+    story.append(Spacer(1, 12))
+
+    # --- Product Summary Table ---
+    data_summary = [
+        ["Producto", data.productOverview.productName],
+        ["Empaque Detectado", data.productOverview.detectedPackaging],
+        ["Contenido Detectado", data.productOverview.detectedContent]
+    ]
+    t_summary = Table(data_summary, colWidths=[150, 300])
+    t_summary.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#F3F4F6')),
+        ('TEXTCOLOR', (0,0), (0,-1), colors.black),
+        ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
+        ('GRID', (0,0), (-1,-1), 1, colors.grey),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(t_summary)
+    story.append(Spacer(1, 20))
+
+    # --- 1. Lifecycle Metrics (Chart) ---
+    story.append(Paragraph("1. Métricas de Ciclo de Vida", styles['Heading2']))
+    story.append(Paragraph(f"Vida Útil Estimada: {data.lifecycleMetrics.estimatedLifespan}", styles['Normal']))
+    
+    # Generate Horizontal Bar Chart for Durability
+    plt.figure(figsize=(6, 1.5))
+    plt.barh(['Durabilidad'], [data.lifecycleMetrics.durabilityScore], color='#3B82F6', height=0.5)
+    plt.xlim(0, 100)
+    plt.title(f"Score de Durabilidad: {data.lifecycleMetrics.durabilityScore}/100")
+    plt.tight_layout()
+    
+    img_buffer = BytesIO()
+    plt.savefig(img_buffer, format='png', dpi=100)
+    img_buffer.seek(0)
+    plt.close()
+    
+    story.append(Image(img_buffer, width=400, height=100))
+    story.append(Paragraph(f"<i>Disposición: {data.lifecycleMetrics.disposalStage}</i>", styles['Normal']))
+    story.append(Spacer(1, 12))
+
+    # --- 2. Environmental Impact ---
+    story.append(Paragraph("2. Impacto Ambiental", styles['Heading2']))
+    
+    impact_data = [
+        ["Huella de Carbono", data.environmentalImpact.carbonFootprintLevel],
+        ["Peligrosidad", data.environmentalImpact.hazardLevel],
+        ["Potencial Reciclado", data.environmentalImpact.recycledContentPotential]
+    ]
+    t_impact = Table(impact_data, colWidths=[150, 300])
+    t_impact.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
+        ('TEXTCOLOR', (1,0), (1,0), colors.red if 'High' in data.environmentalImpact.carbonFootprintLevel or 'Alto' in data.environmentalImpact.carbonFootprintLevel else colors.green),
+    ]))
+    story.append(t_impact)
+    story.append(Spacer(1, 12))
+
+    # --- 3. Economic Analysis ---
+    story.append(Paragraph("3. Análisis Económico (Estimado)", styles['Heading2']))
+    story.append(Paragraph(f"Valor estimado de Recuperación: <b>{data.economicAnalysis.estimatedRecyclingValue}</b>", styles['Normal']))
+    
+    story.append(Spacer(1, 6))
+    p_action = Paragraph(f"Recomendación: {data.economicAnalysis.costBenefitAction}", styles['Normal'])
+    p_action_style = TableStyle([('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#FEF3C7')), ('BOX', (0,0), (-1,-1), 1, colors.orange)])
+    t_action = Table([[p_action]], colWidths=[450])
+    t_action.setStyle(p_action_style)
+    story.append(t_action)
+
+    story.append(Spacer(1, 20))
+
+    # --- 4. Circular Strategy ---
+    story.append(Paragraph("4. Estrategia Circular Recomendada", styles['Heading2']))
+    
+    strat_text = f'''
+    <b>Ruta: {data.circularStrategy.recommendedRoute}</b><br/><br/>
+    {data.circularStrategy.justification}
+    '''
+    story.append(Paragraph(strat_text, styles['Normal']))
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer

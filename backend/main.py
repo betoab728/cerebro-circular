@@ -11,8 +11,36 @@ from PIL import Image
 from sqlmodel import SQLModel
 from database import engine
 from routers import auth
-from utils.report_generator import generate_pdf_report
-from models import AnalysisResult
+from utils.report_generator import generate_pdf_report, generate_predictive_report
+from models import AnalysisResult, PredictiveAnalysisResult
+
+# ... (existing code)
+
+@app.post("/report")
+async def get_report(data: AnalysisResult):
+    try:
+        pdf_buffer = generate_pdf_report(data)
+        return StreamingResponse(
+            pdf_buffer, 
+            media_type="application/pdf", 
+            headers={"Content-Disposition": f"attachment; filename=technical_report_{data.materialName}.pdf"}
+        )
+    except Exception as e:
+        print(f"Report Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Report Generation Failed: {str(e)}")
+
+@app.post("/predictive-report")
+async def get_predictive_report(data: PredictiveAnalysisResult):
+    try:
+        pdf_buffer = generate_predictive_report(data)
+        return StreamingResponse(
+            pdf_buffer, 
+            media_type="application/pdf", 
+            headers={"Content-Disposition": f"attachment; filename=prediccion_inteligente_{data.productOverview.productName}.pdf"}
+        )
+    except Exception as e:
+        print(f"Predictive Report Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Report Generation Failed: {str(e)}")
 
 # Load environment variables
 load_dotenv()

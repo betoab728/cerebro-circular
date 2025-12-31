@@ -76,6 +76,31 @@
     error = null;
   }
 
+  async function downloadReport() {
+    if (!results) return;
+    try {
+        const response = await fetch(`${PUBLIC_API_URL}/predictive-report`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(results)
+        });
+
+        if (!response.ok) throw new Error("Download failed");
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Prediccion_${results.productOverview.productName}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error("Report Download Error:", e);
+        alert("Error al descargar el reporte.");
+    }
+  }
+
   // --- HELPERS FOR UI ---
   function getScoreColor(score: number): string {
     if (score >= 80) return 'text-emerald-600 bg-emerald-50 border-emerald-200';
@@ -215,7 +240,13 @@
                     🧪 {results.productOverview.detectedContent}
                 </div>
             </div>
-            <button on:click={reset} class="text-sm text-slate-400 hover:text-slate-600 underline">Nuevo Análisis</button>
+            <div class="flex gap-4">
+                <button on:click={downloadReport} class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Descargar Informe
+                </button>
+                <button on:click={reset} class="text-sm text-slate-400 hover:text-slate-600 underline">Nuevo Análisis</button>
+            </div>
         </div>
 
         <!-- 3 PILLARS GRID -->
