@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fade, fly, slide } from 'svelte/transition';
   import { onMount } from 'svelte';
+  import { PUBLIC_API_URL } from '$env/static/public';
 
   // --- STORES & STATE ---
   let imageFile: File | null = null;
@@ -45,7 +46,7 @@
         formData.append('image', imageFile);
         formData.append('document', docFile);
 
-        const response = await fetch('http://localhost:8000/predictive-analysis', {
+        const response = await fetch(`${PUBLIC_API_URL}/predictive-analysis`, {
             method: 'POST',
             body: formData
         });
