@@ -274,6 +274,11 @@
                         <div class="w-full bg-slate-100 rounded-full h-2">
                             <div class="bg-blue-500 h-2 rounded-full" style="width: {results.lifecycleMetrics.durabilityScore}%"></div>
                         </div>
+                        <p class="text-[10px] text-slate-400 mt-2 text-justify leading-tight">
+                            * El score (0-100) indica la <b>integridad estructural</b> y <b>potencial de reutilización</b>.
+                            <br>
+                            <span class="opacity-75">100 = Altamente reutilizable. 0 = Un solo uso.</span>
+                        </p>
                     </div>
                     
                     <div class="p-3 bg-slate-50 rounded-lg text-xs text-slate-600 leading-relaxed border border-slate-100">
