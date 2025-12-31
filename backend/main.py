@@ -160,38 +160,45 @@ async def predictive_analysis(
 
         # 4. Construct Multi-modal Prompt
         prompt_text = """
-        ACT AS: Expert Material Scientist & Circular Economy Strategist.
-        TASK: Perform a PREDICTIVE LIFECYCLE ANALYSIS based on the PRODUCT IMAGE (packaging/form factor) and TECHNICAL DATASHEET (content/chemical composition).
+        ACT AS: Expert Material Scientist & Circular Economy Strategist (Peru Context).
+        TASK: Perform a PREDICTIVE LIFECYCLE ANALYSIS based on the PRODUCT IMAGE and TECHNICAL DATASHEET.
         
+        CRITICAL INSTRUCTION: 
+        - Do NOT just analyze the empty packaging (e.g. plastic bottle).
+        - YOU MUST Analyze the COMPLETE PRODUCT: The Container (Packaging) AND The Content (The Chemical/Liquid inside).
+        - Use the IMAGE to identify the container type.
+        - Use the PDF/Datasheet to identify the Chemical Content properties.
+        - Combine both to determine the full lifecycle.
+
         Analyze these factors:
-        1. PRODUCT PACKAGING (from Image): Identify material (plastic type, cardboard, etc.), single-use vs durable.
-        2. CHEMICAL/PRODUCT CONTENT (from PDF): Identify hazardous components, shelf life, active ingredients.
-        3. INTEGRATION: Predict the fate of this item.
+        1. PRODUCT SYSTEM: Container material + Chemical content.
+        2. LIFECYCLE: How long does the content last? What happens to the container after content is used?
+        3. ECONOMIC: Use PERUVIAN CURRENCY (S/.) for all value estimates.
 
         OUTPUT: Strictly JSON matching this schema:
         {
           "productOverview": {
-             "productName": "String",
-             "detectedPackaging": "String (e.g., HDPE Bottle)",
-             "detectedContent": "String (e.g., Sodium Hypochlorite Solution)"
+             "productName": "String (Commercial Name)",
+             "detectedPackaging": "String (e.g., HDPE Bottle, industrial grade)",
+             "detectedContent": "String (e.g., Sodium Hypochlorite 5%)"
           },
           "lifecycleMetrics": {
-             "estimatedLifespan": "String (e.g., '6 months shelf life')",
+             "estimatedLifespan": "String (e.g., '6 months active shelf life')",
              "durabilityScore": Number (0-100),
-             "disposalStage": "String (e.g., 'Packaging becomes waste, content is consumed')"
+             "disposalStage": "String (e.g., 'Container: Recycle, Residue: Hazardous disposal')"
           },
           "environmentalImpact": {
              "carbonFootprintLevel": "String (Low/Medium/High)",
-             "recycledContentPotential": "String (Details on recyclability)",
-             "hazardLevel": "String (Based on MSDS)"
+             "recycledContentPotential": "String (e.g., 'Bottle is 100% recyclable if rinsed')",
+             "hazardLevel": "String (Based on MSDS content)"
           },
           "economicAnalysis": {
              "recyclingViability": "String (High/Low)",
-             "estimatedRecyclingValue": "String (e.g., '$0.50/kg for HDPE')",
-             "costBenefitAction": "String (e.g., 'Profitable to segregation')"
+             "estimatedRecyclingValue": "String (e.g., 'S/. 1.20/kg for HDPE')",
+             "costBenefitAction": "String (e.g., 'Profitable to segregate')"
           },
           "circularStrategy": {
-             "recommendedRoute": "String (Reuse, Recycle, Incineration, etc.)",
+             "recommendedRoute": "String (Reuse, Recycle, Neutralization, etc.)",
              "justification": "String"
           }
         }
