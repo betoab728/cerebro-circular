@@ -127,7 +127,107 @@ async def analyze_waste(file: UploadFile = File(...), type: str = Form("technica
         # Return meaningful error to frontend
         raise HTTPException(status_code=500, detail=f"AI Processing Failed: {str(e)}")
 
-@app.post("/report")
+
+@app.post("/predictive-analysis")
+async def predictive_analysis(
+    image: UploadFile = File(...),
+    document: UploadFile = File(...)
+):
+    print(f"Starting Predictive Analysis with Image: {image.filename} and Document: {document.filename}")
+    
+    if not os.getenv("GOOGLE_API_KEY"):
+         raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not configured on server.")
+
+    try:
+        # 1. Read Inputs
+        image_content = await image.read()
+        pdf_content = await document.read()
+
+        # 2. Process Image
+        image_stream = io.BytesIO(image_content)
+        img_pil = Image.open(image_stream)
+
+        # 3. Process PDF
+        try:
+            pdf_file = io.BytesIO(pdf_content)
+            reader = pypdf.PdfReader(pdf_file)
+            extracted_text = ""
+            for page in reader.pages:
+                extracted_text += page.extract_text() + "\n"
+            extracted_text = extracted_text[:30000] # Cap for context window
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to read PDF: {str(e)}")
+
+        # 4. Construct Multi-modal Prompt
+        prompt_text = """
+        ACT AS: Expert Material Scientist & Circular Economy Strategist.
+        TASK: Perform a PREDICTIVE LIFECYCLE ANALYSIS based on the PRODUCT IMAGE (packaging/form factor) and TECHNICAL DATASHEET (content/chemical composition).
+        
+        Analyze these factors:
+        1. PRODUCT PACKAGING (from Image): Identify material (plastic type, cardboard, etc.), single-use vs durable.
+        2. CHEMICAL/PRODUCT CONTENT (from PDF): Identify hazardous components, shelf life, active ingredients.
+        3. INTEGRATION: Predict the fate of this item.
+
+        OUTPUT: Strictly JSON matching this schema:
+        {
+          "productOverview": {
+             "productName": "String",
+             "detectedPackaging": "String (e.g., HDPE Bottle)",
+             "detectedContent": "String (e.g., Sodium Hypochlorite Solution)"
+          },
+          "lifecycleMetrics": {
+             "estimatedLifespan": "String (e.g., '6 months shelf life')",
+             "durabilityScore": Number (0-100),
+             "disposalStage": "String (e.g., 'Packaging becomes waste, content is consumed')"
+          },
+          "environmentalImpact": {
+             "carbonFootprintLevel": "String (Low/Medium/High)",
+             "recycledContentPotential": "String (Details on recyclability)",
+             "hazardLevel": "String (Based on MSDS)"
+          },
+          "economicAnalysis": {
+             "recyclingViability": "String (High/Low)",
+             "estimatedRecyclingValue": "String (e.g., '$0.50/kg for HDPE')",
+             "costBenefitAction": "String (e.g., 'Profitable to segregation')"
+          },
+          "circularStrategy": {
+             "recommendedRoute": "String (Reuse, Recycle, Incineration, etc.)",
+             "justification": "String"
+          }
+        }
+        Translate fields to Spanish. Return ONLY valid JSON.
+        """
+
+        generation_parts = [
+            prompt_text,
+            "--- PRODUCT IMAGE ---",
+            img_pil,
+            "--- TECHNICAL DOCUMENT CONTENT ---",
+            extracted_text
+        ]
+
+        # 5. Generate with Gemini
+        response = model.generate_content(
+            generation_parts,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json"
+            )
+        )
+        
+        result_text = response.text
+        print(f"Gemini Predictive Response: {result_text}")
+
+        # Cleanup
+        if result_text.startswith("```json"): result_text = result_text[7:]
+        if result_text.startswith("```"): result_text = result_text[3:]
+        if result_text.endswith("```"): result_text = result_text[:-3]
+
+        return json.loads(result_text.strip())
+
+    except Exception as e:
+        print(f"Predictive Analysis Failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis Failed: {str(e)}")
+
 async def get_report(data: AnalysisResult):
     try:
         pdf_buffer = generate_pdf_report(data)
