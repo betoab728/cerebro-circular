@@ -158,10 +158,15 @@ def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
     story.append(Spacer(1, 12))
 
     # --- Product Summary Table ---
+    # Use Paragraphs to allow text wrapping for long detected content names
+    p_prod = Paragraph(data.productOverview.productName, styles['Normal'])
+    p_pack = Paragraph(data.productOverview.detectedPackaging, styles['Normal'])
+    p_cont = Paragraph(data.productOverview.detectedContent, styles['Normal'])
+
     data_summary = [
-        ["Producto", data.productOverview.productName],
-        ["Empaque Detectado", data.productOverview.detectedPackaging],
-        ["Contenido Detectado", data.productOverview.detectedContent]
+        ["Producto", p_prod],
+        ["Empaque Detectado", p_pack],
+        ["Contenido Detectado", p_cont]
     ]
     t_summary = Table(data_summary, colWidths=[150, 300])
     t_summary.setStyle(TableStyle([
@@ -170,6 +175,7 @@ def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
         ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
         ('GRID', (0,0), (-1,-1), 1, colors.grey),
         ('PADDING', (0,0), (-1,-1), 6),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'), # Align top for multiline
     ]))
     story.append(t_summary)
     story.append(Spacer(1, 20))
@@ -197,16 +203,34 @@ def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
     # --- 2. Environmental Impact ---
     story.append(Paragraph("2. Impacto Ambiental", styles['Heading2']))
     
+    # Helper to create styled paragraphs for the table
+    def get_impact_color_style(level):
+        color = colors.green
+        if 'High' in level or 'Alto' in level: color = colors.red
+        elif 'Medium' in level or 'Medio' in level: color = colors.orange
+        
+        return ParagraphStyle(
+            'ImpactStyle',
+            parent=styles['Normal'],
+            textColor=color,
+            fontName='Helvetica-Bold'
+        )
+
+    p_carbon = Paragraph(data.environmentalImpact.carbonFootprintLevel, get_impact_color_style(data.environmentalImpact.carbonFootprintLevel))
+    p_hazard = Paragraph(data.environmentalImpact.hazardLevel, styles['Normal'])
+    p_recycle = Paragraph(data.environmentalImpact.recycledContentPotential, styles['Normal'])
+
     impact_data = [
-        ["Huella de Carbono", data.environmentalImpact.carbonFootprintLevel],
-        ["Peligrosidad", data.environmentalImpact.hazardLevel],
-        ["Potencial Reciclado", data.environmentalImpact.recycledContentPotential]
+        ["Huella de Carbono", p_carbon],
+        ["Peligrosidad", p_hazard],
+        ["Potencial Reciclado", p_recycle]
     ]
     t_impact = Table(impact_data, colWidths=[150, 300])
     t_impact.setStyle(TableStyle([
         ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
         ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
-        ('TEXTCOLOR', (1,0), (1,0), colors.red if 'High' in data.environmentalImpact.carbonFootprintLevel or 'Alto' in data.environmentalImpact.carbonFootprintLevel else colors.green),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('PADDING', (0,0), (-1,-1), 6),
     ]))
     story.append(t_impact)
     story.append(Spacer(1, 12))
