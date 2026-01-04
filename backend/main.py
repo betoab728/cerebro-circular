@@ -12,56 +12,19 @@ from sqlmodel import SQLModel
 from database import engine
 from routers import auth
 from utils.report_generator import generate_pdf_report, generate_predictive_report
-from models import AnalysisResult, PredictiveAnalysisResult
+from models import AnalysisResult, PredictiveAnalysisResult, User
 
-# Load environment variables
-load_dotenv()
-
-app = FastAPI(title="CEREBRO CIRCULAR API", version="1.0.0")
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://cerebro-circular.vercel.app",
-        "*"
-    ], 
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.post("/report")
-async def get_report(data: AnalysisResult):
-    try:
-        pdf_buffer = generate_pdf_report(data)
-        return StreamingResponse(
-            pdf_buffer, 
-            media_type="application/pdf", 
-            headers={"Content-Disposition": f"attachment; filename=technical_report_{data.materialName}.pdf"}
-        )
-    except Exception as e:
-        print(f"Report Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Report Generation Failed: {str(e)}")
-
-@app.post("/predictive-report")
-async def get_predictive_report(data: PredictiveAnalysisResult):
-    try:
-        pdf_buffer = generate_predictive_report(data)
-        return StreamingResponse(
-            pdf_buffer, 
-            media_type="application/pdf", 
-            headers={"Content-Disposition": f"attachment; filename=prediccion_inteligente_{data.productOverview.productName}.pdf"}
-        )
-    except Exception as e:
-        print(f"Predictive Report Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Report Generation Failed: {str(e)}")
+# ... existing code ...
 
 # Initialize Database
 @app.on_event("startup")
 def on_startup():
-    SQLModel.metadata.create_all(engine)
+    print("Startup: Creating database tables...")
+    try:
+        SQLModel.metadata.create_all(engine)
+        print("Startup: Tables created successfully!")
+    except Exception as e:
+        print(f"Startup Error: Failed to create tables: {e}")
 
 # Include Routers
 app.include_router(auth.router)
