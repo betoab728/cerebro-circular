@@ -5,6 +5,7 @@ from pydantic import BaseModel
 class UserBase(SQLModel):
     email: str = Field(index=True, unique=True)
     full_name: str | None = None
+    role: str = Field(default="user")
     is_active: bool = True
 
 class User(UserBase, table=True):

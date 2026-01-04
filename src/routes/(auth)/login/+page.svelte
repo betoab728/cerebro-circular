@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { login } from '$lib/stores/auth';
   import { PUBLIC_API_URL } from '$env/static/public';
   
   let email = '';
@@ -13,13 +12,16 @@
     error = '';
     
     try {
-      const formData = new FormData();
-      formData.append('username', email); // OAuth2 expects 'username'
-      formData.append('password', password);
+      const params = new URLSearchParams();
+      params.append('username', email); // OAuth2 expects 'username'
+      params.append('password', password);
 
       const response = await fetch(`${PUBLIC_API_URL}/auth/login`, {
         method: 'POST',
-        body: formData,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params
       });
 
       if (!response.ok) {
@@ -28,8 +30,10 @@
       }
 
       const data = await response.json();
-      login(data.access_token);
-      goto('/dashboard'); // Or wherever you want to redirect
+      localStorage.setItem('token', data.access_token);
+      
+      // Redirect to home or dashboard
+      goto('/');
     } catch (e: any) {
       error = e.message;
     } finally {
@@ -40,16 +44,13 @@
 
 <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
   <div class="sm:mx-auto sm:w-full sm:max-w-md">
-    <div class="flex justify-center">
-        <img src="/logoazul.png" alt="Cerebro Circular" class="h-auto w-48 mx-auto">
-    </div>
     <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
       Iniciar Sesión
     </h2>
     <p class="mt-2 text-center text-sm text-gray-600">
       O
       <a href="/register" class="font-medium text-scientific-600 hover:text-scientific-500">
-        registrarse para una nueva cuenta
+        crear una cuenta nueva
       </a>
     </p>
   </div>
@@ -95,7 +96,7 @@
             {#if isLoading}
                 Cargando...
             {:else}
-                Ingresar
+                Entrar
             {/if}
           </button>
         </div>
