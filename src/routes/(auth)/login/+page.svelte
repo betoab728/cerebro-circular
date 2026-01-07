@@ -46,13 +46,9 @@
     <img class="mx-auto h-32 w-auto mb-4" src="/logocerebro.png" alt="Logo">
     <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
       Iniciar Sesión
+    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      Iniciar Sesión
     </h2>
-    <p class="mt-2 text-center text-sm text-gray-600">
-      O
-      <a href="/register" class="font-medium text-scientific-600 hover:text-scientific-500">
-        crear una cuenta nueva
-      </a>
-    </p>
   </div>
 
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
