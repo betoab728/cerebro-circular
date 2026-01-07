@@ -63,22 +63,4 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], sessio
     except Exception as e:
         print(f"Auth middleware error (Usuario): {e}")
 
-    # Fallback to User table
-    try:
-        statement = select(User).where(User.email == email)
-        user = session.exec(statement).first()
-        
-        # Check new Usuario table if not found in User (Redundant but keeps logic safe)
-        if not user:
-            from models import Usuario
-            statement_usuario = select(Usuario).where(Usuario.nombre == email)
-            user_usuario = session.exec(statement_usuario).first()
-            if user_usuario:
-                return user_usuario
-
-        if user is None:
-            raise credentials_exception
-        return user
-    except Exception as e:
-         print(f"Auth middleware error (User): {e}")
-         raise credentials_exception
+    raise credentials_exception

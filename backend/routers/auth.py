@@ -68,26 +68,6 @@ async def login_for_access_token(
         return {"access_token": access_token, "token_type": "bearer"}
     else:
         print("User NOT found in manual 'usuarios' table.")
-
-    # Fallback to standard User table (wrapped in try-except to avoid crashes)
-    try:
-        statement = select(User).where(User.email == form_data.username)
-        user = session.exec(statement).first()
-        
-        if not user or not verify_password(form_data.password, user.hashed_password):
-             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-            
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"sub": user.email, "role": user.role}, expires_delta=access_token_expires
-        )
-        return {"access_token": access_token, "token_type": "bearer"}
-    except Exception as e:
-        print(f"Login fallback error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
