@@ -85,11 +85,4 @@ async def read_users_me(current_user: Annotated[User | Usuario, Depends(get_curr
         )
     return current_user
 
-@router.get("/debug-users")
-def debug_users(session: Session = Depends(get_session)):
-    try:
-        from models import Usuario
-        users = session.exec(select(Usuario)).all()
-        return [{"id": u.id, "nombre": u.nombre, "clave": u.clave} for u in users]
-    except Exception as e:
-        return {"error": str(e)}
+

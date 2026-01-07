@@ -39,20 +39,6 @@
       isLoading = false;
     }
   }
-
-  let debugInfo: any = null;
-  async function checkUsers() {
-      try {
-          const res = await fetch(`${PUBLIC_API_URL}/auth/debug-users`);
-          if (res.ok) {
-              debugInfo = await res.json();
-          } else {
-              debugInfo = { error: `Status ${res.status}`, text: await res.text() };
-          }
-      } catch (e: any) {
-          debugInfo = { error: e.message };
-      }
-  }
 </script>
 
 <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -116,18 +102,6 @@
         </div>
       </form>
       
-      <!-- DEBUG SECTION: REMOVE THIS AFTER FIXING -->
-      <div class="mt-6 border-t pt-4">
-        <h3 class="text-xs font-bold text-gray-500 uppercase">Herramientas de Depuración</h3>
-        <button type="button" on:click={checkUsers} class="mt-2 w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            Verificar Usuarios en BD
-        </button>
-        {#if debugInfo}
-            <pre class="mt-2 p-2 bg-gray-900 text-green-400 text-xs rounded overflow-auto max-h-40">{JSON.stringify(debugInfo, null, 2)}</pre>
-        {/if}
-      </div>
-      <!-- END DEBUG SECTION -->
-
     </div>
   </div>
 </div>
