@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { PUBLIC_API_URL } from '$env/static/public';
   
-  let email = '';
+  let username = '';
   let password = '';
   let error = '';
   let isLoading = false;
@@ -13,7 +13,7 @@
     
     try {
       const params = new URLSearchParams();
-      params.append('username', email); // OAuth2 expects 'username'
+      params.append('username', username); // OAuth2 expects 'username'
       params.append('password', password);
 
       const response = await fetch(`${PUBLIC_API_URL}/auth/login`, {
@@ -72,11 +72,11 @@
         {/if}
 
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">
-            Correo Electrónico
+          <label for="username" class="block text-sm font-medium text-gray-700">
+            Usuario
           </label>
           <div class="mt-1">
-            <input id="email" name="email" type="email" autocomplete="email" required bind:value={email}
+            <input id="username" name="username" type="text" autocomplete="username" required bind:value={username}
               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-scientific-500 focus:border-scientific-500 sm:text-sm">
           </div>
         </div>
