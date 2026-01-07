@@ -1,16 +1,3 @@
-from datetime import timedelta
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlmodel import Session, select
-from database import get_session
-from models import User, UserCreate, UserRead, Token, Usuario
-from auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
-
-router = APIRouter(prefix="/auth", tags=["auth"])
-
-@router.post("/register", response_model=UserRead)
-def register(user: UserCreate, session: Session = Depends(get_session)):
     # Check if user already exists
     statement = select(User).where(User.email == user.email)
     existing_user = session.exec(statement).first()
