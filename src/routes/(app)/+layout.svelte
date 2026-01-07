@@ -2,8 +2,20 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import "../../app.css";
 	import favicon from '$lib/assets/favicon.svg';
+    import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
+    import { browser } from '$app/environment';
 
 	let { children } = $props();
+
+    onMount(() => {
+        if (browser) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                goto('/login');
+            }
+        }
+    });
 </script>
 
 <svelte:head>
