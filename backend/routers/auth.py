@@ -31,43 +31,51 @@ async def login_for_access_token(
     session: Session = Depends(get_session)
 ):
     # First try connecting with standard User table
-    statement = select(User).where(User.email == form_data.username)
-    user = session.exec(statement).first()
+    # PRIORITIZE MANUAL USER TABLE (Fix for missing User table schema)
+    from models import Usuario
+    statement = select(Usuario).where(Usuario.nombre == form_data.username)
+    user_usuario = session.exec(statement).first()
     
-    # If not found, try the new Usuario table
-    if not user:
-        from models import Usuario
-        statement = select(Usuario).where(Usuario.nombre == form_data.username)
-        user_usuario = session.exec(statement).first()
-        
-        if user_usuario:
-            # Check password simply for now as requested
-            if form_data.password != user_usuario.clave:
-                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Incorrect password (manual)",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            
-            # Create token for manual user
-            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-            access_token = create_access_token(
-                data={"sub": user_usuario.nombre, "role": "admin"}, expires_delta=access_token_expires
+    if user_usuario:
+        # Check plain text password (as requested)
+        if form_data.password != user_usuario.clave:
+                raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect password",
+                headers={"WWW-Authenticate": "Bearer"},
             )
-            return {"access_token": access_token, "token_type": "bearer"}
+        
+        # Create token for manual user
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user_usuario.nombre, "role": "admin"}, expires_delta=access_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
 
-    if not user or not verify_password(form_data.password, user.hashed_password):
+    # Fallback to standard User table (wrapped in try-except to avoid crashes)
+    try:
+        statement = select(User).where(User.email == form_data.username)
+        user = session.exec(statement).first()
+        
+        if not user or not verify_password(form_data.password, user.hashed_password):
+             raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user.email, "role": user.role}, expires_delta=access_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
+    except Exception as e:
+        print(f"Login fallback error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email, "role": user.role}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserRead)
 async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
