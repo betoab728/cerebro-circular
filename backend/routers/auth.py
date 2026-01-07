@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 from database import get_session
-from models import User, UserCreate, UserRead, Token
+from models import User, UserCreate, UserRead, Token, Usuario
 from auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -30,10 +30,7 @@ async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Session = Depends(get_session)
 ):
-    # First try connecting with standard User table
     # PRIORITIZE MANUAL USER TABLE (Fix for missing User table schema)
-    # PRIORITIZE MANUAL USER TABLE (Fix for missing User table schema)
-    from models import Usuario
     
     # Input Sanitization
     username_input = form_data.username.strip()
