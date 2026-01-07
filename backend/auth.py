@@ -17,7 +17,14 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    # Try verifying as hash first
+    try:
+        if pwd_context.verify(plain_password, hashed_password):
+            return True
+    except:
+        pass
+    # Fallback/Primary for manual users: Check plain text match
+    return plain_password == hashed_password
 
 def get_password_hash(password):
     return pwd_context.hash(password)
@@ -48,6 +55,15 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], sessio
     
     statement = select(User).where(User.email == email)
     user = session.exec(statement).first()
+    
+    # Check new Usuario table if not found in User
+    if not user:
+        from models import Usuario
+        statement_usuario = select(Usuario).where(Usuario.nombre == email)
+        user_usuario = session.exec(statement_usuario).first()
+        if user_usuario:
+             return user_usuario
+
     if user is None:
         raise credentials_exception
     return user

@@ -24,6 +24,15 @@ class Token(SQLModel):
 
 class TokenData(SQLModel):
     email: str | None = None
+    
+# Manual User Table Model
+from datetime import datetime
+class Usuario(SQLModel, table=True):
+    __tablename__ = "usuarios"
+    id: int | None = Field(default=None, primary_key=True)
+    nombre: str = Field(index=True, unique=True)
+    clave: str
+    fecha_creacion: datetime = Field(default_factory=datetime.now)
 
 # Analysis Models
 class PhysicochemicalProp(BaseModel):

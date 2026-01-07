@@ -30,9 +30,32 @@ async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Session = Depends(get_session)
 ):
+    # First try connecting with standard User table
     statement = select(User).where(User.email == form_data.username)
     user = session.exec(statement).first()
     
+    # If not found, try the new Usuario table
+    if not user:
+        from models import Usuario
+        statement = select(Usuario).where(Usuario.nombre == form_data.username)
+        user_usuario = session.exec(statement).first()
+        
+        if user_usuario:
+            # Check password simply for now as requested
+            if form_data.password != user_usuario.clave:
+                 raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Incorrect password (manual)",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            
+            # Create token for manual user
+            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = create_access_token(
+                data={"sub": user_usuario.nombre, "role": "admin"}, expires_delta=access_token_expires
+            )
+            return {"access_token": access_token, "token_type": "bearer"}
+
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
