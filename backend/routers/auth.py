@@ -32,6 +32,7 @@ async def login_for_access_token(
 ):
     # First try connecting with standard User table
     # PRIORITIZE MANUAL USER TABLE (Fix for missing User table schema)
+    # PRIORITIZE MANUAL USER TABLE (Fix for missing User table schema)
     from models import Usuario
     
     # Input Sanitization
@@ -75,5 +76,14 @@ async def login_for_access_token(
         )
 
 @router.get("/me", response_model=UserRead)
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+async def read_users_me(current_user: Annotated[User | Usuario, Depends(get_current_user)]):
+    # Adapt Usuario to UserRead schema if necessary
+    if isinstance(current_user, Usuario):
+        return UserRead(
+            email=current_user.nombre,
+            full_name=current_user.nombre,
+            role="admin", # Default role for manual users
+            is_active=True,
+            id=current_user.id
+        )
     return current_user
