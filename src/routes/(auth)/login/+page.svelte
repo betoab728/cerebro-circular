@@ -46,8 +46,6 @@
     <img class="mx-auto h-40 w-auto mb-4" src="/logocerebro.png" alt="Logo">
     <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
       Iniciar Sesión
-    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-      Iniciar Sesión
     </h2>
     <p class="mt-2 text-center text-sm text-gray-600">
       Análisis inteligente para su empresa
