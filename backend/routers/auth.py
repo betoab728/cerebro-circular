@@ -33,12 +33,26 @@ async def login_for_access_token(
     # First try connecting with standard User table
     # PRIORITIZE MANUAL USER TABLE (Fix for missing User table schema)
     from models import Usuario
-    statement = select(Usuario).where(Usuario.nombre == form_data.username)
-    user_usuario = session.exec(statement).first()
+    
+    # Input Sanitization
+    username_input = form_data.username.strip()
+    password_input = form_data.password.strip()
+    
+    print(f"Login Attempt: Username='{username_input}'")
+    
+    statement = select(Usuario).where(Usuario.nombre == username_input)
+    try:
+        user_usuario = session.exec(statement).first()
+        print(f"User Query Result: {user_usuario}")
+    except Exception as e:
+        print(f"Query Error: {e}")
+        user_usuario = None
     
     if user_usuario:
+        print(f"User Found. Verifying password...")
         # Check plain text password (as requested)
-        if form_data.password != user_usuario.clave:
+        if password_input != user_usuario.clave:
+                print(f"Password Mismatch. Input='{password_input}', Stored='{user_usuario.clave}'")
                 raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect password",
@@ -46,11 +60,14 @@ async def login_for_access_token(
             )
         
         # Create token for manual user
+        print("Password Match. Generating token.")
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
             data={"sub": user_usuario.nombre, "role": "admin"}, expires_delta=access_token_expires
         )
         return {"access_token": access_token, "token_type": "bearer"}
+    else:
+        print("User NOT found in manual 'usuarios' table.")
 
     # Fallback to standard User table (wrapped in try-except to avoid crashes)
     try:
