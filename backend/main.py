@@ -195,49 +195,65 @@ async def predictive_analysis(
 
         # 4. Construct Multi-modal Prompt
         prompt_text = """
-        ACT AS: Expert Material Scientist & Circular Economy Strategist (Peru Context).
-        TASK: Perform a PREDICTIVE LIFECYCLE ANALYSIS based on the PRODUCT IMAGE and TECHNICAL DATASHEET.
+        ACT AS: Expert AI Engine for Classification and Regulatory Management of Health Sector Waste in Peru.
+        CONTEXT: You analyze hospital materials/supplies when they become waste, using visual evidence and technical data (FDS/MSDS).
+        PRIORITY: Correct classification and strict adherence to NTS N.° 199-MINSA/DIGESA (RM 1295-2018-MINSA).
         
-        CRITICAL INSTRUCTION: 
-        - Do NOT just analyze the empty packaging (e.g. plastic bottle).
-        - YOU MUST Analyze the COMPLETE PRODUCT: The Container (Packaging) AND The Content (The Chemical/Liquid inside).
-        - Use the IMAGE to identify the container type.
-        - Use the PDF/Datasheet to identify the Chemical Content properties.
-        - Combine both to determine the full lifecycle.
+        CRITICAL RULES:
+        1. DO NOT propose valorization/recycling if the regulation prohibits it (Class A/Biocontaminated or Class B/Special).
+        2. Commercial or environmental criteria are SECONDARY to sanitary regulations.
+        3. Compliance with MINAM and DIGEMID/IPEN regulations.
 
-        Analyze these factors:
-        1. PRODUCT SYSTEM: Container material + Chemical content.
-        2. LIFECYCLE: How long does the content last? What happens to the container after content is used?
-        3. ECONOMIC: Use PERUVIAN CURRENCY (S/.) for all value estimates.
+        BEHAVIOR:
+        Step 1: IDENTIFICATION (From image + PDF)
+        - Material: Plastic, glass, metal, paper, mixed.
+        - Usage: Patient contact, lab, pharmacy, cleaning.
+        - Contamination: Blood, fluids, sharps, chemical residues.
+        - Hazard (GHS): Toxic, corrosive, flammable, etc.
+        - Condition: Clean, used, expired.
 
-        OUTPUT: Strictly JSON matching this schema:
+        Step 2: SANITARY DECISION (CLASSIFICATION)
+        - Class A (Biocontaminated): Contact with biological fluids/tissues/sharps.
+        - Class B (Special): Chemical/Pharma/Radioactive risk (even without bio contact).
+        - Class C (Common): Safe, clean, admin/logistics usage ONLY. If in doubt -> Classify as Hazardous.
+
+        Step 3: VALORIZATION (RESTRICTIVE RULE)
+        - Class A or B -> VALORIZATION PROHIBITED.
+        - Class C -> Optional (via authorized EO-RS). Never reuse direct in EESS.
+
+        Step 4: FINAL DISPOSAL
+        - Class A: Treatment (autoclave/incineration) + Final Disposal.
+        - Class B: Specialized treatment.
+        - Class C: Municipal disposal or Valorization.
+
+        OUTPUT: Return strictly valid JSON matching this schema. MAPPING INSTRUCTIONS:
         {
           "productOverview": {
-             "productName": "String (Commercial Name)",
-             "detectedPackaging": "String (e.g., HDPE Bottle, industrial grade)",
-             "detectedContent": "String (e.g., Sodium Hypochlorite 5%)"
+             "productName": "String (Commercial Name + Status)",
+             "detectedPackaging": "String (Material Type)",
+             "detectedContent": "String (Usage context & Contaminant evidence)"
           },
           "lifecycleMetrics": {
-             "estimatedLifespan": "String (e.g., '6 months active shelf life')",
-             "durabilityScore": Number (0-100),
-             "disposalStage": "String (e.g., 'Container: Recycle, Residue: Hazardous disposal')"
+             "estimatedLifespan": "String (Condition: Used/Expired/Clean)",
+             "durabilityScore": Number (0-100. NOTE: If Class A/B, set to 0 as it must be destroyed)",
+             "disposalStage": "String (Step 4 Requirement, e.g., 'Tratamiento por Incineración')"
           },
           "environmentalImpact": {
-             "carbonFootprintLevel": "String (Low/Medium/High)",
-             "recycledContentPotential": "String (e.g., 'Bottle is 100% recyclable if rinsed')",
-             "hazardLevel": "String (Based on MSDS content)"
+             "carbonFootprintLevel": "String (Low/Medium/High - considering treatment)",
+             "recycledContentPotential": "String (e.g., 'PROHIBIDO por NTS 199' for Class A/B, or potential for Class C)",
+             "hazardLevel": "String (STRICTLY: 'Clase A - Biocontaminado', 'Clase B - Especial', or 'Clase C - Común')"
           },
           "economicAnalysis": {
-             "recyclingViability": "String (High/Low)",
-             "estimatedRecyclingValue": "String (e.g., 'S/. 1.20/kg for HDPE')",
-             "costBenefitAction": "String (e.g., 'Profitable to segregate')"
+             "recyclingViability": "String ('NULA (Prohibido)' for Class A/B, or 'Alta/Media' for Class C)",
+             "estimatedRecyclingValue": "String (e.g., 'S/. 0.00 (Residuo Peligroso)' or market value for Class C)",
+             "costBenefitAction": "String (Compliance Action: e.g., 'Segregar en Bolsa Roja/Amarilla')"
           },
           "circularStrategy": {
-             "recommendedRoute": "String (Reuse, Recycle, Neutralization, etc.)",
-             "justification": "String"
+             "recommendedRoute": "String (e.g., 'Destrucción Controlada' for Class A/B, 'Reciclaje' for Class C)",
+             "justification": "String (Cite NTS N.° 199-MINSA/DIGESA and reasons)"
           }
         }
-        Translate fields to Spanish. Return ONLY valid JSON. Ensure all keys are present.
+        Translate string values to Spanish. Return ONLY valid JSON.
         """
 
         generation_parts = [
