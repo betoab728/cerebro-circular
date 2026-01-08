@@ -16,13 +16,18 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     # File structure:
     # project_root/
     #   backend/utils/report_generator.py
-    #   static/logoazul.png
+    #   static/logocerebro.png
     
     current_dir = os.path.dirname(os.path.abspath(__file__)) # utils
     backend_dir = os.path.dirname(current_dir) # backend
     project_root = os.path.dirname(backend_dir) # project_root
     
-    logo_path = os.path.join(project_root, "static", "logoazul.png")
+    # Try finding logo in static folder first
+    logo_path = os.path.join(project_root, "static", "logocerebro.png")
+    
+    # Fallback to backend dir if deployed with flat structure
+    if not os.path.exists(logo_path):
+        logo_path = os.path.join(backend_dir, "logocerebro.png")
     
     print(f"DEBUG: Calculated Logo Path: {logo_path}")
     print(f"DEBUG: File Exists? {os.path.exists(logo_path)}")
@@ -146,14 +151,14 @@ def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
     # Logo is expected to be in the 'backend' folder (copied from static)
     current_dir = os.path.dirname(os.path.abspath(__file__)) # utils
     backend_dir = os.path.dirname(current_dir) # backend
+    project_root = os.path.dirname(backend_dir)
     
-    # Try finding logo in backend dir first (deployment safe)
-    logo_path = os.path.join(backend_dir, "logoazul.png")
+    # Try finding logo in static folder first (standard local dev)
+    logo_path = os.path.join(project_root, "static", "logocerebro.png")
     
-    # Fallback to project root static for local dev if not found
+    # Fallback to backend dir (for deployment where static might not be moved or flat structure)
     if not os.path.exists(logo_path):
-         project_root = os.path.dirname(backend_dir)
-         logo_path = os.path.join(project_root, "static", "logoazul.png")
+         logo_path = os.path.join(backend_dir, "logocerebro.png")
     
     if os.path.exists(logo_path):
         im = Image(logo_path, width=150, height=50) 
