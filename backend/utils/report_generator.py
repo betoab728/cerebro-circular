@@ -139,6 +139,37 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg') # Non-interactive backend
+from models import PredictiveAnalysisResult
+
+def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    story = []
+
+    # --- Header & Logo ---
+    current_dir = os.path.dirname(os.path.abspath(__file__)) # utils
+    backend_dir = os.path.dirname(current_dir) # backend
+    project_root = os.path.dirname(backend_dir) # project_root
+
+    # 1. Look in backend dir (safest for deployment)
+    logo_path = os.path.join(backend_dir, "logocerebro.png")
+    
+    # 2. Fallback to project root static (dev environment)
+    if not os.path.exists(logo_path):
+        logo_path = os.path.join(project_root, "static", "logocerebro.png")
+
+    if os.path.exists(logo_path):
+        im = Image(logo_path, width=200, height=50, kind='proportional') 
+        im.hAlign = 'LEFT'
+        story.append(im)
+        story.append(Spacer(1, 12))
+
+    story.append(Paragraph(f"Informe de Predicción Inteligente: {data.productOverview.productName}", styles['Title']))
+    story.append(Paragraph("Evaluación de Ciclo de Vida y Economía Circular", styles['Italic']))
+    story.append(Spacer(1, 12))
+
+    # --- Product Summary Table ---
     # Use Paragraphs to allow text wrapping for long detected content names
     p_prod = Paragraph(data.productOverview.productName, styles['Normal'])
     p_pack = Paragraph(data.productOverview.detectedPackaging, styles['Normal'])
