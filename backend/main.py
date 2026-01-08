@@ -195,36 +195,65 @@ async def predictive_analysis(
 
         # 4. Construct Multi-modal Prompt
         prompt_text = """
-        ACT AS: Expert AI Engine for Classification and Regulatory Management of Health Sector Waste in Peru.
-        CONTEXT: You analyze hospital materials/supplies when they become waste, using visual evidence and technical data (FDS/MSDS).
-        PRIORITY: Correct classification and strict adherence to NTS N.° 199-MINSA/DIGESA (RM 1295-2018-MINSA).
-        
-        CRITICAL RULES:
-        1. DO NOT propose valorization/recycling if the regulation prohibits it (Class A/Biocontaminated or Class B/Special).
-        2. Commercial or environmental criteria are SECONDARY to sanitary regulations.
-        3. Compliance with MINAM and DIGEMID/IPEN regulations.
+        Rol
+        Eres un motor experto en normativa peruana de residuos del sector salud. Analizas materiales y suministros hospitalarios cuando se convierten en residuo, usando imagen del material y Ficha de Datos de Seguridad (FDS/MSDS).
+        Tu análisis debe cumplir obligatoriamente con:
+        - NTS N.° 144-2018-MINSA (RM 1295-2018-MINSA) – gestión, tratamiento y sistemas autorizados.
+        - Ley 1278 y su Reglamento – jerarquía de residuos: prevención → valorización → tratamiento → disposición final.
 
-        BEHAVIOR:
-        Step 1: IDENTIFICATION (From image + PDF)
-        - Material: Plastic, glass, metal, paper, mixed.
-        - Usage: Patient contact, lab, pharmacy, cleaning.
-        - Contamination: Blood, fluids, sharps, chemical residues.
-        - Hazard (GHS): Toxic, corrosive, flammable, etc.
-        - Condition: Clean, used, expired.
+        ⚠️ La valorización es prioritaria
 
-        Step 2: SANITARY DECISION (CLASSIFICATION)
-        - Class A (Biocontaminated): Contact with biological fluids/tissues/sharps.
-        - Class B (Special): Chemical/Pharma/Radioactive risk (even without bio contact).
-        - Class C (Common): Safe, clean, admin/logistics usage ONLY. If in doubt -> Classify as Hazardous.
+        METODOLOGÍA DE ANÁLISIS (NO OMITIR PASOS)
 
-        Step 3: VALORIZATION (RESTRICTIVE RULE)
-        - Class A or B -> VALORIZATION PROHIBITED.
-        - Class C -> Optional (via authorized EO-RS). Never reuse direct in EESS.
+        PASO 1 – IDENTIFICACIÓN TÉCNICA
+        Desde la imagen y la FDS identifica:
+        - Material: plástico, vidrio, metal, papel/cartón, textil, mixto.
+        - Uso en salud: atención al paciente, laboratorio, farmacia, apoyo, administrativo.
+        - Evidencia de contaminación: sangre, fluidos, tejidos, punzocortante, residuos visibles.
+        - Peligrosidad según FDS (GHS): inflamable, tóxico, corrosivo, reactivo, eco-tóxico.
+        - Estado: limpio, usado, contaminado, vencido, deteriorado.
 
-        Step 4: FINAL DISPOSAL
-        - Class A: Treatment (autoclave/incineration) + Final Disposal.
-        - Class B: Specialized treatment.
-        - Class C: Municipal disposal or Valorization.
+        PASO 2 – CLASIFICACIÓN SANITARIA (NTS 144 – CRITERIO DOMINANTE)
+        Clasifica únicamente según la NTS:
+        - Clase A – Biocontaminados: Si hubo contacto real o potencial con sangre, fluidos, tejidos, punzocortantes o atención directa al paciente.
+        - Clase B – Especiales: Si la FDS confirma peligrosidad química, farmacéutica o radioactiva, aunque no haya contacto biológico.
+        - Clase C – Comunes: Solo si el material está no contaminado, no es punzocortante, no es químico peligroso, y proviene de actividades no asistenciales.
+
+        📌 Regla crítica: Ante duda → NO clasificar como Clase C.
+
+        PASO 3 – FORMAS DE VALORIZACIÓN (LECTURA OBLIGATORIA NTS 144 + LEY 1278)
+        Evalúa todas las alternativas permitidas, según clase:
+
+        🔴 Clase A – Biocontaminados
+        - Tratamientos autorizados: Incineración, Autoclave, Microondas, Pirólisis, Otros sistemas aprobados por MINSA.
+        - Luego → disposición final en infraestructura autorizada.
+
+        🟠 Clase B – Especiales
+        - Tratamiento especializado según tipo:
+          - Químicos: neutralización / incineración
+          - Farmacéuticos: según DIGEMID
+          - Radioactivos: según IPEN
+
+        🟢 Clase C – Comunes (ÚNICA CLASE VALORIZABLE)
+        Si está confirmado como Clase C, evalúa todas estas opciones:
+        - Valorización material: Reciclaje de plásticos, vidrio, metales, papel/cartón. Reaprovechamiento de envases no contaminados. Compostaje (residuos orgánicos no contaminados).
+        - Valorización energética (si aplica): Co-procesamiento, Incineración con recuperación energética (solo si autorizado).
+
+        ⚠️ Toda valorización:
+        - Es opcional, no automática.
+        - Debe realizarse exclusivamente mediante EO-RS autorizada.
+        - Requiere estar prevista en el Plan de Manejo de Residuos del EESS.
+
+        PASO 4 – DESTINO FINAL (OBLIGATORIO)
+        Si no aplica valorización:
+        - Infraestructura de disposición final autorizada.
+        - Nunca disposición directa sin tratamiento cuando la NTS lo exige.
+
+        PASO 5 – CUMPLIMIENTO LEGAL
+        Determina obligaciones:
+        - MRSP → residuos peligrosos.
+        - SIGERSOL: Trimestral (peligrosos), Anual (todos los generadores).
+        - Entidades especiales: DIGEMID (residuos farmacéuticos), IPEN (residuos radioactivos).
 
         OUTPUT: Return strictly valid JSON matching this schema. MAPPING INSTRUCTIONS:
         {
@@ -236,21 +265,26 @@ async def predictive_analysis(
           "lifecycleMetrics": {
              "estimatedLifespan": "String (Condition: Used/Expired/Clean)",
              "durabilityScore": Number (0-100. NOTE: If Class A/B, set to 0 as it must be destroyed)",
-             "disposalStage": "String (Step 4 Requirement, e.g., 'Tratamiento por Incineración')"
+             "disposalStage": "String (Step 4 Requirement, e.g., 'Tratamiento por Incineración/Pirólisis')"
           },
           "environmentalImpact": {
              "carbonFootprintLevel": "String (Low/Medium/High - considering treatment)",
-             "recycledContentPotential": "String (e.g., 'PROHIBIDO por NTS 199' for Class A/B, or potential for Class C)",
+             "recycledContentPotential": "String (e.g., 'PROHIBIDO por NTS 144' for Class A/B, or potential for Class C)",
              "hazardLevel": "String (STRICTLY: 'Clase A - Biocontaminado', 'Clase B - Especial', or 'Clase C - Común')"
           },
           "economicAnalysis": {
              "recyclingViability": "String ('NULA (Prohibido)' for Class A/B, or 'Alta/Media' for Class C)",
              "estimatedRecyclingValue": "String (e.g., 'S/. 0.00 (Residuo Peligroso)' or market value for Class C)",
-             "costBenefitAction": "String (Compliance Action: e.g., 'Segregar en Bolsa Roja/Amarilla')"
+             "costBenefitAction": "String (Compliance Action: e.g., 'Segregar en Bolsa Roja/Amarilla y Tratamiento')"
           },
           "circularStrategy": {
-             "recommendedRoute": "String (e.g., 'Destrucción Controlada' for Class A/B, 'Reciclaje' for Class C)",
-             "justification": "String (Cite NTS N.° 199-MINSA/DIGESA and reasons)"
+             "recommendedRoute": "String (e.g., 'Pirólisis/Incineración' for Class A/B, 'Reciclaje' for Class C)",
+             "justification": "String (Cite NTS N.° 144 y Ley 1278)"
+          },
+          "compliance": {
+             "mrsp_applicability": "String (e.g., 'OBLIGATORIO - Residuo Peligroso' or 'No aplica')",
+             "sigersol_reporting": "String (e.g., 'Reporte Trimestral + DA' or 'DA')",
+             "competent_authority": "String (e.g., 'DIGESA / Municipalidad / DIGEMID')"
           }
         }
         Translate string values to Spanish. Return ONLY valid JSON.

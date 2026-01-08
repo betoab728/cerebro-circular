@@ -266,6 +266,26 @@ def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
     {data.circularStrategy.justification}
     '''
     story.append(Paragraph(strat_text, styles['Normal']))
+    story.append(Spacer(1, 20))
+
+    # --- 5. Regulatory Compliance ---
+    story.append(Paragraph("5. Cumplimiento Normativo (Obligatorio)", styles['Heading2']))
+    
+    comp_data = [
+        ["MRSP (Manejo de Residuos)", Paragraph(data.compliance.mrsp_applicability, styles['Normal'])],
+        ["Reporte SIGERSOL", Paragraph(data.compliance.sigersol_reporting, styles['Normal'])],
+        ["Entidad Competente", Paragraph(data.compliance.competent_authority, styles['Normal'])]
+    ]
+    
+    t_comp = Table(comp_data, colWidths=[150, 300])
+    t_comp.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('BACKGROUND', (0,0), (0,-1), colors.HexColor('#F3F4F6')),
+        ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(t_comp)
 
     doc.build(story)
     buffer.seek(0)

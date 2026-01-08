@@ -92,9 +92,15 @@ class CircularStrategy(BaseModel):
     recommendedRoute: str = "Reciclaje General"
     justification: str = "Falta información suficiente para una estrategia específica."
 
+class ComplianceSpec(BaseModel):
+    mrsp_applicability: str = "Requerido si es residuo peligroso"
+    sigersol_reporting: str = "Declaración Anual obligatoria"
+    competent_authority: str = "DIGESA / Municipalidad"
+
 class PredictiveAnalysisResult(BaseModel):
     productOverview: ProductOverview = Field(default_factory=ProductOverview)
     lifecycleMetrics: LifecycleMetrics = Field(default_factory=LifecycleMetrics)
     environmentalImpact: EnvironmentalImpact = Field(default_factory=EnvironmentalImpact)
     economicAnalysis: EconomicAnalysis = Field(default_factory=EconomicAnalysis)
     circularStrategy: CircularStrategy = Field(default_factory=CircularStrategy)
+    compliance: ComplianceSpec = Field(default_factory=ComplianceSpec)
