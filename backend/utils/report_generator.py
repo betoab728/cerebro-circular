@@ -139,38 +139,6 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg') # Non-interactive backend
-from models import PredictiveAnalysisResult
-
-def generate_predictive_report(data: PredictiveAnalysisResult) -> BytesIO:
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    styles = getSampleStyleSheet()
-    story = []
-
-    # --- Header & Logo ---
-    # Logo is expected to be in the 'backend' folder (copied from static)
-    current_dir = os.path.dirname(os.path.abspath(__file__)) # utils
-    backend_dir = os.path.dirname(current_dir) # backend
-    project_root = os.path.dirname(backend_dir)
-    
-    # Try finding logo in static folder first (standard local dev)
-    logo_path = os.path.join(project_root, "static", "logocerebro.png")
-    
-    # Fallback to backend dir (for deployment where static might not be moved or flat structure)
-    if not os.path.exists(logo_path):
-         logo_path = os.path.join(backend_dir, "logocerebro.png")
-    
-    if os.path.exists(logo_path):
-        im = Image(logo_path, width=150, height=50) 
-        im.hAlign = 'LEFT'
-        story.append(im)
-    story.append(Spacer(1, 12))
-
-    story.append(Paragraph(f"Informe de Predicción Inteligente: {data.productOverview.productName}", styles['Title']))
-    story.append(Paragraph("Evaluación de Ciclo de Vida y Economía Circular", styles['Italic']))
-    story.append(Spacer(1, 12))
-
-    # --- Product Summary Table ---
     # Use Paragraphs to allow text wrapping for long detected content names
     p_prod = Paragraph(data.productOverview.productName, styles['Normal'])
     p_pack = Paragraph(data.productOverview.detectedPackaging, styles['Normal'])
