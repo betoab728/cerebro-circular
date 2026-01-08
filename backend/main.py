@@ -12,7 +12,7 @@ from sqlmodel import SQLModel
 from database import engine
 from routers import auth, waste
 from utils.report_generator import generate_pdf_report, generate_predictive_report
-from models import AnalysisResult, PredictiveAnalysisResult, User
+from models import AnalysisResult, PredictiveAnalysisResult, User, Residuo
 
 # Load environment variables
 load_dotenv()
