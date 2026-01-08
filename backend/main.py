@@ -258,7 +258,7 @@ async def predictive_analysis(
           },
           "economicAnalysis": {
              "recyclingViability": "String (High/Medium/Low - Be Optimistic but Realistic)",
-             "estimatedRecyclingValue": "String (Estimated value of recovered material)",
+             "estimatedRecyclingValue": "String (INDISPENSABLE: Dar un valor monetario en SOLES S/. por Kg o Unidad. Ej: 'S/. 1.50 por Kg')",
              "costBenefitAction": "String (e.g. 'Rentable segregar para reciclar')"
           },
           "circularStrategy": {
