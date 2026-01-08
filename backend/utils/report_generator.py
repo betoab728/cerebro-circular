@@ -33,7 +33,7 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     print(f"DEBUG: File Exists? {os.path.exists(logo_path)}")
 
     if os.path.exists(logo_path):
-        im = Image(logo_path, width=150, height=50) 
+        im = Image(logo_path, width=200, height=50, kind='proportional') 
         im.hAlign = 'LEFT'
         story.append(im)
         story.append(Spacer(1, 12))
