@@ -10,7 +10,7 @@ import pypdf
 from PIL import Image
 from sqlmodel import SQLModel
 from database import engine
-from routers import auth
+from routers import auth, waste
 from utils.report_generator import generate_pdf_report, generate_predictive_report
 from models import AnalysisResult, PredictiveAnalysisResult, User
 
@@ -70,6 +70,7 @@ def on_startup():
 
 # Include Routers
 app.include_router(auth.router)
+app.include_router(waste.router)
 
 # Initialize Gemini
 # Ensure GOOGLE_API_KEY is set in your .env file

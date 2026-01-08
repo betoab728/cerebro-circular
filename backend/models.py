@@ -34,6 +34,19 @@ class Usuario(SQLModel, table=True):
     clave: str
     fecha_creacion: datetime = Field(default_factory=datetime.now)
 
+class Residuo(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    responsable: str
+    unidad_generadora: str
+    tipo_residuo: str
+    caracteristica: str
+    cantidad: float
+    unidad_medida: str
+    volumen: float
+    peso_total: float
+    frecuencia: str
+    fecha_registro: datetime = Field(default_factory=datetime.now)
+
 # Analysis Models
 class PhysicochemicalProp(BaseModel):
     name: str
