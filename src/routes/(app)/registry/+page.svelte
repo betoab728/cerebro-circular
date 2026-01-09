@@ -1,20 +1,42 @@
 <script lang="ts">
   import Navbar from '$lib/components/Navbar.svelte';
+  import { onMount } from 'svelte';
+  import { API_BASE_URL } from '$lib/config';
 
-  let wasteItems = [
-    { id: 1, code: 'R-ORG-01', name: 'Cáscara de Café', category: 'Orgánico', hazard: 'No Peligroso', potential: 'Bioenergía' },
-    { id: 2, code: 'R-INO-05', name: 'Virutas de Aluminio', category: 'Inorgánico', hazard: 'Inflamable', potential: 'Reciclaje' },
-    { id: 3, code: 'R-ORG-03', name: 'Bagazo de Caña', category: 'Orgánico', hazard: 'No Peligroso', potential: 'Biopelículas' },
-  ];
+  let wasteItems = $state([]);
+  let loading = $state(true);
+  let error = $state('');
+
+  onMount(fetchWasteItems);
+
+  async function fetchWasteItems() {
+    loading = true;
+    error = '';
+    try {
+      const response = await fetch(`${API_BASE_URL}/waste/generation`);
+      if (!response.ok) throw new Error('No se pudieron cargar los registros');
+      
+      const data = await response.json();
+      
+      // Map backend Residuo model to frontend structure
+      wasteItems = data.map((item: any) => ({
+        id: item.id,
+        code: `RES-${String(item.id).padStart(3, '0')}`,
+        name: item.caracteristica.substring(0, 30) + (item.caracteristica.length > 30 ? '...' : ''),
+        category: item.tipo_residuo === 'PELIGRO' ? 'Peligroso' : 'No Peligroso',
+        hazard: item.tipo_residuo,
+        potential: 'Por determinar' // This field could be derived or added to the model later
+      }));
+    } catch (err) {
+      error = err.message;
+      // Fallback if needed, but let's keep it empty or error message
+    } finally {
+      loading = false;
+    }
+  }
 
   let searchQuery = $state('');
 
-  // Svelte 5 derived state
-  // If Svelte 4, use $: filteredItems = ...
-  // Assuming Svelte 5 since 'sv' was used.
-  // Actually, let's use a function or simpler approach to be safe if version is ambiguous, 
-  // but let's try standard reactivity.
-  
   let filteredItems = $derived(wasteItems.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     item.code.toLowerCase().includes(searchQuery.toLowerCase())
