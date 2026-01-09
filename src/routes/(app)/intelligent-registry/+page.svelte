@@ -170,67 +170,87 @@
             </svg>
             <p class="text-scientific-700 font-medium">Motor de IA procesando material...</p>
           </div>
-        {:else if analysisResult}
-          <div transition:slide class="space-y-4 bg- scientific-50/30 p-4 rounded-lg border border-scientific-100">
-             <div class="flex justify-between items-start">
-               <div>
-                 <span class="text-[10px] font-bold uppercase text-scientific-600">Material Detectado</span>
-                 <h3 class="text-lg font-bold text-gray-900">{analysisResult.materialName}</h3>
+        {#if analysisResult}
+          <div transition:slide class="space-y-6">
+            <!-- HEADER -->
+            <div class="bg-scientific-50/30 p-4 rounded-lg border border-scientific-100">
+               <div class="flex justify-between items-start">
+                 <div>
+                   <span class="text-[10px] font-bold uppercase text-scientific-600">Material Detectado</span>
+                   <h3 class="text-xl font-bold text-gray-900">{analysisResult.materialName}</h3>
+                 </div>
+                 <button on:click={() => { analysisResult = null; file = null; }} class="text-xs text-red-500 underline">Cambiar archivo</button>
                </div>
-               <button on:click={() => analysisResult = null} class="text-xs text-red-500 underline">Cambiar archivo</button>
-             </div>
-             
-             <div class="grid grid-cols-2 gap-4 text-xs">
-                <div class="bg-white p-2 border border-gray-100 rounded">
-                   <span class="text-gray-400 block mb-1">Confianza</span>
-                   <span class="font-bold text-green-600">{analysisResult.confidence}%</span>
-                </div>
-                <div class="bg-white p-2 border border-gray-100 rounded">
-                   <span class="text-gray-400 block mb-1">Categoría</span>
-                   <span class="font-bold">{analysisResult.category}</span>
-                </div>
-             </div>
+               
+               <div class="grid grid-cols-2 gap-4 text-xs mt-3">
+                  <div class="bg-white p-2 border border-gray-100 rounded">
+                     <span class="text-gray-400 block mb-1">Confianza</span>
+                     <span class="font-bold text-green-600">{analysisResult.confidence}%</span>
+                  </div>
+                  <div class="bg-white p-2 border border-gray-100 rounded">
+                     <span class="text-gray-400 block mb-1">Categoría</span>
+                     <span class="font-bold">{analysisResult.category}</span>
+                  </div>
+               </div>
+            </div>
 
-             <div class="p-3 bg-white border border-gray-200 rounded-lg text-xs">
-               <h4 class="font-bold mb-2">Composición Elemental (Clave)</h4>
-               <div class="flex flex-wrap gap-2">
-                 {#each analysisResult.elemental as el}
-                   <span class="bg-gray-50 px-2 py-1 rounded border border-gray-100">{el.label}: <strong>{el.value}%</strong></span>
-                 {/each}
-               </div>
-             </div>
-          </div>
-        {:else}
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {#each uploadOptions as opt}
-              <button on:click={() => openUpload(opt.id)} class="flex flex-col items-center p-4 border rounded-xl hover:border-scientific-400 hover:bg-scientific-50 transition-all group">
-                <div class={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${opt.color}`}>
-                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={opt.icon} /></svg>
+            <!-- PHYSICOCHEMICAL -->
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Propiedades Físico-Químicas</h4>
+              <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                {#each analysisResult.physicochemical as prop}
+                  <div class="flex justify-between text-sm py-2 border-b border-gray-50">
+                    <span class="text-gray-500">{prop.name}</span>
+                    <span class="font-bold text-gray-900">{prop.value}</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+
+            <!-- ELEMENTAL -->
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Composición Elemental</h4>
+                <div class="flex flex-wrap gap-2">
+                  {#each analysisResult.elemental as el}
+                    <div class="bg-gray-50 border border-gray-100 px-3 py-2 rounded text-center min-w-[60px]">
+                      <div class="text-[10px] text-gray-400 uppercase">{el.label}</div>
+                      <div class="text-sm font-bold text-indigo-600">{el.value}%</div>
+                    </div>
+                  {/each}
                 </div>
-                <span class="text-xs font-bold text-gray-700">{opt.title}</span>
-              </button>
-            {/each}
+                {#if analysisResult.elementalSummary}
+                  <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">{analysisResult.elementalSummary}</p>
+                {/if}
+            </div>
+
+            <!-- ENGINEERING -->
+            <div class="bg-gradient-to-br from-scientific-50 to-white border border-scientific-100 rounded-xl p-5 shadow-sm">
+               <h4 class="text-xs font-bold text-scientific-600 uppercase tracking-wider mb-2">Evaluación de Ingeniería</h4>
+               <p class="text-xs text-gray-700 leading-relaxed mb-2">
+                 <strong class="font-bold text-gray-900">Estructura:</strong> {analysisResult.engineeringContext.structure}
+               </p>
+               <p class="text-xs text-gray-700 leading-relaxed">
+                 <strong class="font-bold text-gray-900">Procesabilidad:</strong> {analysisResult.engineeringContext.processability}
+               </p>
+            </div>
+
+            <!-- VALORIZATION -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rutas de Valorización</h4>
+              {#each analysisResult.valorizationRoutes as route}
+                <div class="flex items-center gap-3 p-3 rounded-lg border bg-white {route.score >= 90 ? 'border-green-100' : 'border-gray-100'}">
+                   <div class="flex-1 min-w-0">
+                      <p class="text-[10px] font-bold text-scientific-700 uppercase">{route.method}</p>
+                      <p class="text-[9px] text-gray-500 truncate">Output: {route.output}</p>
+                   </div>
+                   <div class="text-xs font-bold {route.score >= 90 ? 'text-green-600' : 'text-gray-400'}">
+                     {route.score}%
+                   </div>
+                </div>
+              {/each}
+            </div>
           </div>
         {/if}
-      </div>
-
-      <!-- Result Review Section (If analyzed) -->
-      {#if analysisResult}
-        <div transition:fade class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h3 class="text-sm font-bold text-gray-500 uppercase flex items-center gap-2 mb-4">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Resumen de Propiedades
-          </h3>
-          <div class="space-y-2">
-            {#each analysisResult.physicochemical.slice(0, 4) as prop}
-              <div class="flex justify-between text-sm py-1 border-b border-gray-50">
-                <span class="text-gray-500">{prop.name}</span>
-                <span class="font-medium text-gray-900">{prop.value}</span>
-              </div>
-            {/each}
-          </div>
-        </div>
-      {/if}
     </div>
 
     <!-- RIGHT: Waste Generation Form -->
