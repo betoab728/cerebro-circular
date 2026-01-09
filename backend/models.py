@@ -46,6 +46,13 @@ class Residuo(SQLModel, table=True):
     peso_total: float
     frecuencia: str
     fecha_registro: datetime = Field(default_factory=datetime.now)
+    
+    # AI Analysis Fields (Optional, stored as JSON strings for simplicity in SQLite/Generic DB)
+    analysis_material_name: Optional[str] = None
+    analysis_physicochemical: Optional[str] = None # JSON string
+    analysis_elemental: Optional[str] = None # JSON string
+    analysis_engineering: Optional[str] = None # JSON string
+    analysis_valorization: Optional[str] = None # JSON string
 
 # Analysis Models
 class PhysicochemicalProp(BaseModel):

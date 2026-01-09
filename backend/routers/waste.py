@@ -12,12 +12,14 @@ router = APIRouter(
 @router.post("/generation", response_model=Residuo)
 async def create_waste_generation(residuo: Residuo, session: Session = Depends(get_session)):
     try:
+        print(f"Received registration: {residuo.responsable} - Analysis included: {residuo.analysis_material_name is not None}")
         session.add(residuo)
         session.commit()
         session.refresh(residuo)
         return residuo
     except Exception as e:
         session.rollback()
+        print(f"Error in create_waste_generation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to register waste generation: {str(e)}")
 
 @router.get("/generation", response_model=list[Residuo])
