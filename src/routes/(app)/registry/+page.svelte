@@ -28,7 +28,7 @@
         type: item.tipo_residuo,
         cantidad: `${item.cantidad} ${item.unidad_medida}`,
         peso: `${item.peso_total} kg`,
-        category: item.tipo_residuo === 'PELIGRO' ? 'Peligroso' : 'No Peligroso'
+        category: (item.tipo_residuo === 'PELIGRO' || item.tipo_residuo === 'PELIGROSO') ? 'Peligroso' : 'No Peligroso'
       }));
     } catch (err) {
       error = err.message;

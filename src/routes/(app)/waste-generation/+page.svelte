@@ -24,7 +24,7 @@
   ];
 
   const tiposResiduo = [
-    'PELIGRO', 'NO PELIGROSO', 'NFU', 'RAEE', 'ESPECIAL', 'OTROS'
+    'PELIGROSO', 'NO PELIGROSO', 'NFU', 'RAEE', 'ESPECIAL', 'OTROS'
   ];
 
   const unidadesMedida = [
