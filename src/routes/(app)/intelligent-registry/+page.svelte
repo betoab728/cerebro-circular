@@ -168,7 +168,7 @@
          <h2 class="text-xl font-bold text-gray-800">Datos de Generación y Escala</h2>
        </div>
 
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
          <div class="space-y-1.5 focus-within:text-scientific-600 transition-colors">
            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Responsable</label>
            <input type="text" required bind:value={formData.responsable} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4" placeholder="Nombre completo" />
@@ -178,6 +178,13 @@
            <select required bind:value={formData.unidad_generadora} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4 bg-white">
              <option value="" disabled>Seleccione unidad...</option>
              {#each unidadesGeneradoras as u} <option value={u}>{u}</option> {/each}
+           </select>
+         </div>
+         <div class="space-y-1.5">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Tipo de Residuo</label>
+           <select required bind:value={formData.tipo_residuo} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4 bg-white">
+             <option value="" disabled>Seleccione...</option>
+             {#each tiposResiduo as t} <option value={t}>{t}</option> {/each}
            </select>
          </div>
        </div>
