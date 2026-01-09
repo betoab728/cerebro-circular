@@ -112,7 +112,7 @@ async def analyze_waste(
     You are an expert Material Scientist and Circular Economy consultant. 
     Analyze the input to identify the waste material. 
     
-    IMPORTANT CONTEXT FROM USER FORM:
+    IMPORTANT CONTEXT FROM USER FORM (Scale matters!):
     - Quantity/Amount: {context_data.get('cantidad', 'Not specified')} {context_data.get('unidad_medida', '')}
     - Total Weight: {context_data.get('peso_total', 'Not specified')} kg
     - User Description: {context_data.get('caracteristica', 'None')}
@@ -128,7 +128,7 @@ async def analyze_waste(
         "elementalSummary": "String (Friendly paragraph explaining the chemical composition)",
         "engineeringContext": {{ 
             "structure": "String (Detailed material structure)", 
-            "processability": "String (How easy it is to process given the amount/context)", 
+            "processability": "String (CRITICAL: Assess how to process THIS SPECIFIC AMOUNT. e.g., 'Apto para prensa industrial' for high volumes)", 
             "impurities": "String" 
         }},
         "valorizationRoutes": [ {{
@@ -140,9 +140,10 @@ async def analyze_waste(
     }}
     
     INSTRUCTIONS:
-    1. If the weight/quantity is high, prioritize industrial valorization routes.
-    2. If the user provided a description, use it to refine the material identification.
-    3. Translate all string values to Spanish.
+    1. SCALING ECONOMICS: If weight/quantity is high (e.g., >100kg), prioritize industrial recycling routes and bulk sales. If low, focus on local segregation.
+    2. MATERIAL ID: Use the user description to help identify the material in the file/photo.
+    3. VALORIZATION: In the 'method' or 'output' of valorizationRoutes, include an ESTIMATED ECONOMIC VALUE in Soles (S/.) per kg or per total batch based on the provided weight.
+    4. Translate all string values to Spanish.
     """
 
     generation_parts = [prompt_text]

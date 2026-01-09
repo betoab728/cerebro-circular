@@ -135,209 +135,172 @@
 
 <Navbar title="Registro Inteligente & Caracterización" />
 
-<div class="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+<div class="p-6 md:p-10 max-w-3xl mx-auto space-y-10 pb-24">
   
+  <header class="text-center space-y-2">
+    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Registro Inteligente con IA</h1>
+    <p class="text-gray-500">Ingresa los datos operativos y deja que nuestra IA caracterice técnicamente el material.</p>
+  </header>
+
   {#if successMessage}
-    <div transition:fade class="p-4 bg-green-50 text-green-700 rounded-lg border border-green-200 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-        {successMessage}
+    <div transition:fade class="p-5 bg-green-50 text-green-700 rounded-2xl border border-green-100 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-3">
+        <div class="bg-green-100 p-2 rounded-full"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
+        <span class="font-medium">{successMessage}</span>
       </div>
-      <a href="/registry" class="text-sm font-bold underline">Ver en Registros Maestros</a>
+      <a href="/registry" class="text-sm font-bold underline hover:text-green-800">Ver Historial</a>
     </div>
   {/if}
 
   {#if errorMessage}
-    <div transition:fade class="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 flex items-center gap-2">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      {errorMessage}
+    <div transition:fade class="p-5 bg-red-50 text-red-700 rounded-2xl border border-red-100 flex items-center gap-3 shadow-sm">
+      <div class="bg-red-100 p-2 rounded-full"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+      <span class="font-medium">{errorMessage}</span>
     </div>
   {/if}
 
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+  <div class="space-y-8">
     
-    <!-- LEFT: AI Characterization Selection -->
-    <div class="space-y-6">
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <svg class="w-6 h-6 text-scientific-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-          1. Análisis de IA del Residuo
-        </h2>
-        <p class="text-sm text-gray-500 mb-6">Analiza técnicamente el material para obtener sus propiedades antes de registrarlo.</p>
+    <!-- STEP 1: Basic & Scale Data -->
+    <section class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+       <div class="flex items-center gap-3 mb-2">
+         <div class="w-8 h-8 bg-scientific-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+         <h2 class="text-xl font-bold text-gray-800">Datos de Generación y Escala</h2>
+       </div>
 
-        {#if isAnalyzing}
-          <div class="py-12 flex flex-col items-center justify-center text-center space-y-4">
-            <svg class="animate-spin h-10 w-10 text-scientific-600" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p class="text-scientific-700 font-medium">Motor de IA procesando material...</p>
-          </div>
-        {:else if analysisResult}
-          <div transition:slide class="space-y-6">
-            <!-- HEADER -->
-            <div class="bg-scientific-50/30 p-4 rounded-lg border border-scientific-100">
-               <div class="flex justify-between items-start">
-                 <div>
-                   <span class="text-[10px] font-bold uppercase text-scientific-600">Material Detectado</span>
-                   <h3 class="text-xl font-bold text-gray-900">{analysisResult.materialName}</h3>
-                 </div>
-                 <button on:click={() => { analysisResult = null; file = null; }} class="text-xs text-red-500 underline">Cambiar archivo</button>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+         <div class="space-y-1.5 focus-within:text-scientific-600 transition-colors">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Responsable</label>
+           <input type="text" required bind:value={formData.responsable} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4" placeholder="Nombre completo" />
+         </div>
+         <div class="space-y-1.5">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Unidad Generadora</label>
+           <select required bind:value={formData.unidad_generadora} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4 bg-white">
+             <option value="" disabled>Seleccione unidad...</option>
+             {#each unidadesGeneradoras as u} <option value={u}>{u}</option> {/each}
+           </select>
+         </div>
+       </div>
+
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+         <div class="space-y-1.5">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Cantidad</label>
+           <input type="number" step="0.01" required bind:value={formData.cantidad} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:border-scientific-400 px-4" placeholder="0.00" />
+         </div>
+         <div class="space-y-1.5">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Unidad Medida</label>
+           <select required bind:value={formData.unidad_medida} class="w-full h-12 rounded-xl border-gray-200 focus:border-scientific-400 px-4 bg-white">
+             {#each unidadesMedida as um} <option value={um}>{um}</option> {/each}
+           </select>
+         </div>
+         <div class="space-y-1.5">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Peso Total (kg)</label>
+           <input type="number" step="0.01" required bind:value={formData.peso_total} class="w-full h-12 rounded-xl border-gray-200 border-2 border-scientific-100 focus:border-scientific-400 px-4 font-bold text-scientific-700" placeholder="0.00 kg" />
+         </div>
+       </div>
+
+       <div class="space-y-1.5 pt-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Descripción Inicial</label>
+          <textarea bind:value={formData.caracteristica} rows="2" class="w-full rounded-xl border-gray-200 focus:border-scientific-400 px-4 py-3" placeholder="Ej: Plástico de envase de suero, cartón corrugado empapado..."></textarea>
+       </div>
+    </section>
+
+    <!-- STEP 2: AI Characterization -->
+    <section class="bg-gradient-to-br from-scientific-50/50 to-white p-8 rounded-2xl shadow-sm border border-scientific-100 space-y-6">
+       <div class="flex items-center gap-3 mb-2">
+         <div class="w-8 h-8 bg-scientific-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
+         <h2 class="text-xl font-bold text-gray-800">Caracterización Técnica con IA</h2>
+       </div>
+
+       {#if !analysisResult && !isAnalyzing}
+         <div in:fade class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+           {#each uploadOptions as opt}
+             <button on:click={() => openUpload(opt.id)} class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-2xl hover:border-scientific-400 hover:shadow-md transition-all group scale-100 hover:scale-[1.02] active:scale-95">
+               <div class={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${opt.color} group-hover:scale-110 transition-transform`}>
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={opt.icon} /></svg>
                </div>
-               
-               <div class="grid grid-cols-2 gap-4 text-xs mt-3">
-                  <div class="bg-white p-2 border border-gray-100 rounded">
-                     <span class="text-gray-400 block mb-1">Confianza</span>
-                     <span class="font-bold text-green-600">{analysisResult.confidence}%</span>
-                  </div>
-                  <div class="bg-white p-2 border border-gray-100 rounded">
-                     <span class="text-gray-400 block mb-1">Categoría</span>
-                     <span class="font-bold">{analysisResult.category}</span>
-                  </div>
-               </div>
-            </div>
-
-            <!-- PHYSICOCHEMICAL -->
-            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Propiedades Físico-Químicas</h4>
-              <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                {#each analysisResult.physicochemical as prop}
-                  <div class="flex justify-between text-sm py-2 border-b border-gray-50">
-                    <span class="text-gray-500">{prop.name}</span>
-                    <span class="font-bold text-gray-900">{prop.value}</span>
-                  </div>
-                {/each}
-              </div>
-            </div>
-
-            <!-- ELEMENTAL -->
-            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Composición Elemental</h4>
-                <div class="flex flex-wrap gap-2">
-                  {#each analysisResult.elemental as el}
-                    <div class="bg-gray-50 border border-gray-100 px-3 py-2 rounded text-center min-w-[60px]">
-                      <div class="text-[10px] text-gray-400 uppercase">{el.label}</div>
-                      <div class="text-sm font-bold text-indigo-600">{el.value}%</div>
+               <span class="text-sm font-bold text-gray-700">{opt.title}</span>
+               <span class="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">{opt.desc}</span>
+             </button>
+           {/each}
+         </div>
+       {:else if isAnalyzing}
+         <div in:fade class="py-12 flex flex-col items-center justify-center text-center space-y-5 bg-white rounded-2xl border border-dashed border-scientific-200">
+           <svg class="animate-spin h-12 w-12 text-scientific-600" viewBox="0 0 24 24">
+             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+           </svg>
+           <div class="space-y-1">
+              <p class="text-scientific-700 font-bold text-lg">Cross-referencing scale data...</p>
+              <p class="text-xs text-gray-400 uppercase tracking-widest">Escalando análisis a {formData.peso_total || 0} kg</p>
+           </div>
+         </div>
+       {:else if analysisResult}
+         <div in:slide class="space-y-6">
+           <!-- AI RESULTS BANNER -->
+           <div class="bg-white p-6 rounded-2xl border border-scientific-200 shadow-sm relative overflow-hidden">
+              <div class="absolute top-0 right-0 p-3"><button on:click={() => { analysisResult = null; file = null; }} class="text-red-500 hover:text-red-700 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+              <div class="flex flex-col md:flex-row gap-6 items-start">
+                 <div class="flex-1 space-y-1">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-scientific-600">Material Detectado</span>
+                    <h3 class="text-2xl font-black text-gray-900 leading-none">{analysisResult.materialName}</h3>
+                    <div class="flex gap-2 pt-1">
+                       <span class="px-2 py-0.5 bg-gray-100 rounded text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Confianza: {analysisResult.confidence}%</span>
+                       <span class="px-2 py-0.5 bg-scientific-50 rounded text-[10px] font-bold text-scientific-700 uppercase tracking-tighter">Cat: {analysisResult.category}</span>
                     </div>
-                  {/each}
+                 </div>
+                 
+                 <div class="w-full md:w-auto grid grid-cols-1 gap-3">
+                    <div class="bg-scientific-600 p-4 rounded-xl text-white text-center min-w-[180px]">
+                       <span class="block text-[10px] font-bold uppercase opacity-80 mb-1">Métrica de Procesabilidad</span>
+                       <p class="text-xs leading-tight font-medium">{analysisResult.engineeringContext.processability}</p>
+                    </div>
+                 </div>
+              </div>
+
+              <!-- VALORIZATION ROUTES (Integrated) -->
+              <div class="mt-8 space-y-3">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                   Oportunidades de Economía Circular
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                   {#each analysisResult.valorizationRoutes as route}
+                     <div class="p-4 rounded-xl border-2 {route.score >= 90 ? 'border-green-50 bg-green-50/20' : 'border-gray-50 bg-gray-50/30'} flex justify-between items-center group hover:border-scientific-200 transition-all">
+                        <div class="max-w-[70%]">
+                           <p class="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">{route.method}</p>
+                           <p class="text-sm font-bold text-gray-800 leading-tight">{route.output}</p>
+                        </div>
+                        <div class="text-right">
+                           <span class="block text-lg font-black {route.score >= 90 ? 'text-green-600' : 'text-gray-400'}">{route.score}%</span>
+                           <span class="text-[9px] font-bold text-gray-400 uppercase">Viabilidad</span>
+                        </div>
+                     </div>
+                   {/each}
                 </div>
-                {#if analysisResult.elementalSummary}
-                  <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">{analysisResult.elementalSummary}</p>
-                {/if}
-            </div>
-
-            <!-- ENGINEERING -->
-            <div class="bg-gradient-to-br from-scientific-50 to-white border border-scientific-100 rounded-xl p-5 shadow-sm">
-               <h4 class="text-xs font-bold text-scientific-600 uppercase tracking-wider mb-2">Evaluación de Ingeniería</h4>
-               <p class="text-xs text-gray-700 leading-relaxed mb-2">
-                 <strong class="font-bold text-gray-900">Estructura:</strong> {analysisResult.engineeringContext.structure}
-               </p>
-               <p class="text-xs text-gray-700 leading-relaxed">
-                 <strong class="font-bold text-gray-900">Procesabilidad:</strong> {analysisResult.engineeringContext.processability}
-               </p>
-            </div>
-
-            <!-- VALORIZATION -->
-            <div class="space-y-3">
-              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rutas de Valorización</h4>
-              {#each analysisResult.valorizationRoutes as route}
-                <div class="flex items-center gap-3 p-3 rounded-lg border bg-white {route.score >= 90 ? 'border-green-100' : 'border-gray-100'}">
-                   <div class="flex-1 min-w-0">
-                      <p class="text-[10px] font-bold text-scientific-700 uppercase">{route.method}</p>
-                      <p class="text-[9px] text-gray-500 truncate">Output: {route.output}</p>
-                   </div>
-                   <div class="text-xs font-bold {route.score >= 90 ? 'text-green-600' : 'text-gray-400'}">
-                     {route.score}%
-                   </div>
-                </div>
-              {/each}
-            </div>
-          </div>
-        {:else}
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {#each uploadOptions as opt}
-              <button on:click={() => openUpload(opt.id)} class="flex flex-col items-center p-4 border rounded-xl hover:border-scientific-400 hover:bg-scientific-50 transition-all group">
-                <div class={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${opt.color}`}>
-                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={opt.icon} /></svg>
-                </div>
-                <span class="text-xs font-bold text-gray-700">{opt.title}</span>
-              </button>
-            {/each}
-          </div>
-        {/if}
-      </div>
-    </div>
-
-    <!-- RIGHT: Waste Generation Form -->
-    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border-2 border-scientific-100">
-       <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-         <svg class="w-6 h-6 text-scientific-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-         2. Datos de Registro y Generación
-       </h2>
-
-       <form on:submit|preventDefault={handleRegister} class="space-y-5">
-         <div>
-           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Responsable</label>
-           <input type="text" required bind:value={formData.responsable} class="w-full rounded-lg border-gray-200 focus:border-scientific-500" placeholder="Nombre completo" />
-         </div>
-
-         <div class="grid grid-cols-2 gap-4">
-           <div>
-             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Unidad Generadora</label>
-             <select required bind:value={formData.unidad_generadora} class="w-full rounded-lg border-gray-200">
-               <option value="" disabled>Seleccione...</option>
-               {#each unidadesGeneradoras as u} <option value={u}>{u}</option> {/each}
-             </select>
-           </div>
-           <div>
-             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Residuo</label>
-             <select required bind:value={formData.tipo_residuo} class="w-full rounded-lg border-gray-200">
-               <option value="" disabled>Seleccione...</option>
-               {#each tiposResiduo as t} <option value={t}>{t}</option> {/each}
-             </select>
+              </div>
            </div>
          </div>
+       {/if}
+    </section>
 
-         <div>
-           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Característica / Descripción</label>
-           <textarea required bind:value={formData.caracteristica} rows="2" class="w-full rounded-lg border-gray-200" placeholder="Descripción física del residuo..."></textarea>
-         </div>
-
-         <div class="grid grid-cols-3 gap-4">
-           <div>
-             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Cantidad</label>
-             <input type="number" step="0.01" required bind:value={formData.cantidad} class="w-full rounded-lg border-gray-200" />
-           </div>
-           <div>
-             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">U.M</label>
-             <select required bind:value={formData.unidad_medida} class="w-full rounded-lg border-gray-200">
-               {#each unidadesMedida as um} <option value={um}>{um}</option> {/each}
-             </select>
-           </div>
-           <div>
-             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Peso (kg)</label>
-             <input type="number" step="0.01" required bind:value={formData.peso_total} class="w-full rounded-lg border-gray-200" />
-           </div>
-         </div>
-
-         <div class="pt-4">
-           <button 
-             type="submit" 
-             disabled={isSaving || isAnalyzing}
-             class="w-full bg-scientific-600 hover:bg-scientific-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-           >
-             {#if isSaving}
-               <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-               Procesando Guardado...
-             {:else}
-               <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
-               Guardar y Caracterizar Registro
-             {/if}
-           </button>
-           <p class="text-[10px] text-gray-400 text-center mt-3">Al guardar, la información técnica de la IA se adjuntará permanentemente a este registro de generación.</p>
-         </div>
-       </form>
-    </div>
+    <!-- STEP 3: Final Registration -->
+    <section class="space-y-4">
+       <button 
+         on:click={handleRegister}
+         disabled={isSaving || isAnalyzing}
+         class="w-full h-16 bg-scientific-600 hover:bg-scientific-700 text-white font-black text-lg rounded-2xl shadow-xl shadow-scientific-200 transition-all flex items-center justify-center gap-4 group disabled:opacity-50"
+       >
+         {#if isSaving}
+            <svg class="animate-spin h-6 w-6 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <span class="tracking-tight uppercase">Persistiendo Datos en Blockchain Local...</span>
+         {:else}
+            <svg class="w-7 h-7 group-hover:translate-y-[-2px] transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 21.355r2.263-5.21c.242-.558.118-1.23-.303-1.65l-4.242-4.242a.5.5 0 00-.707 0L4.764 14.494c-.42.42-.544 1.092-.302 1.65l2.263 5.21a.5.5 0 00.915 0L12 16.145l4.36 5.21a.5.5 0 00.915 0z" /></svg>
+            <span class="tracking-tight uppercase">Finalizar y Guardar Caracterización</span>
+         {/if}
+       </button>
+       <p class="text-center text-[11px] text-gray-400 font-medium">Al guardar, los datos de escala y la inteligencia técnica del material se unificarán en el historial permanente.</p>
+    </section>
 
   </div>
 </div>
