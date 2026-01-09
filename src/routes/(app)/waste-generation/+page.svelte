@@ -31,13 +31,15 @@
     'KILOGRAMO', 'METROS CUBICOS', 'OTROS'
   ];
 
+  import { API_BASE_URL } from '$lib/config';
+
   async function handleSubmit() {
     loading = true;
     errorMessage = '';
     successMessage = '';
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/waste/generation', {
+      const response = await fetch(`${API_BASE_URL}/waste/generation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -46,7 +48,8 @@
       });
 
       if (!response.ok) {
-        throw new Error('Error al registrar los datos');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Error al registrar los datos');
       }
 
       successMessage = 'Registro guardado exitosamente';
@@ -62,7 +65,11 @@
         frecuencia: ''
       };
     } catch (error) {
-      errorMessage = error.message;
+      if (error.message.includes('Failed to fetch')) {
+        errorMessage = 'No se pudo conectar con el servidor. ¿Está el backend encendido?';
+      } else {
+        errorMessage = error.message;
+      }
     } finally {
       loading = false;
     }
