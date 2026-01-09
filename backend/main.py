@@ -85,29 +85,64 @@ def read_root():
     return {"message": "CEREBRO CIRCULAR Backend Online (Gemini Powered)"}
 
 @app.post("/analyze", response_model=AnalysisResult)
-async def analyze_waste(file: UploadFile = File(...), type: str = Form("technical")):
+async def analyze_waste(
+    file: UploadFile = File(...), 
+    type: str = Form("technical"),
+    context: str = Form(None)
+):
     print(f"Processing file: {file.filename} of type: {type}")
+    if context:
+        print(f"Form Context received: {context}")
     
     if not os.getenv("GOOGLE_API_KEY"):
          raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not configured on server.")
 
     content = await file.read()
     
+    # Base Context from Form
+    context_data = {}
+    if context:
+        try:
+            context_data = json.loads(context)
+        except:
+            pass
+
     # Prompt for JSON generation
-    prompt_text = """
-    You are an expert Material Scientist. Analyze the input to identify the waste material.
+    prompt_text = f"""
+    You are an expert Material Scientist and Circular Economy consultant. 
+    Analyze the input to identify the waste material. 
+    
+    IMPORTANT CONTEXT FROM USER FORM:
+    - Quantity/Amount: {context_data.get('cantidad', 'Not specified')} {context_data.get('unidad_medida', '')}
+    - Total Weight: {context_data.get('peso_total', 'Not specified')} kg
+    - User Description: {context_data.get('caracteristica', 'None')}
+    - Origin Unit: {context_data.get('unidad_generadora', 'Unknown')}
+
     Return strictly valid JSON matching this schema:
-    {
+    {{
         "materialName": "String",
-        "category": "String",
+        "category": "String (Peligroso / No Peligroso / Especial)",
         "confidence": Number (0-100),
-        "physicochemical": [ {"name": "String", "value": "String", "method": "String"} ],
-        "elemental": [ {"label": "String (e.g., 'C (Carbono)')", "value": Number, "description": "String (e.g. 'Base polimérica')", "trace": Boolean} ],
-        "elementalSummary": "String (Friendly paragraph explaining the chemical composition to a non-expert)",
-        "engineeringContext": { "structure": "String", "processability": "String", "impurities": "String" },
-        "valorizationRoutes": [ {"role": "String", "method": "String", "output": "String", "score": Number (0-100)} ]
-    }
-    Translate values to Spanish.
+        "physicochemical": [ {{"name": "String", "value": "String", "method": "String"}} ],
+        "elemental": [ {{"label": "String (e.g., 'C (Carbono)')", "value": Number, "description": "String", "trace": Boolean}} ],
+        "elementalSummary": "String (Friendly paragraph explaining the chemical composition)",
+        "engineeringContext": {{ 
+            "structure": "String (Detailed material structure)", 
+            "processability": "String (How easy it is to process given the amount/context)", 
+            "impurities": "String" 
+        }},
+        "valorizationRoutes": [ {{
+            "role": "String", 
+            "method": "String", 
+            "output": "String", 
+            "score": Number (0-100)
+        }} ]
+    }}
+    
+    INSTRUCTIONS:
+    1. If the weight/quantity is high, prioritize industrial valorization routes.
+    2. If the user provided a description, use it to refine the material identification.
+    3. Translate all string values to Spanish.
     """
 
     generation_parts = [prompt_text]

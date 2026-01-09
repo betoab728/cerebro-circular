@@ -69,6 +69,9 @@
       const data = new FormData();
       data.append('file', file);
       data.append('type', currentUploadType);
+      
+      // Send current form data as context for better AI analysis
+      data.append('context', JSON.stringify(formData));
 
       const response = await fetch(`${API_BASE_URL}/analyze`, { method: 'POST', body: data });
       if (!response.ok) throw new Error('Error en el análisis de IA');
