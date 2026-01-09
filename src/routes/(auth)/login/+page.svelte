@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { API_BASE_URL } from '$lib/config';
   
   let username = '';
   let password = '';
@@ -16,7 +16,7 @@
       params.append('username', username); // OAuth2 expects 'username'
       params.append('password', password);
 
-      const response = await fetch(`${PUBLIC_API_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'

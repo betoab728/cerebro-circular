@@ -262,6 +262,7 @@
             {/each}
           </div>
         {/if}
+      </div>
     </div>
 
     <!-- RIGHT: Waste Generation Form -->

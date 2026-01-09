@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fade, fly, slide } from 'svelte/transition';
   import { onMount } from 'svelte';
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { API_BASE_URL } from '$lib/config';
 
   // --- STORES & STATE ---
   let imageFile: File | null = null;
@@ -46,7 +46,7 @@
         formData.append('image', imageFile);
         formData.append('document', docFile);
 
-        const response = await fetch(`${PUBLIC_API_URL}/predictive-analysis`, {
+        const response = await fetch(`${API_BASE_URL}/predictive-analysis`, {
             method: 'POST',
             body: formData
         });
@@ -79,7 +79,7 @@
   async function downloadReport() {
     if (!results) return;
     try {
-        const response = await fetch(`${PUBLIC_API_URL}/predictive-report`, {
+        const response = await fetch(`${API_BASE_URL}/predictive-report`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(results)

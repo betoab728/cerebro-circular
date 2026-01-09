@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { API_BASE_URL } from '$lib/config';
   
   let email = '';
   let full_name = '';
@@ -13,7 +13,7 @@
     error = '';
     
     try {
-      const response = await fetch(`${PUBLIC_API_URL}/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

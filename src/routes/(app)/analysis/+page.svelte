@@ -1,7 +1,7 @@
 <script lang="ts">
   import Navbar from '$lib/components/Navbar.svelte';
   import Modal from '$lib/components/Modal.svelte';
-  import { PUBLIC_API_URL } from '$env/static/public';
+  import { API_BASE_URL } from '$lib/config';
 
   // Analysis State
   let isAnalyzing = false;
