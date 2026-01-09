@@ -170,7 +170,7 @@
             </svg>
             <p class="text-scientific-700 font-medium">Motor de IA procesando material...</p>
           </div>
-        {#if analysisResult}
+        {:else if analysisResult}
           <div transition:slide class="space-y-6">
             <!-- HEADER -->
             <div class="bg-scientific-50/30 p-4 rounded-lg border border-scientific-100">
@@ -249,6 +249,17 @@
                 </div>
               {/each}
             </div>
+          </div>
+        {:else}
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {#each uploadOptions as opt}
+              <button on:click={() => openUpload(opt.id)} class="flex flex-col items-center p-4 border rounded-xl hover:border-scientific-400 hover:bg-scientific-50 transition-all group">
+                <div class={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${opt.color}`}>
+                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={opt.icon} /></svg>
+                </div>
+                <span class="text-xs font-bold text-gray-700">{opt.title}</span>
+              </button>
+            {/each}
           </div>
         {/if}
     </div>
