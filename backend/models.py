@@ -34,6 +34,8 @@ class Usuario(SQLModel, table=True):
     clave: str
     fecha_creacion: datetime = Field(default_factory=datetime.now)
 
+from sqlalchemy import Text, Column
+
 class Residuo(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     responsable: str
@@ -42,17 +44,17 @@ class Residuo(SQLModel, table=True):
     caracteristica: str
     cantidad: float
     unidad_medida: str
-    volumen: float
+    volumen: Optional[float] = Field(default=None)
     peso_total: float
-    frecuencia: str
+    frecuencia: Optional[str] = Field(default=None)
     fecha_registro: datetime = Field(default_factory=datetime.now)
     
-    # AI Analysis Fields (Optional, stored as JSON strings for simplicity in SQLite/Generic DB)
-    analysis_material_name: Optional[str] = None
-    analysis_physicochemical: Optional[str] = None # JSON string
-    analysis_elemental: Optional[str] = None # JSON string
-    analysis_engineering: Optional[str] = None # JSON string
-    analysis_valorization: Optional[str] = None # JSON string
+    # AI Analysis Fields - Using Text for long content
+    analysis_material_name: Optional[str] = Field(default=None)
+    analysis_physicochemical: Optional[str] = Field(default=None, sa_column=Column(Text))
+    analysis_elemental: Optional[str] = Field(default=None, sa_column=Column(Text))
+    analysis_engineering: Optional[str] = Field(default=None, sa_column=Column(Text))
+    analysis_valorization: Optional[str] = Field(default=None, sa_column=Column(Text))
 
 # Analysis Models
 class PhysicochemicalProp(BaseModel):

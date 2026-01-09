@@ -1,35 +1,42 @@
-import sqlite3
 import os
+from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
 
-db_path = os.path.join(os.path.dirname(__file__), 'database.db')
+load_dotenv()
 
-def migrate():
-    print(f"Connecting to database at: {db_path}")
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+database_url = os.getenv("DATABASE_URL")
 
-    columns_to_add = [
-        ("analysis_material_name", "TEXT"),
-        ("analysis_physicochemical", "TEXT"),
-        ("analysis_elemental", "TEXT"),
-        ("analysis_engineering", "TEXT"),
-        ("analysis_valorization", "TEXT")
-    ]
+if not database_url:
+    print("Error: DATABASE_URL not found in environment.")
+    exit(1)
 
-    for col_name, col_type in columns_to_add:
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(database_url)
+
+migration_queries = [
+    # 1. Make columns nullable
+    "ALTER TABLE residuo ALTER COLUMN volumen DROP NOT NULL;",
+    "ALTER TABLE residuo ALTER COLUMN frecuencia DROP NOT NULL;",
+    
+    # 2. Change types to TEXT for long AI content
+    "ALTER TABLE residuo ALTER COLUMN analysis_physicochemical TYPE TEXT;",
+    "ALTER TABLE residuo ALTER COLUMN analysis_elemental TYPE TEXT;",
+    "ALTER TABLE residuo ALTER COLUMN analysis_engineering TYPE TEXT;",
+    "ALTER TABLE residuo ALTER COLUMN analysis_valorization TYPE TEXT;"
+]
+
+print(f"Connecting to: {database_url.split('@')[0]}...")
+
+with engine.connect() as conn:
+    for query in migration_queries:
         try:
-            print(f"Adding column {col_name}...")
-            cursor.execute(f"ALTER TABLE residuo ADD COLUMN {col_name} {col_type}")
-            print(f"Column {col_name} added successfully.")
-        except sqlite3.OperationalError as e:
-            if "duplicate column name" in str(e).lower():
-                print(f"Column {col_name} already exists.")
-            else:
-                print(f"Error adding column {col_name}: {e}")
+            print(f"Executing: {query}")
+            conn.execute(text(query))
+            conn.commit()
+            print("Successfully applied.")
+        except Exception as e:
+            print(f"Skipped/Failed: {query} (Error: {e})")
 
-    conn.commit()
-    conn.close()
-    print("Migration complete.")
-
-if __name__ == "__main__":
-    migrate()
+print("Migration completed.")
