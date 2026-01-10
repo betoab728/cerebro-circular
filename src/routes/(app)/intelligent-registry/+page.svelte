@@ -139,7 +139,7 @@
   
   <header class="text-center space-y-2">
     <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Registro Inteligente con IA</h1>
-    <p class="text-gray-500">Ingresa los datos operativos y deja que nuestra IA caracterice técnicamente el material.</p>
+    <p class="text-gray-500">Ingresa los datos operativos y deja que nuestra IA caracterice técnicamente el residuo.</p>
   </header>
 
   {#if successMessage}
@@ -306,7 +306,7 @@
             <span class="tracking-tight uppercase">Finalizar y Guardar Caracterización</span>
          {/if}
        </button>
-       <p class="text-center text-[11px] text-gray-400 font-medium">Al guardar, los datos de escala y la inteligencia técnica del material se unificarán en el historial permanente.</p>
+       <p class="text-center text-[11px] text-gray-400 font-medium">Al guardar, los datos de escala y la inteligencia técnica del residuo se unificarán en el historial permanente.</p>
     </section>
 
   </div>
