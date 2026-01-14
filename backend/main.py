@@ -142,8 +142,7 @@ async def analyze_waste(
     INSTRUCTIONS:
     1. SCALING ECONOMICS: If weight/quantity is high (e.g., >100kg), prioritize industrial recycling routes and bulk sales. If low, focus on local segregation.
     2. MATERIAL ID: Use the user description to help identify the material in the file/photo.
-    3. VALORIZATION: In the 'method' or 'output' of valorizationRoutes, include an ESTIMATED ECONOMIC VALUE in Soles (S/.) per kg or per total batch based on the provided weight.
-    4. Translate all string values to Spanish.
+    3. Translate all string values to Spanish.
     """
 
     generation_parts = [prompt_text]
