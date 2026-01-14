@@ -100,9 +100,18 @@
         // Include Analysis Data if available
         analysis_material_name: analysisResult?.materialName,
         analysis_physicochemical: JSON.stringify(analysisResult?.physicochemical),
+      const payload = {
+        ...formData,
+        // Include Analysis Data if available
+        analysis_material_name: analysisResult?.materialName,
+        analysis_physicochemical: JSON.stringify(analysisResult?.physicochemical),
         analysis_elemental: JSON.stringify(analysisResult?.elemental),
         analysis_engineering: JSON.stringify(analysisResult?.engineeringContext),
-        analysis_valorization: JSON.stringify(analysisResult?.valorizationRoutes)
+        analysis_valorization: JSON.stringify(analysisResult?.valorizationRoutes),
+        
+        // Financials
+        costo_disposicion_final: analysisResult?.disposalCost || 0,
+        ingreso_economia_circular: analysisResult?.circularIncome || 0
       };
 
       const response = await fetch(`${API_BASE_URL}/waste/generation`, {
@@ -257,12 +266,22 @@
                     </div>
                  </div>
                  
-                 <div class="w-full md:w-auto grid grid-cols-1 gap-3">
-                    <div class="bg-scientific-600 p-4 rounded-xl text-white text-center min-w-[180px]">
-                       <span class="block text-[10px] font-bold uppercase opacity-80 mb-1">Métrica de Procesabilidad</span>
-                       <p class="text-xs leading-tight font-medium">{analysisResult.engineeringContext.processability}</p>
-                    </div>
-                 </div>
+                  <div class="w-full md:w-auto grid grid-cols-1 gap-3">
+                     <div class="bg-scientific-600 p-4 rounded-xl text-white text-center min-w-[180px]">
+                        <span class="block text-[10px] font-bold uppercase opacity-80 mb-1">Métrica de Procesabilidad</span>
+                        <p class="text-xs leading-tight font-medium">{analysisResult.engineeringContext.processability}</p>
+                     </div>
+                     <div class="grid grid-cols-2 gap-3">
+                         <div class="bg-gray-100 p-3 rounded-xl text-center">
+                            <span class="block text-[9px] font-bold uppercase text-gray-500 mb-1">Costo Disposición</span>
+                            <p class="text-sm font-black text-red-600">S/. {analysisResult.disposalCost?.toFixed(2) || '0.00'}</p>
+                         </div>
+                         <div class="bg-indigo-50 p-3 rounded-xl text-center">
+                            <span class="block text-[9px] font-bold uppercase text-indigo-500 mb-1">Ingreso EC</span>
+                            <p class="text-sm font-black text-green-600">S/. {analysisResult.circularIncome?.toFixed(2) || '0.00'}</p>
+                         </div>
+                     </div>
+                  </div>
               </div>
 
               <!-- VALORIZATION ROUTES (Integrated) -->

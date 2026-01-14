@@ -130,7 +130,13 @@ def generate_pdf_report(data: AnalysisResult) -> BytesIO:
     for route in data.valorizationRoutes:
         story.append(Paragraph(f"<b>{route.role} ({route.score}%):</b> {route.method}", normal_style))
         story.append(Paragraph(f"Output: {route.output}", styles['Italic']))
-        story.append(Spacer(1, 6))
+    story.append(Spacer(1, 6))
+
+    # Financial Estimates
+    story.append(Paragraph("Estimación Económica", heading_style))
+    story.append(Paragraph(f"<b>Costo de Disposición Final (Estimado):</b> S/. {data.disposalCost:.2f}", normal_style))
+    story.append(Paragraph(f"<b>Ingreso Economía Circular (Potencial):</b> S/. {data.circularIncome:.2f}", normal_style))
+    story.append(Spacer(1, 12))
 
     doc.build(story)
     buffer.seek(0)

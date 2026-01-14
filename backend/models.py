@@ -55,6 +55,10 @@ class Residuo(SQLModel, table=True):
     analysis_elemental: Optional[str] = Field(default=None, sa_column=Column(Text))
     analysis_engineering: Optional[str] = Field(default=None, sa_column=Column(Text))
     analysis_valorization: Optional[str] = Field(default=None, sa_column=Column(Text))
+    
+    # Financial Estimates
+    costo_disposicion_final: Optional[float] = Field(default=0.0)
+    ingreso_economia_circular: Optional[float] = Field(default=0.0)
 
 # Analysis Models
 class PhysicochemicalProp(BaseModel):
@@ -88,6 +92,10 @@ class AnalysisResult(BaseModel):
     elementalSummary: str | None = None
     engineeringContext: EngineeringContext
     valorizationRoutes: List[ValorizationRoute]
+    
+    # Financials
+    disposalCost: float
+    circularIncome: float
 
 # Predictive Analysis Models
 class ProductOverview(BaseModel):
