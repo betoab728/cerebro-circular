@@ -100,11 +100,6 @@
         // Include Analysis Data if available
         analysis_material_name: analysisResult?.materialName,
         analysis_physicochemical: JSON.stringify(analysisResult?.physicochemical),
-      const payload = {
-        ...formData,
-        // Include Analysis Data if available
-        analysis_material_name: analysisResult?.materialName,
-        analysis_physicochemical: JSON.stringify(analysisResult?.physicochemical),
         analysis_elemental: JSON.stringify(analysisResult?.elemental),
         analysis_engineering: JSON.stringify(analysisResult?.engineeringContext),
         analysis_valorization: JSON.stringify(analysisResult?.valorizationRoutes),
