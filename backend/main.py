@@ -136,13 +136,23 @@ async def analyze_waste(
             "method": "String", 
             "output": "String", 
             "score": Number (0-100)
-        }} ]
+        }} ],
+        "disposalCost": Number (Estimated cost to dispose/process this TOTAL amount in Soles. Positive value.),
+        "circularIncome": Number (Estimated POTENTIAL income/saving from circular economy for this TOTAL amount in Soles. Positive value.)
     }}
     
     INSTRUCTIONS:
     1. SCALING ECONOMICS: If weight/quantity is high (e.g., >100kg), prioritize industrial recycling routes and bulk sales. If low, focus on local segregation.
     2. MATERIAL ID: Use the user description to help identify the material in the file/photo.
+<<<<<<< HEAD
     3. Translate all string values to Spanish.
+=======
+    3. FINANCIALS: Estimate 'disposalCost' (how much it costs to treat/landfill) and 'circularIncome' (how much they could make by selling/recycling). USE PERUVIAN MARKET REALISTIC VALUES in Soles (PEN). If unknown, estimate based on material type and weight.
+        - disposalCost: E.g., Landfill cost ~ S/. 0.50/kg, Incineration ~ S/. 3.00/kg.
+        - circularIncome: E.g., PET Scrap ~ S/. 1.20/kg, Scrap Metal ~ S/. 0.80/kg.
+        - Calculate TOTAL for the provided weight.
+    4. Translate all string values to Spanish.
+>>>>>>> 947303d048a5eedee82118df5ed97166e8c9947b
     """
 
     generation_parts = [prompt_text]
