@@ -31,7 +31,7 @@
           {/if}
         </div>
         <!-- Decorative line -->
-        <div class="h-1 w-full mt-4 rounded-full bg-gradient-to-r {kpi.color} opacity-20">
+        <div class="h-1 w-full mt-3 rounded-full bg-gradient-to-r {kpi.color} opacity-20">
           <div class="h-full rounded-full bg-gradient-to-r {kpi.color} w-3/4"></div>
         </div>
       </div>
