@@ -102,6 +102,68 @@
   }
 
   // --- HELPERS FOR UI ---
+  // --- REGISTRY FORM ---
+  let regDate = new Date().toISOString().split('T')[0];
+  let regResponsable = "";
+  let regArea = "";
+  let regProducto = "";
+  let regCantidad = 0;
+  let regDescripcion = "";
+  let regValorUnit = 0;
+  let regValorTotal = 0;
+  let regTipoAmbiental = "reciclable"; // reciclable, reutilizable, reaprovechable
+  let isSaving = false;
+  let saveMessage: { type: 'success' | 'error', text: string } | null = null;
+  
+  $: if (results) {
+      // Pre-fill form when results arrive
+      regProducto = results.productOverview.productName || "";
+      regDescripcion = results.productOverview.detectedPackaging || "";
+      // Try to parse value
+      const valStr = results.economicAnalysis.estimatedRecyclingValue || "";
+      const match = valStr.match(/[\d\.]+/);
+      if (match) {
+          regValorUnit = parseFloat(match[0]);
+      }
+  }
+
+  $: regValorTotal = (regCantidad * regValorUnit) || 0;
+
+  async function saveRegistry() {
+      isSaving = true;
+      saveMessage = null;
+      
+      const payload = {
+          fecha: new Date(regDate).toISOString(),
+          responsable: regResponsable,
+          area_solicitante: regArea,
+          producto: regProducto,
+          cantidad: regCantidad,
+          descripcion: regDescripcion,
+          valor_economico_unitario: regValorUnit,
+          valor_economico_total: regValorTotal,
+          tipo_valor_ambiental: regTipoAmbiental,
+          analysis_snapshot: JSON.stringify(results)
+      };
+
+      try {
+          const res = await fetch(`${API_BASE_URL}/predictive-registry`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+          });
+          
+          if (!res.ok) throw new Error("Error al guardar registro");
+          
+          saveMessage = { type: 'success', text: "Registro guardado exitosamente en base de datos." };
+      } catch (e) {
+          console.error(e);
+          saveMessage = { type: 'error', text: "Fallo al guardar el registro." };
+      } finally {
+          isSaving = false;
+      }
+  }
+
   function getScoreColor(score: number): string {
     if (score >= 80) return 'text-emerald-600 bg-emerald-50 border-emerald-200';
     if (score >= 50) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
@@ -358,6 +420,90 @@
                      </div>
                  </div>
              </div>
+        </div>
+
+        <!-- REGISTRATION FORM -->
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 mt-8">
+            <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                📂 Registro de Gestión de Residuos
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Fecha -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Fecha</label>
+                    <input type="date" bind:value={regDate} class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                
+                <!-- Responsable -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Responsable</label>
+                    <input type="text" bind:value={regResponsable} placeholder="Nombre del responsable" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+
+                <!-- Area Solicitante -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Área Solicitante</label>
+                    <input type="text" bind:value={regArea} placeholder="Ej: Logística" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+
+                <!-- Producto -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Producto</label>
+                    <input type="text" bind:value={regProducto} class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+
+                <!-- Cantidad -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cantidad</label>
+                    <input type="number" bind:value={regCantidad} min="0" step="0.1" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+
+                <!-- Descripcion -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+                    <input type="text" bind:value={regDescripcion} class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+
+                <!-- Valor Unitario -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Valor Unitario (S/.)</label>
+                    <input type="number" bind:value={regValorUnit} min="0" step="0.01" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+
+                <!-- Valor Total (Readonly) -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Valor Total (S/.)</label>
+                    <input type="text" value={regValorTotal.toFixed(2)} readonly class="w-full px-4 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-600 cursor-not-allowed" />
+                </div>
+
+                <!-- Tipo Valor Ambiental -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Tipo Valor Ambiental</label>
+                    <select bind:value={regTipoAmbiental} class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <option value="reciclable">Reciclable</option>
+                        <option value="reutilizable">Reutilizable</option>
+                        <option value="reaprovechable">Reaprovechable</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Boton Guardar -->
+            <div class="mt-8 flex flex-col items-center">
+                {#if saveMessage}
+                    <div class={`mb-4 px-4 py-2 rounded-lg text-sm ${saveMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {saveMessage.text}
+                    </div>
+                {/if}
+                
+                <button 
+                    on:click={saveRegistry}
+                    disabled={isSaving}
+                    class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {isSaving ? 'Guardando...' : '💾 Guardar Registro en Base de Datos'}
+                </button>
+            </div>
         </div>
 
       </div>

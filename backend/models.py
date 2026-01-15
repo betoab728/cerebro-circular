@@ -60,6 +60,19 @@ class Residuo(SQLModel, table=True):
     costo_disposicion_final: Optional[float] = Field(default=0.0)
     ingreso_economia_circular: Optional[float] = Field(default=0.0)
 
+class PredictiveRegistration(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    fecha: datetime
+    responsable: str
+    area_solicitante: str
+    producto: str
+    cantidad: float
+    descripcion: str
+    valor_economico_unitario: float
+    valor_economico_total: float
+    tipo_valor_ambiental: str  # reciclable, reutilizable, reaprovechable
+    analysis_snapshot: Optional[str] = Field(default=None, sa_column=Column(Text))  # Store JSON as text
+
 # Analysis Models
 class PhysicochemicalProp(BaseModel):
     name: str

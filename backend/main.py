@@ -8,11 +8,11 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import pypdf
 from PIL import Image
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, Session
 from database import engine
 from routers import auth, waste
 from utils.report_generator import generate_pdf_report, generate_predictive_report
-from models import AnalysisResult, PredictiveAnalysisResult, User, Residuo
+from models import AnalysisResult, PredictiveAnalysisResult, User, Residuo, PredictiveRegistration
 
 # Load environment variables
 load_dotenv()
@@ -31,6 +31,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.post("/predictive-registry")
+async def create_predictive_registry(registry: PredictiveRegistration):
+    try:
+        with Session(engine) as session:
+            session.add(registry)
+            session.commit()
+            session.refresh(registry)
+            return registry
+    except Exception as e:
+        print(f"Registry Save Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save registry: {str(e)}")
 
 @app.post("/report")
 async def get_report(data: AnalysisResult):
