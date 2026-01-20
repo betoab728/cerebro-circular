@@ -163,9 +163,11 @@
           <thead>
             <tr class="bg-gray-50/50 text-gray-400 font-bold text-[10px] uppercase tracking-widest border-b border-gray-100">
               <th class="px-6 py-4">Entidad / Planta</th>
-              <th class="px-6 py-4">Residuo</th>
+              <th class="px-6 py-4">Residuo (Reporte)</th>
+              <th class="px-6 py-4 text-scientific-600">Material IA</th>
               <th class="px-6 py-4">Clasificación</th>
               <th class="px-6 py-4 text-right">Cantidad</th>
+              <th class="px-6 py-4 text-right">Estimados (S/)</th>
               <th class="px-6 py-4 text-center">Acciones</th>
             </tr>
           </thead>
@@ -178,7 +180,14 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="font-medium text-gray-700">{rec.caracteristica}</div>
-                  <div class="text-[10px] font-bold text-scientific-600 bg-scientific-50 inline-block px-1.5 rounded uppercase mt-0.5">{rec.codigo_basilea}</div>
+                  <div class="text-[10px] font-bold text-gray-400 bg-gray-50 inline-block px-1.5 rounded uppercase mt-0.5">{rec.codigo_basilea}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="font-black text-scientific-700 leading-tight uppercase text-xs">{rec.analysis_material_name || 'Pendiente'}</div>
+                  <div class="flex gap-1 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-scientific-400 animate-pulse"></span>
+                    <span class="text-[9px] font-bold text-scientific-500 uppercase tracking-tighter">Caracterizado</span>
+                  </div>
                 </td>
                 <td class="px-6 py-4">
                   <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase {rec.tipo_residuo === 'PELIGROSO' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}">
@@ -189,6 +198,18 @@
                   <div class="font-black text-gray-900">{rec.cantidad.toLocaleString()}</div>
                   <div class="text-[10px] text-gray-400 font-bold uppercase">{rec.unidad_medida}</div>
                   <div class="text-[9px] text-scientific-600 font-medium italic">({rec.peso_total} kg)</div>
+                </td>
+                <td class="px-6 py-4 text-right">
+                   <div class="flex flex-col items-end gap-1">
+                      <div class="flex items-center gap-1.5">
+                         <span class="text-[9px] font-bold text-gray-400 uppercase">Disp.</span>
+                         <span class="text-xs font-black text-red-500">S/. {rec.costo_disposicion_final?.toFixed(2)}</span>
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                         <span class="text-[9px] font-bold text-indigo-400 uppercase">Ing. EC</span>
+                         <span class="text-xs font-black text-green-600">S/. {rec.ingreso_economia_circular?.toFixed(2)}</span>
+                      </div>
+                   </div>
                 </td>
                 <td class="px-6 py-4 text-center">
                   <button on:click={() => removeRecord(i)} class="p-2 text-gray-300 hover:text-red-500 transition-colors">

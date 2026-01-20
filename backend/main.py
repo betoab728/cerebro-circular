@@ -378,32 +378,45 @@ async def analyze_batch(file: UploadFile = File(...)):
         extracted_text = extracted_text[:40000] # Cap for context window
 
         prompt_text = """
-        Eres un experto en extracción de datos estructurados de documentos de gestión de residuos.
-        Analiza el texto extraído de un reporte PDF que contiene una tabla de registros de residuos.
+        Eres un experto Científico de Materiales y Consultor de Economía Circular.
+        Tu tarea es doble:
+        1. EXTRAER: Identifica cada fila de la tabla de residuos en el texto del reporte PDF.
+        2. CARACTERIZAR: Para CADA residuo extraído, realiza un análisis técnico profundo (como si estuvieras analizando una ficha técnica individual).
         
-        Tu objetivo es extraer cada fila de la tabla y convertirla a un objeto JSON compatible con este esquema:
+        Tu objetivo es devolver una lista de objetos JSON. Cada objeto debe ser un registro completo compatible con la base de datos (Modelo Residuo).
+        
+        ESQUEMA REQUERIDO:
         {
             "records": [
                 {
-                    "razon_social": "String (Razón Social)",
-                    "planta": "String (Planta)",
-                    "departamento": "String (ANCASH, etc)",
+                    "razon_social": "String",
+                    "planta": "String",
+                    "departamento": "String",
                     "tipo_residuo": "String (PELIGROSO / NO PELIGROSO / ESPECIAL / NFU / RAEE / OTROS)",
-                    "codigo_basilea": "String (Código de Basilea)",
-                    "caracteristica": "String (Descripción del residuo)",
+                    "codigo_basilea": "String",
+                    "caracteristica": "String (Descripción original)",
                     "cantidad": Number,
-                    "unidad_medida": "String (TONELADAS / KILOGRAMOS / METROS CUBICOS / OTROS)",
-                    "peso_total": Number (Calculado en KILOGRAMOS. Si la unidad es Toneladas, multiplica x 1000. Si está en kg ya, dejar igual.)
+                    "unidad_medida": "String (TONELADAS / KILOGRAMOS / ETC)",
+                    "peso_total": Number (En KILOGRAMOS - calcula segun cantidad/unidad),
+                    
+                    "analysis_material_name": "Nombre científico/claro del material",
+                    "analysis_physicochemical": "JSON String (List of {name, value, method})",
+                    "analysis_elemental": "JSON String (List of {label, value, description, trace})",
+                    "analysis_engineering": "JSON String ({structure, processability, impurities})",
+                    "analysis_valorization": "JSON String (List of {role, method, output, score})",
+                    "costo_disposicion_final": Number (Estimado en Soles S/ para este peso),
+                    "ingreso_economia_circular": Number (Estimado en Soles S/ para este peso)
                 }
             ]
         }
         
-        INSTRUCCIONES:
-        1. Procesa TODAS las filas visibles en el texto.
-        2. Mantén la fidelidad de los datos originales.
-        3. Si la unidad es Toneladas (o TON), multiplica por 1000 para obtener el peso_total en Kg.
-        4. Traduce los tipos de residuo a los valores permitidos (PELIGROSO, NO PELIGROSO, etc).
-        5. Devuelve ÚNICAMENTE el JSON.
+        INSTRUCCIONES DE ANÁLISIS TÉCNICO:
+        - Para cada residuo, infiere sus propiedades físico-químicas y composición elemental basándote en su descripción y contexto industrial.
+        - En 'analysis_engineering.processability', evalúa específicamente cómo manejar el volumen extraído (peso_total).
+        - En 'analysis_valorization', propón rutas de economía circular con puntajes de viabilidad realistas según normativa peruana.
+        - MUY IMPORTANTE: Los campos que dicen "JSON String" deben ser cadenas de texto que contengan el JSON serializado, NO objetos anidados directamente.
+        
+        Devuelve ÚNICAMENTE el JSON.
         """
 
         generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
