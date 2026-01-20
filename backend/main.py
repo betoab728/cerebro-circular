@@ -13,6 +13,8 @@ from database import engine
 from routers import auth, waste
 from utils.report_generator import generate_pdf_report, generate_predictive_report
 from models import AnalysisResult, PredictiveAnalysisResult, User, Residuo, PredictiveRegistration
+import asyncio
+
 
 # Load environment variables
 load_dotenv()
@@ -355,6 +357,91 @@ async def predictive_analysis(
     except Exception as e:
         print(f"Predictive Analysis Failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Analysis Failed: {str(e)}")
+
+@app.post("/analyze-batch")
+async def analyze_batch(file: UploadFile = File(...)):
+    print(f"Processing Batch PDF: {file.filename}")
+    
+    if not os.getenv("GOOGLE_API_KEY"):
+         raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not configured on server.")
+
+    content = await file.read()
+    
+    try:
+        # Read PDF
+        pdf_file = io.BytesIO(content)
+        reader = pypdf.PdfReader(pdf_file)
+        extracted_text = ""
+        for page in reader.pages:
+            extracted_text += page.extract_text() + "\n"
+        
+        extracted_text = extracted_text[:40000] # Cap for context window
+
+        prompt_text = """
+        Eres un experto en extracción de datos estructurados de documentos de gestión de residuos.
+        Analiza el texto extraído de un reporte PDF que contiene una tabla de registros de residuos.
+        
+        Tu objetivo es extraer cada fila de la tabla y convertirla a un objeto JSON compatible con este esquema:
+        {
+            "records": [
+                {
+                    "razon_social": "String (Razón Social)",
+                    "planta": "String (Planta)",
+                    "departamento": "String (ANCASH, etc)",
+                    "tipo_residuo": "String (PELIGROSO / NO PELIGROSO / ESPECIAL / NFU / RAEE / OTROS)",
+                    "codigo_basilea": "String (Código de Basilea)",
+                    "caracteristica": "String (Descripción del residuo)",
+                    "cantidad": Number,
+                    "unidad_medida": "String (TONELADAS / KILOGRAMOS / METROS CUBICOS / OTROS)",
+                    "peso_total": Number (Calculado en KILOGRAMOS. Si la unidad es Toneladas, multiplica x 1000. Si está en kg ya, dejar igual.)
+                }
+            ]
+        }
+        
+        INSTRUCCIONES:
+        1. Procesa TODAS las filas visibles en el texto.
+        2. Mantén la fidelidad de los datos originales.
+        3. Si la unidad es Toneladas (o TON), multiplica por 1000 para obtener el peso_total en Kg.
+        4. Traduce los tipos de residuo a los valores permitidos (PELIGROSO, NO PELIGROSO, etc).
+        5. Devuelve ÚNICAMENTE el JSON.
+        """
+
+        generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
+
+        response = model.generate_content(
+            generation_parts,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json"
+            )
+        )
+        
+        result_text = response.text
+        if result_text.startswith("```json"): result_text = result_text[7:]
+        if result_text.startswith("```"): result_text = result_text[3:]
+        if result_text.endswith("```"): result_text = result_text[:-3]
+
+        parsed_json = json.loads(result_text.strip())
+        return parsed_json
+
+    except Exception as e:
+        print(f"Batch Analysis Failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Batch Analysis Failed: {str(e)}")
+
+@app.post("/save-batch")
+async def save_batch(records: list[Residuo], session: Session = Depends(waste.get_session)):
+    try:
+        saved_count = 0
+        for record in records:
+            record.id = None
+            session.add(record)
+            saved_count += 1
+        
+        session.commit()
+        return {"message": f"Successfully saved {saved_count} records", "count": saved_count}
+    except Exception as e:
+        session.rollback()
+        print(f"Save Batch Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save batch: {str(e)}")
 
 async def get_report(data: AnalysisResult):
     try:
