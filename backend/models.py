@@ -41,6 +41,10 @@ class Residuo(SQLModel, table=True):
     responsable: str
     unidad_generadora: str
     tipo_residuo: str
+    razon_social: Optional[str] = Field(default=None)
+    planta: Optional[str] = Field(default=None)
+    departamento: Optional[str] = Field(default=None)
+    codigo_basilea: Optional[str] = Field(default=None)
     caracteristica: str
     cantidad: float
     unidad_medida: str

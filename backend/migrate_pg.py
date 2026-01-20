@@ -22,7 +22,11 @@ def migrate():
         ("analysis_physicochemical", "TEXT text"), # In Postgres it's just TEXT
         ("analysis_elemental", "TEXT"),
         ("analysis_engineering", "TEXT"),
-        ("analysis_valorization", "TEXT")
+        ("analysis_valorization", "TEXT"),
+        ("razon_social", "TEXT"),
+        ("planta", "TEXT"),
+        ("departamento", "TEXT"),
+        ("codigo_basilea", "TEXT")
     ]
 
     with engine.connect() as conn:

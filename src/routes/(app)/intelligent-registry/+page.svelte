@@ -14,9 +14,13 @@
 
   // --- FORM STATE ---
   let formData = $state({
+    razon_social: '',
+    planta: '',
+    departamento: '',
     responsable: '',
     unidad_generadora: '',
     tipo_residuo: '',
+    codigo_basilea: '',
     caracteristica: '',
     cantidad: null,
     unidad_medida: '',
@@ -172,7 +176,23 @@
          <h2 class="text-xl font-bold text-gray-800">Datos de Generación y Escala</h2>
        </div>
 
+       <!-- ORG INFO -->
        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+         <div class="space-y-1.5 focus-within:text-scientific-600 transition-colors">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Razón Social</label>
+           <input type="text" bind:value={formData.razon_social} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4" placeholder="Empresa S.A." />
+         </div>
+         <div class="space-y-1.5">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Planta</label>
+           <input type="text" bind:value={formData.planta} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4" placeholder="Planta Principal" />
+         </div>
+         <div class="space-y-1.5">
+           <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Departamento</label>
+           <input type="text" bind:value={formData.departamento} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4" placeholder="Logística" />
+         </div>
+       </div>
+
+       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 pt-2">
          <div class="space-y-1.5 focus-within:text-scientific-600 transition-colors">
            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Responsable</label>
            <input type="text" required bind:value={formData.responsable} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4" placeholder="Nombre completo" />
@@ -190,6 +210,10 @@
              <option value="" disabled>Seleccione...</option>
              {#each tiposResiduo as t} <option value={t}>{t}</option> {/each}
            </select>
+         </div>
+         <div class="space-y-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Código de Basilea</label>
+            <input type="text" bind:value={formData.codigo_basilea} class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4" placeholder="Ej: A1180" />
          </div>
        </div>
 
