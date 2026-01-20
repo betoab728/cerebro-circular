@@ -78,7 +78,10 @@
       data.append('context', JSON.stringify(formData));
 
       const response = await fetch(`${API_BASE_URL}/analyze`, { method: 'POST', body: data });
-      if (!response.ok) throw new Error('Error en el análisis de IA');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Unknown Error' }));
+        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+      }
 
       analysisResult = await response.json();
       
