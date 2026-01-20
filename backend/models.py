@@ -111,8 +111,8 @@ class AnalysisResult(BaseModel):
     valorizationRoutes: List[ValorizationRoute]
     
     # Financials
-    disposalCost: float
-    circularIncome: float
+    disposalCost: float = 0.0
+    circularIncome: float = 0.0
 
 # Predictive Analysis Models
 class ProductOverview(BaseModel):

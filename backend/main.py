@@ -148,7 +148,9 @@ async def analyze_waste(
             "method": "String", 
             "output": "String", 
             "score": Number (0-100)
-        }} ]
+        }} ],
+        "disposalCost": Number (ESTIMATED Total cost in Soles S/ for disposal of this quantity),
+        "circularIncome": Number (ESTIMATED Total potential income in Soles S/ from circular economy)
     }}
     
     INSTRUCTIONS:
