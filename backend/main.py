@@ -406,7 +406,8 @@ async def analyze_batch(file: UploadFile = File(...)):
                     "analysis_valorization": "JSON String (List of {role, method, output, score})",
                     "costo_disposicion_final": Number (Estimado en Soles S/ para este peso),
                     "ingreso_economia_circular": Number (Estimado en Soles S/ para este peso),
-                    "oportunidades_ec": "String (Resumen corto de max 15 palabras sobre la mejor oportunidad de EC)"
+                    "oportunidades_ec": "String (Resumen corto de max 15 palabras sobre la mejor oportunidad de EC)",
+                    "viabilidad_ec": Number (Porcentaje 0-100 de viabilidad de la oportunidad)
                 }
             ]
         }
@@ -416,6 +417,7 @@ async def analyze_batch(file: UploadFile = File(...)):
         - En 'analysis_engineering.processability', evalúa específicamente cómo manejar el volumen extraído (peso_total).
         - En 'analysis_valorization', propón rutas de economía circular con puntajes de viabilidad realistas según normativa peruana.
         - En 'oportunidades_ec', redacta un resumen ejecutivo y persuasivo (máximo 15 palabras) de la oportunidad de valorización más rentable.
+        - En 'viabilidad_ec', asigna un puntaje de viabilidad (0-100) coherente con el análisis técnico.
         - MUY IMPORTANTE: Los campos que dicen "JSON String" deben ser cadenas de texto que contengan el JSON serializado, NO objetos anidados directamente.
         
         Devuelve ÚNICAMENTE el JSON.

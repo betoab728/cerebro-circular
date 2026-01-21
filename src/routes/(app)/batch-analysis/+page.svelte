@@ -201,11 +201,17 @@
                 </td>
                 <td class="px-6 py-4">
                   {#if rec.oportunidades_ec}
-                    <div class="bg-scientific-50 border border-scientific-100 p-2 rounded-lg">
-                      <p class="text-[11px] font-bold text-scientific-700 leading-tight">
-                        <span class="text-scientific-400 mr-1">⚡</span>
-                        {rec.oportunidades_ec}
-                      </p>
+                    <div class="flex items-center gap-4 bg-scientific-50 border border-scientific-100 p-3 rounded-xl hover:border-scientific-200 transition-all group">
+                      <div class="flex-1">
+                        <p class="text-[11px] font-bold text-scientific-700 leading-tight">
+                          <span class="text-scientific-400 mr-1">⚡</span>
+                          {rec.oportunidades_ec}
+                        </p>
+                      </div>
+                      <div class="text-right border-l border-scientific-100 pl-4 min-w-[80px]">
+                        <span class="block text-lg font-black text-scientific-600 leading-none">{rec.viabilidad_ec || 0}%</span>
+                        <span class="text-[9px] font-bold text-scientific-400 uppercase tracking-tighter italic">Viabilidad</span>
+                      </div>
                     </div>
                   {:else}
                     <span class="text-gray-300 italic text-xs">Cargando...</span>

@@ -66,6 +66,7 @@ class Residuo(SQLModel, table=True):
     
     # New Fields
     oportunidades_ec: Optional[str] = Field(default=None, sa_column=Column(Text))
+    viabilidad_ec: Optional[float] = Field(default=0.0)
 
 class PredictiveRegistration(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
