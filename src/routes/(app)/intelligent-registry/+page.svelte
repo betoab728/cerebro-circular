@@ -88,6 +88,7 @@
       // Auto-fill some form data from AI
       formData.tipo_residuo = analysisResult.category === 'Peligroso' ? 'PELIGROSO' : 'NO PELIGROSO';
       formData.caracteristica = analysisResult.materialName;
+      formData.codigo_basilea = analysisResult.baselCode || '';
       
     } catch (err) {
       errorMessage = `Error de Análisis: ${err.message}`;

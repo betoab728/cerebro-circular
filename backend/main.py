@@ -136,6 +136,7 @@ async def analyze_waste(
     {{
         "materialName": "String",
         "category": "String (Peligroso / No Peligroso / Especial)",
+        "baselCode": "String (e.g., A1180, Y46, etc.)",
         "confidence": Number (0-100),
         "physicochemical": [ {{"name": "String", "value": "String", "method": "String"}} ],
         "elemental": [ {{"label": "String (e.g., 'C (Carbono)')", "value": Number, "description": "String", "trace": Boolean}} ],
@@ -155,9 +156,9 @@ async def analyze_waste(
     
     INSTRUCTIONS:
     1. SCALING SENSITIVITY: Assess the technical properties and valorization routes based on the provided quantity and context.
-    2. MATERIAL ID: Use the user description to help identify the material in the file/photo.
+    2. MATERIAL ID: Use the user description and visual cues to identify the material and its corresponding Basel Convention Code (baselCode).
     3. VALORIZATION: In the 'method' or 'output' of valorizationRoutes, focus on high-impact alternatives.
-    4. Translate all string values to Spanish.
+    4. Translate all string values to Spanish (except codes like baselCode).
     """
 
     generation_parts = [prompt_text]
