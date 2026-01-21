@@ -1,0 +1,498 @@
+[
+  {
+    "codigo": "A1030",
+    "descripcion": "Residuos que tengan como constituyentes o contaminantes cualquiera de las sustancias siguientes: i. Arsénico; compuestos de arsénico ii. Mercurio; compuestos de mercurio iii. Talio; compuestos de talio A 1040 Residuos que tengan como constituyentes: i. Carbonilos de metal ii. Compuestos de cromo hexavalente"
+  },
+  {
+    "codigo": "A1050",
+    "descripcion": "Lodos galvánicos."
+  },
+  {
+    "codigo": "A1060",
+    "descripcion": "Líquidos de desecho del decapaje de metales."
+  },
+  {
+    "codigo": "A1070",
+    "descripcion": "Residuos de lixiviación del tratamiento del zinc, polvos y lodos como jarosita, hematites, etc."
+  },
+  {
+    "codigo": "A1080",
+    "descripcion": "Residuos de desechos de zinc no incluidos en el Anexo V, que contengan plomo y cadmio en concentraciones tales que presenten características del Anexo IV lista de características peligrosas."
+  },
+  {
+    "codigo": "A1090",
+    "descripcion": "Cenizas de la incineración de cables de cobre recubiertos."
+  },
+  {
+    "codigo": "A1100",
+    "descripcion": "Polvos y residuos de los sistemas de depuración de gases de las fundiciones de cobre."
+  },
+  {
+    "codigo": "A1110",
+    "descripcion": "Soluciones electrolíticas usadas en las operaciones de refinación y extracción electrolítica del cobre."
+  },
+  {
+    "codigo": "A1120",
+    "descripcion": "Lodos residuales, excluidos los fangos anódicos, de los sistemas de depuración electrolítica de las operaciones de refinación y extracción electrolítica del cobre."
+  },
+  {
+    "codigo": "A1130",
+    "descripcion": "Soluciones de ácidos para grabar usadas que contengan cobre disuelto."
+  },
+  {
+    "codigo": "A1140",
+    "descripcion": "Residuos de catalizadores de cloruro cúprico y cianuro de cobre."
+  },
+  {
+    "codigo": "A1150",
+    "descripcion": "Cenizas de metales preciosos procedentes de la incineración de circuitos impresos no incluidos en el Anexo V1."
+  },
+  {
+    "codigo": "A1160",
+    "descripcion": "Acumuladores de plomo de desecho, enteros o triturados."
+  },
+  {
+    "codigo": "A1170",
+    "descripcion": "Acumuladores de residuos sin seleccionar excluidas mezclas de acumuladores solo de la lista B del Anexo V. Los acumuladores de residuos no incluidos en la lista B que contengan constituyentes del Anexo I del Convenio de Basilea, en tal grado que los conviertan en peligrosos"
+  },
+  {
+    "codigo": "A1180",
+    "descripcion": "Residuos de Montajes eléctricos y electrónicos o restos de éstos2 que contengan componentes como acumuladores y otras baterías incluidas en la lista A, interruptores de mercurio, vidrios de tubos de rayos catódicos y otros vidrios activados y capacitadores de PCB, o contaminados con constituyentes del Anexo I (por ejemplo, Cadmio, Mercurio, Plomo, Bifenilo Policlorado) en tal grado que posean alguna de las características del Anexo IV Lista de Características Peligrosas (véase la entrada correspondiente en la lista B"
+  },
+  {
+    "codigo": "A1190",
+    "descripcion": "Residuos de cables de metal recubiertos o aislados con plástico que contienen alquitrán de carbón, PBC4 (presentes a una concentración igual o superior a 50 mg/kg)"
+  },
+  {
+    "codigo": "A2",
+    "descripcion": "RESIDUOS QUE CONTENGAN PRINCIPALMENTE CONSTITUYENTES INORGÁNICOS, QUE PUEDAN CONTENER METALES O MATERIA ORGÁNICA."
+  },
+  {
+    "codigo": "A2010",
+    "descripcion": "Residuos de vidrio de tubos de rayos catódicos y otros vidrios activados."
+  },
+  {
+    "codigo": "A2020",
+    "descripcion": "Residuos de compuestos inorgánicos de flúor en forma de líquidos o Iodos, pero excluidos los residuos de ese tipo especificados en el Anexo V."
+  },
+  {
+    "codigo": "A2030",
+    "descripcion": "Residuos de catalizadores, pero excluidos los residuos de este tipo especificados en el Anexo V."
+  },
+  {
+    "codigo": "A2040",
+    "descripcion": "Residuos de yeso procedente de procesos de la industria química, si contiene constituyentes del Anexo I del Convenio de Basilea en tal grado que presenten una característica peligrosa del Anexo IV lista de características peligrosas (véase la entrada correspondiente en la lista B"
+  },
+  {
+    "codigo": "A2050",
+    "descripcion": "Residuos de amianto (polvo y fibras)"
+  },
+  {
+    "codigo": "A2060",
+    "descripcion": "Cenizas volantes de centrales eléctricas de carbón que contengan sustancias del Anexo I del Convenio de Basilea en concentraciones tales que presenten características del Anexo IV lista de características peligrosas (véase la entrada correspondiente en la lista B"
+  },
+  {
+    "codigo": "A3",
+    "descripcion": "RESIDUOS QUE CONTENGAN PRINCIPALMENTE CONSTITUYENTES ORGÁNICOS, QUE PUEDAN CONTENER METALES Y MATERIA INORGÁNICA."
+  },
+  {
+    "codigo": "A3010",
+    "descripcion": "Residuos resultantes de la producción o el tratamiento de coque de petróleo y asfalto."
+  },
+  {
+    "codigo": "A3020",
+    "descripcion": "Residuos de aceites minerales no aptos para el uso al que estaban destinados."
+  },
+  {
+    "codigo": "A3030",
+    "descripcion": "Residuos que contengan, estén integrados o estén contaminados por Iodos de compuestos antidetonantes con plomo."
+  },
+  {
+    "codigo": "A3040",
+    "descripcion": "Residuos de líquidos térmicos (transferencia de calor)."
+  },
+  {
+    "codigo": "A3050",
+    "descripcion": "Residuos resultantes de la producción, preparación y utilización de resinas, látex, plastificantes o colas/adhesivos excepto los residuos especificados en la lista B del Anexo V (véase el apartado correspondiente en la lista B"
+  },
+  {
+    "codigo": "A3060",
+    "descripcion": "Residuos de nitrocelulosa."
+  },
+  {
+    "codigo": "A3070",
+    "descripcion": "Residuo de fenoles, compuestos fenólicos, incluido el clorofenol en forma de líquido o de lodo."
+  },
+  {
+    "codigo": "A3080",
+    "descripcion": "Residuos de éteres excepto los especificados en el Anexo V del reglamento."
+  },
+  {
+    "codigo": "A3090",
+    "descripcion": "Residuos de cuero en forma de polvo, cenizas, Iodos y harinas que contengan compuestos de cromo hexavalente o biocidas (véase el apartado correspondiente en la lista B"
+  },
+  {
+    "codigo": "A3100",
+    "descripcion": "Raeduras y otros residuos del cuero o de cuero regenerado que no sirvan para la fabricación de artículos de cuero, que contengan compuestos de cromo hexavalente o biocidas (véase el apartado correspondiente en la lista B"
+  },
+  {
+    "codigo": "A3110",
+    "descripcion": "Residuos del curtido de pieles que contengan compuestos de cromo hexavalente o biocidas o sustancias infecciosas. (véase el apartado correspondiente en la lista B"
+  },
+  {
+    "codigo": "A3120",
+    "descripcion": "Pelusas - fragmentos ligeros resultantes del desmenuzamiento."
+  },
+  {
+    "codigo": "A3130",
+    "descripcion": "Residuos de compuestos de fósforo orgánicos."
+  },
+  {
+    "codigo": "A3140",
+    "descripcion": "Residuos de disolventes orgánicos no halogenados pero con exclusión de los residuos especificados en el Anexo V del Reglamento."
+  },
+  {
+    "codigo": "A3150",
+    "descripcion": "Residuos de disolventes orgánicos halogenados"
+  },
+  {
+    "codigo": "A3160",
+    "descripcion": "Residuos resultantes de desechos no acuosos de destilación halogenados o no halogenados derivados de operaciones de recuperación de disolventes orgánicos."
+  },
+  {
+    "codigo": "A3170",
+    "descripcion": "Residuos resultantes de la producción de hidrocarburos halogenados alifáticos (tales como el clorometano, dicloroetano, cloruro de vinilo, cloruro de alilo, epicloridrina)"
+  },
+  {
+    "codigo": "A3180",
+    "descripcion": "Residuos, sustancias y artículos que contienen, consisten o están contaminados con bifenilo policlorado (PCB), terfenilo policlorado (PCT), naftaleno policlorado (PCN) o bifenilo polibromado (PBB), o cualquier otro compuesto polibromado análogo, con una concentración de igual o superior a 50 mg/kg5."
+  },
+  {
+    "codigo": "A3190",
+    "descripcion": "Residuos de desechos alquitranados (con exclusión de los cementos asfálticos) resultantes de la refinación, destilación o cualquier otro tratamiento pirolítico de materiales orgánicos."
+  },
+  {
+    "codigo": "A3200",
+    "descripcion": "Material bituminoso (residuos de asfalto) con contenido de alquitrán resultantes de la construcción y el mantenimiento de carreteras (obsérvese el articulo correspondiente"
+  },
+  {
+    "codigo": "B2130",
+    "descripcion": "de la lista B Anexo V)"
+  },
+  {
+    "codigo": "A4",
+    "descripcion": "RESIDUOS QUE PUEDEN CONTENER CONSTITUYENTES INORGÁNICOS U ORGÁNICOS"
+  },
+  {
+    "codigo": "A4010",
+    "descripcion": "Residuos resultantes de la producción, preparación y utilización de productos farmacéuticos, pero con exclusión de los residuos especificados en el Anexo V del Reglamento."
+  },
+  {
+    "codigo": "A4020",
+    "descripcion": "Residuos clínicos y afines; es decir residuos resultantes de prácticas médicas, de enfermería, dentales, veterinaria o actividades similares, y residuos generados en hospitales u otras instalaciones durante actividades de investigación o el tratamiento de pacientes, o de proyecto de investigación."
+  },
+  {
+    "codigo": "A4030",
+    "descripcion": "Residuos resultantes de la producción, la preparación y la utilización de biocidas y productos fitofarmacéuticos, con inclusión de residuos de plaguicidas y herbicidas que no respondan a las especificaciones, caducados6, o no aptos para el uso previsto originalmente."
+  },
+  {
+    "codigo": "A4040",
+    "descripcion": "Residuos resultantes de la fabricación, preparación y utilización de productos químicos para la preservación de la madera7."
+  },
+  {
+    "codigo": "A4050",
+    "descripcion": "Residuos que contienen, consisten o están contaminados con algunos de los productos siguientes: i. Cianuros inorgánicos, con excepción de los residuos que contienen metales preciosos, en forma sólida, con trazas de cianuros inorgánicos ii. Cianuros orgánicos."
+  },
+  {
+    "codigo": "A4060",
+    "descripcion": "Residuos de mezclas y emulsiones de aceite y agua o de hidrocarburos y agua."
+  },
+  {
+    "codigo": "A4070",
+    "descripcion": "Residuos resultantes de la producción, preparación y utilización de tintas, colorantes, pigmentos, pinturas, lacas o barnices, con exclusión de los residuos especificados en el Anexo V del Reglamento (véase el apartado correspondiente de la lista B"
+  },
+  {
+    "codigo": "A4080",
+    "descripcion": "Residuos de carácter explosivo (pero con exclusión de los residuos especificados en el Anexo V del Reglamento)"
+  },
+  {
+    "codigo": "A4090",
+    "descripcion": "Residuos de soluciones ácidas o básicas, distintas de las especificadas en el apartado correspondiente del Anexo V del Reglamento (véase el apartado correspondiente de la lista B"
+  },
+  {
+    "codigo": "A4100",
+    "descripcion": "Residuos resultantes de la utilización de dispositivos de control de la contaminación industrial para la depuración de los gases industriales, pero con exclusión de los residuos especificados en el Anexo V del Reglamento."
+  },
+  {
+    "codigo": "A4110",
+    "descripcion": "Residuos que contienen, consisten o están contaminados con algunos de los productos siguientes:"
+  },
+  {
+    "codigo": "A4120",
+    "descripcion": "Residuos que contienen, consisten o están contaminados con peróxidos."
+  },
+  {
+    "codigo": "A4130",
+    "descripcion": "Envases y contenedores de residuos que contienen sustancias incluidas en el Anexo I del Convenio de Basilea, en concentraciones suficientes como para mostrar las características peligrosas del Anexo IV lista de características peligrosas."
+  },
+  {
+    "codigo": "A4140",
+    "descripcion": "Residuos consistentes o que contienen productos químicos que no responden a las especificaciones o caducados8, según a las categorías del Anexo I del Convenio de Basilea, y a las características de peligrosidad señalada en el Anexo IV lista de características peligrosas."
+  },
+  {
+    "codigo": "A4150",
+    "descripcion": "Residuos contaminados con sustancias químicas nuevas o no identificadas, resultantes de investigación o de actividades de enseñanza, cuyos efectos en el ser humano o el medio ambiente no se conozcan."
+  },
+  {
+    "codigo": "A4160",
+    "descripcion": "Carbón activado consumido no incluido en el Anexo V del Reglamento (Véase el correspondiente apartado de la lista B"
+  },
+  {
+    "codigo": "B1",
+    "descripcion": "RESIDUOS DE METALES Y RESIDUOS QUE CONTENGAN METALES"
+  },
+  {
+    "codigo": "B1020",
+    "descripcion": "Chatarra de metal limpia, no contaminada, incluidas las aleaciones, en forma acabada en bruto (láminas, chapas, vigas, barras, etc.) i. Residuos de antimonio ii. Residuos de berilio iii. Residuos de cadmio iv. Residuos de plomo (pero con exclusión de los acumuladores de plomo) v. Residuos de selenio vi. Residuos de telurio"
+  },
+  {
+    "codigo": "B1030",
+    "descripcion": "Metales refractarios que contengan residuos"
+  },
+  {
+    "codigo": "B1031",
+    "descripcion": "Desechos metálicos y de aleaciones metálicas de molibdeno, tungsteno, titanio, tántalo, niobio y renio en forma metálica dispersable (polvo metálico), con exclusión de los desechos especificados en"
+  },
+  {
+    "codigo": "B1040",
+    "descripcion": "Chatarra resultante de la generación de energía eléctrica no contaminada con aceite de lubricante, PBC o PCT en una cantidad que la haga peligrosa."
+  },
+  {
+    "codigo": "B1050",
+    "descripcion": "Fracción pesada de la chatarra de mezcla de metales no ferrosos que no contenga materiales del Anexo I del Convenio de Basilea, en una concentración suficiente como para mostrar las características del Anexo IV lista de características peligrosas10."
+  },
+  {
+    "codigo": "B1060",
+    "descripcion": "Residuos de selenio y telurio en forma metálica elemental, incluido el polvo de estos elementos."
+  },
+  {
+    "codigo": "B1070",
+    "descripcion": "Residuos de cobre y de aleaciones de cobre en forma dispersable, a menos que contengan constituyentes del Anexo I del Convenio de Basilea, en una cantidad tal que les confiera alguna de las características del Anexo IV lista de características peligrosas."
+  },
+  {
+    "codigo": "B1080",
+    "descripcion": "Ceniza y residuos de zinc, incluidos los residuos de aleaciones de zinc en forma dispersable, que contengan constituyentes del Anexo I del Convenio de Basilea, en una concentración tal que les confiera alguna de las características peligrosas de la clase H4.311."
+  },
+  {
+    "codigo": "B1090",
+    "descripcion": "Baterías de desecho que se ajusten a una especificación, con exclusión de los fabricados con plomo, cadmio o mercurio."
+  },
+  {
+    "codigo": "B1100",
+    "descripcion": "Residuos que contienen metales resultantes de la fusión, refundición y refinación de metales: i. Peltre de zinc duro ii. Escorias que contengan zinc iii. Escorias de la superficie de planchas de zinc para galvanización, mayor a 90% Zn iv. Escorias del fondo de planchas de zinc para galvanización, mayor a 92% Zn v. Escorias del zinc de la fundición en coquiIla, mayor a 85% Zn vi. Escorias de planchas de zinc de galvanización por inmersión en caliente (carga), mayor a 92% Zn vii. Espumados de zinc viii. Espumados de aluminio (o espumas) con exclusión de la escoria de sal ix. Escorias de la elaboración del cobre destinado a una elaboración o refinación posteriores, que no contengan arsénico, plomo o cadmio en cantidad tal que les confiera las características peligrosas como se señala en el Anexo IV. x. Residuos de revestimientos refractarios, con inclusión de crisoles, derivados de la fundición del cobre xi. Escorias de la elaboración de metales preciosos destinados a una refinación posterior xii. Escorias de estaño que contengan tántalo, con menos del 0,5% de estaño."
+  },
+  {
+    "codigo": "B1110",
+    "descripcion": "Montajes eléctricos y electrónicos: i. Montajes electrónicos que consistan sólo en metales o aleaciones ii. Residuos o chatarra de montajes electrónicos12 (incluidos los circuitos impresos) que no contengan componentes tales como acumuladores y otras baterías incluidas en el Anexo III, interruptores de mercurio, vidrio procedente de tubos de rayos catódicos u otros vidrios activados ni condensadores de PCB, o no estén contaminados con elementos indicados en el Anexo I del Convenio de Basilea (por ejemplo cadmio, mercurio, plomo, bifenilo policlorado), o de los que esos componentes se hayan extraído hasta el punto de que no muestren ninguna de las características enumeradas en el Anexo IV (véase el apartado correspondiente de la lista A"
+  },
+  {
+    "codigo": "B1115",
+    "descripcion": "Cables de metal de desecho recubiertos o aislados con plástico, no incluidos en la lista A"
+  },
+  {
+    "codigo": "B1120",
+    "descripcion": "Catalizadores agotados, con exclusión de líquidos utilizados como catalizadores, que contengan alguno de los siguientes elementos: Metales de transición, con exclusión de catalizadores de desecho (catalizadores agotados, catalizadores líquidos usados u otros catalizadores) de la lista A: i. Escandio ii. Vanadio iii. Manganeso iv. Cobalto v. Cobre vi. Itrio vii. Niobio viii. Hafnio ix. Tungsteno x. Titanio xi. Cromo xii. Hierro xiii. Niquel xiv. Zinc xv. Circonio xvi. Molibdeno xvii. Tentalo xviii. Renio Lantánidos (metales del grupo de las tierras raras): i. Lantanio ii. Praseodimio iii. Samario iv. Gadolinio v. Disprosio vi. Terbio vii. Iterbio viii. Cerio ix. Neodimio x. Europio xi. Terbio xii. Holmio xiii. Tulio xiv. Lutecio"
+  },
+  {
+    "codigo": "B1130",
+    "descripcion": "Catalizadores agotados limpios que contengan metales preciosos."
+  },
+  {
+    "codigo": "B1140",
+    "descripcion": "Residuos que contengan metales preciosos en forma sólida, con trazas de cianuros inorgánicos."
+  },
+  {
+    "codigo": "B1150",
+    "descripcion": "Residuos de metales preciosos y sus aleaciones (oro, plata, el grupo de platino, pero no el mercurio) en forma dispersable, no líquida, con un embalaje y etiquetado adecuados."
+  },
+  {
+    "codigo": "B1160",
+    "descripcion": "Cenizas de metales preciosos resultantes de la incineración de circuitos impresos (véase el"
+  },
+  {
+    "codigo": "B1170",
+    "descripcion": "Cenizas de metales preciosos resultantes de la incineración de películas fotográficas."
+  },
+  {
+    "codigo": "B1180",
+    "descripcion": "Residuos de películas fotográficas que contengan haluros de plata y plata metálica."
+  },
+  {
+    "codigo": "B1190",
+    "descripcion": "Residuos de papel para fotografía que contengan haluros de plata y plata metálica."
+  },
+  {
+    "codigo": "B1200",
+    "descripcion": "Escoria granulada resultante de la fabricación de hierro y acero."
+  },
+  {
+    "codigo": "B1210",
+    "descripcion": "Escoria resultante de la fabricación de hierro y acero, con inclusión de escorias que sean una fuente del TiO2 y vanadio."
+  },
+  {
+    "codigo": "B1220",
+    "descripcion": "Escoria de la producción de zinc, químicamente estabilizada, con un elevado contenido de hierro (más de 20%) y elaborado de conformidad con las especificaciones industriales (por ejemplo, DIN 4301), sobre todo con fines de construcción."
+  },
+  {
+    "codigo": "B1230",
+    "descripcion": "Escamas de laminado resultante de la fabricación de hierro y acero."
+  },
+  {
+    "codigo": "B1240",
+    "descripcion": "Escamas de laminado del óxido de cobre."
+  },
+  {
+    "codigo": "B1250",
+    "descripcion": "Vehículos automotores al final de su vida útil, para desecho, que no contengan líquidos ni otros componentes peligrosos."
+  },
+  {
+    "codigo": "B2",
+    "descripcion": "RESIDUOS QUE CONTENGAN PRINCIPALMENTE CONSTITUYENTES INORGÁNICOS, QUE A SU VEZ PUEDAN CONTENER METALES Y MATERIALES ORGÁNICOS"
+  },
+  {
+    "codigo": "B2010",
+    "descripcion": "Residuos resultantes de actividades mineras, en forma no dispersable: i. Residuos de grafito natural ii. Residuos de pizarra, estén o no recortados en forma basta o simplemente cortados, mediante aserrado o de otra manera iii. Residuos de mica iv. Residuos de leucita, nefelina y sienita nefelínica v. Residuos de feldespato vi. Desecho de espato flúor vii. Residuos de sílice en forma sólida, con exclusión de los utilizados en operaciones de fundición."
+  },
+  {
+    "codigo": "B2020",
+    "descripcion": "Residuos de vidrios en forma no dispersable: Desperdicios de vidrios rotos y otros residuos y escorias de vidrios, con excepción del vidrio de los tubos rayos catódicos y otros vidrios activados."
+  },
+  {
+    "codigo": "B2030",
+    "descripcion": "Residuos de cerámica en forma no dispersable: i. Residuos y escorias de cerametal (compuestos metalocerámicos) ii. Fibras de base cerámica no especificadas o incluidas en otro lugar"
+  },
+  {
+    "codigo": "B2040",
+    "descripcion": "Otros desperdicios que contengan principalmente constituyentes inorgánicos: i. Sulfato de calcio parcialmente refinado resultante de la desulfurización del gas de combustión ii. Residuos de tablas o planchas de yeso resultantes de la demolición de edificios iii. Escorias de la producción de cobre, químicamente estabilizadas, con un elevado contenido de hierro (más de 20%) y elaboradas de conformidad con las especificaciones industriales (por ejemplo DIN 4301 y DIN 8201) principalmente con fines de construcción y de abrasión iv. Azufre en forma sólida v. Piedra caliza resultante de la producción de cianamida de calcio, con un Ph inferior a 9 vi. Cloruros de sodio, potasio, calcio vii. Carborundo (carburo de silicio) viii. Hormigón en cascotes ix. Escorias de vidrio que contengan litio-tántalo y litio- niobio."
+  },
+  {
+    "codigo": "B2050",
+    "descripcion": "Cenizas volantes de centrales eléctricas a carbón, no incluidas en la lista A del Anexo III del presente reglamento (véase el apartado correspondiente de la lista A"
+  },
+  {
+    "codigo": "B2060",
+    "descripcion": "Carbón activado consumido que no contenga ninguno de los constituyentes del Anexo I del Convenio de Basilea, por ejemplo, carbono resultante del tratamiento de agua potable y de los procesos de la industria alimenticia y la producción de vitaminas.(obsérvese el articulo correspondiente A"
+  },
+  {
+    "codigo": "B2070",
+    "descripcion": "Fango de fluoruro de calcio."
+  },
+  {
+    "codigo": "B2080",
+    "descripcion": "Residuos de yeso resultante de procesos de la industria química no incluidos en el Anexo III (véase el apartado correspondiente"
+  },
+  {
+    "codigo": "B2090",
+    "descripcion": "Residuos de ánodos resultantes de la producción de acero o aluminio, hechos de coque o alquitrán de petróleo y limpiados con arreglo a las especificaciones normales de la industria (con exclusión de los residuos de ánodos resultantes de la electrólisis de álcalis de cloro y de la industria metalúrgica)"
+  },
+  {
+    "codigo": "B2100",
+    "descripcion": "Residuos de hidratos de aluminio y residuos de alúmina, y residuos de la producción de alúmina, con exclusión de los materiales utilizados para la depuración de gases, o para los procesos de floculación o filtrado."
+  },
+  {
+    "codigo": "B2110",
+    "descripcion": "Residuos de bauxita “barro rojo”, con Ph moderado a menos de 11,5."
+  },
+  {
+    "codigo": "B2120",
+    "descripcion": "Residuos de soluciones ácidas o básicas con un Ph superior a 2 o inferior a 11,5, que no muestren otras características corrosivas o peligrosas (véase el apartado correspondiente de la lista A"
+  },
+  {
+    "codigo": "B3",
+    "descripcion": "RESIDUOS QUE CONTENGAN PRINCIPALMENTE CONSTITUYENTES ORGÁNICOS, QUE PUEDEN CONTENER METALES Y MATERIALES INORGÁNICOS"
+  },
+  {
+    "codigo": "B3010",
+    "descripcion": "Residuos sólidos de material plástico: Los siguientes materiales plásticos o sus mezclas, siempre que no estén mezclados con otros residuos y estén preparados con arreglo a una especificación:"
+  },
+  {
+    "codigo": "B3020",
+    "descripcion": "Residuos de papel, cartón y productos del papel Los materiales siguientes siempre que no estén mezclados con residuos peligrosos: Residuos y desperdicios de papel o cartón de: i. Papel o cartón no blanqueado o papel o cartón ondulado ii. Otros papeles o cartones, hechos principalmente de pasta química blanqueada, no coloreada en la masa iii. Papel o cartón hecho principalmente de pasta mecánica (por ejemplo, periódicos, revistas y materiales impresos similares) iv. Otros, con inclusión, pero sin limitarse a: 1) cartón laminado, 2) desperdicios sin triar."
+  },
+  {
+    "codigo": "B3026",
+    "descripcion": "Los siguientes residuos del tratamiento previo de embalajes compuestos para líquidos que no contengan materiales incluidos en el Anexo I del Convenio de Basilea en concentraciones tales que presenten características del Anexo IV del presente reglamento. - Fracciones plásticas no separables - Fracciones de plástico y aluminio no separables"
+  },
+  {
+    "codigo": "B3027",
+    "descripcion": "residuos laminados de etiquetas autoadhesivas que contengan materias primas utilizadas en la producción de materiales para etiquetas."
+  },
+  {
+    "codigo": "B3030",
+    "descripcion": "Residuos de textiles Los siguientes materiales, siempre que no estén mezclados con otros residuos y estén preparados con arreglo a una especificación:"
+  },
+  {
+    "codigo": "B3035",
+    "descripcion": "Revestimiento de suelos textiles y alfombras para desecho"
+  },
+  {
+    "codigo": "B3040",
+    "descripcion": "Residuos de caucho, siempre que no estén mezclados con otros residuos: i. Residuos y desechos de caucho duro (por ejemplo, ebonita) ii. Otros residuos de caucho (con exclusión de los residuos especificados en otro lugar)"
+  },
+  {
+    "codigo": "B3050",
+    "descripcion": "Residuos de corcho y de madera no elaborados: i. Residuos y desechos de madera, estén o no aglomerados en troncos, briquetas, bolas o formas similares ii. Residuos de corcho: corcho triturado, granulado o molido."
+  },
+  {
+    "codigo": "B3060",
+    "descripcion": "Residuos resultantes de las industrias agroalimentarias siempre que no sean infecciosos: i. Borra de vino ii. Residuos, desechos y subproductos vegetales secos y esterilizados, utilizados como piensos, no especificados o incluidos en otro lugar iii. Productos desgrasados: residuos resultantes del tratamiento de sustancias grasas o de ceras animales o vegetales iv. Residuos de huesos y de médula de cuernos, no elaborados, desgrasados, o simplemente preparados (pero sin que se les haya dado forma), tratados con ácido o desgelatinizados v. Residuos de pescado vi. Cáscaras, cortezas, pieles y otros residuos del cacao"
+  },
+  {
+    "codigo": "B3065",
+    "descripcion": "Grasas y aceites comestibles de origen animal o vegetal para desecho (por. ej: aceite de freír), siempre que no exhiban las características del Anexo IV lista de características peligrosas."
+  },
+  {
+    "codigo": "B3070",
+    "descripcion": "Los siguientes residuos: i. Residuos de pelo humano; y, ii. Paja de desecho. iii. Micelios de hongos desactivados resultantes de la producción de penicilina para su utilización como piensos"
+  },
+  {
+    "codigo": "B3080",
+    "descripcion": "Residuos y recortes de caucho."
+  },
+  {
+    "codigo": "B3090",
+    "descripcion": "Recortes y otros residuos de cuero o de cuero aglomerado, no aptos para la fabricación de artículos de cuero, con exclusión de los fangos de cuero que no contengan biocidas o compuestos de cromo hexavalente (véase el apartado correspondiente en la lista A"
+  },
+  {
+    "codigo": "B3100",
+    "descripcion": "Polvo, cenizas, Iodos o harinas de cueros que no contengan compuestos de cromo hexavalente ni biocidas (véase el apartado correspondiente de la lista A"
+  },
+  {
+    "codigo": "B3110",
+    "descripcion": "Residuos de curtido de pieles que no contengan compuestos de cromo hexavalente ni biocidas ni sustancias infecciosas (véase el apartado correspondiente de la lista A"
+  },
+  {
+    "codigo": "B3120",
+    "descripcion": "Residuos consistentes en colorantes alimentarios."
+  },
+  {
+    "codigo": "B3130",
+    "descripcion": "Éteres polímeros de desecho y éteres monómeros inocuos de desecho que no puedan formar peróxidos."
+  },
+  {
+    "codigo": "B3140",
+    "descripcion": "Cubiertas neumáticas de desecho, excluidas las destinadas a las operaciones del Anexo IV.A del Convenio de Basilea."
+  },
+  {
+    "codigo": "B4010",
+    "descripcion": "Residuos integrados principalmente por pinturas de látex y/o con base de agua, tintas y barnices endurecidos que no contengan disolventes orgánicos, metales pesados ni biocidas en tal grado que los convierta en peligroso (véase el apartado correspondiente de la lista A"
+  },
+  {
+    "codigo": "B4020",
+    "descripcion": "Residuos procedentes de la producción, formulación y uso de resinas, látex, plastificantes, colas/ adhesivos, que no figuren en el Anexo III del Reglamento, sin disolventes ni otros contaminantes en tal grado que no presenten características del Anexo IV lista de características peligrosas, por ejemplo, con base de agua, o colas con base de almidón de caseína, dextrina, éteres de celulosa, alcoholes de polivinilo (véase el apartado correspondiente de la lista A"
+  },
+  {
+    "codigo": "B4030",
+    "descripcion": "Cámaras de un solo uso usadas, con baterías no incluidas en el Anexo III del Reglamento. 1 Obsérvese que en el apartado correspondiente de la lista B ("
+  }
+]

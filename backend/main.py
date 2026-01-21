@@ -8,11 +8,11 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import pypdf
 from PIL import Image
-from sqlmodel import SQLModel, Session
+from sqlmodel import SQLModel, Session, select
 from database import engine
 from routers import auth, waste
 from utils.report_generator import generate_pdf_report, generate_predictive_report
-from models import AnalysisResult, PredictiveAnalysisResult, User, Residuo, PredictiveRegistration
+from models import AnalysisResult, PredictiveAnalysisResult, User, Residuo, PredictiveRegistration, BaselCatalog
 import asyncio
 
 
@@ -191,17 +191,66 @@ async def analyze_waste(
         else:
             raise HTTPException(status_code=400, detail="Invalid analysis type")
 
-        # Generate content
+        # 1. First Pass: Identify Material
+        id_prompt = f"""
+        Identify the waste material in this input.
+        Context: {context_data.get('caracteristica', 'None')}
+        Quantity: {context_data.get('cantidad', 'Not specified')}
+        Return JSON: {{"materialName": "String", "shortDescription": "String", "isHazardous": Boolean}}
+        """
+        
+        id_response = model.generate_content(
+            [id_prompt] + ([image] if type == "photo" else [f"Technical Text: {extracted_text[:5000]}"]),
+            generation_config=genai.types.GenerationConfig(response_mime_type="application/json")
+        )
+        
+        id_result = json.loads(id_response.text)
+        material_name = id_result.get("materialName", "Waste")
+        
+        # 2. Search Basel Catalog
+        potential_codes = []
+        with Session(engine) as session:
+            # Search by name or description
+            words = material_name.split()
+            keywords = [w for w in words if len(w) > 3]
+            query = select(BaselCatalog)
+            
+            # Simple keyword search
+            catalog_items = session.exec(query).all()
+            scored_items = []
+            for item in catalog_items:
+                score = 0
+                for kw in keywords:
+                    if kw.lower() in item.descripcion.lower() or kw.lower() in item.codigo.lower():
+                        score += 1
+                if score > 0:
+                    scored_items.append((score, item))
+            
+            scored_items.sort(key=lambda x: x[0], reverse=True)
+            potential_codes = [f"{item.codigo}: {item.descripcion}" for _, item in scored_items[:15]]
+
+        # 3. Second Pass: Full Analysis with Catalog Context
+        catalog_context = "\n".join(potential_codes) if potential_codes else "No specific matches found in local catalog."
+        
+        final_prompt = f"""
+        {prompt_text}
+        
+        POTENTIAL BASEL CODES FROM YOUR EXTRACED CATALOG (Annex I, II, VIII, or IX):
+        {catalog_context}
+        
+        Use the catalog above to select the most accurate 'baselCode'. 
+        If none fit perfectly, use your general knowledge but prefer the catalog if applicable.
+        The identified material is: {material_name}
+        """
+
         response = model.generate_content(
-            generation_parts,
+            [final_prompt] + ([image] if type == "photo" else [f"Technical Text: {extracted_text[:20000]}"]),
             generation_config=genai.types.GenerationConfig(
                 response_mime_type="application/json"
             )
         )
         
         result_text = response.text
-        print(f"Raw Gemini Response: {result_text}") # Debugging
-
         # Cleanup markdown code blocks if present (common with LLMs)
         if result_text.startswith("```json"):
             result_text = result_text[7:]

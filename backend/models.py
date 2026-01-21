@@ -82,6 +82,11 @@ class PredictiveRegistration(SQLModel, table=True):
     analysis_snapshot: Optional[str] = Field(default=None, sa_column=Column(Text))  # Store JSON as text
 
 # Analysis Models
+class BaselCatalog(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    codigo: str = Field(index=True, unique=True)
+    descripcion: str = Field(sa_column=Column(Text))
+
 class PhysicochemicalProp(BaseModel):
     name: str
     value: str
