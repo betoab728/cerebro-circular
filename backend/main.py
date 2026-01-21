@@ -150,15 +150,13 @@ async def analyze_waste(
             "method": "String", 
             "output": "String", 
             "score": Number (0-100)
-        }} ],
-        "disposalCost": Number (ESTIMATED Total cost in Soles S/ for disposal of this quantity),
-        "circularIncome": Number (ESTIMATED Total potential income in Soles S/ from circular economy)
+        }} ]
     }}
     
     INSTRUCTIONS:
-    1. SCALING ECONOMICS: If weight/quantity is high (e.g., >100kg), prioritize industrial recycling routes and bulk sales. If low, focus on local segregation.
+    1. SCALING SENSITIVITY: Assess the technical properties and valorization routes based on the provided quantity and context.
     2. MATERIAL ID: Use the user description to help identify the material in the file/photo.
-    3. VALORIZATION: In the 'method' or 'output' of valorizationRoutes, include an ESTIMATED ECONOMIC VALUE in Soles (S/.) per kg or per total batch based on the provided weight.
+    3. VALORIZATION: In the 'method' or 'output' of valorizationRoutes, focus on high-impact alternatives.
     4. Translate all string values to Spanish.
     """
 
@@ -404,8 +402,6 @@ async def analyze_batch(file: UploadFile = File(...)):
                     "analysis_elemental": "JSON String (List of {label, value, description, trace})",
                     "analysis_engineering": "JSON String ({structure, processability, impurities})",
                     "analysis_valorization": "JSON String (List of {role, method, output, score})",
-                    "costo_disposicion_final": Number (Estimado en Soles S/ para este peso),
-                    "ingreso_economia_circular": Number (Estimado en Soles S/ para este peso),
                     "oportunidades_ec": "String (Resumen corto de max 15 palabras sobre la mejor oportunidad de EC)",
                     "viabilidad_ec": Number (Porcentaje 0-100 de viabilidad de la oportunidad)
                 }
