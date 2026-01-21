@@ -63,6 +63,9 @@ class Residuo(SQLModel, table=True):
     # Financial Estimates
     costo_disposicion_final: Optional[float] = Field(default=0.0)
     ingreso_economia_circular: Optional[float] = Field(default=0.0)
+    
+    # New Fields
+    oportunidades_ec: Optional[str] = Field(default=None, sa_column=Column(Text))
 
 class PredictiveRegistration(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)

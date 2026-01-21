@@ -405,7 +405,8 @@ async def analyze_batch(file: UploadFile = File(...)):
                     "analysis_engineering": "JSON String ({structure, processability, impurities})",
                     "analysis_valorization": "JSON String (List of {role, method, output, score})",
                     "costo_disposicion_final": Number (Estimado en Soles S/ para este peso),
-                    "ingreso_economia_circular": Number (Estimado en Soles S/ para este peso)
+                    "ingreso_economia_circular": Number (Estimado en Soles S/ para este peso),
+                    "oportunidades_ec": "String (Resumen corto de max 15 palabras sobre la mejor oportunidad de EC)"
                 }
             ]
         }
@@ -414,6 +415,7 @@ async def analyze_batch(file: UploadFile = File(...)):
         - Para cada residuo, infiere sus propiedades físico-químicas y composición elemental basándote en su descripción y contexto industrial.
         - En 'analysis_engineering.processability', evalúa específicamente cómo manejar el volumen extraído (peso_total).
         - En 'analysis_valorization', propón rutas de economía circular con puntajes de viabilidad realistas según normativa peruana.
+        - En 'oportunidades_ec', redacta un resumen ejecutivo y persuasivo (máximo 15 palabras) de la oportunidad de valorización más rentable.
         - MUY IMPORTANTE: Los campos que dicen "JSON String" deben ser cadenas de texto que contengan el JSON serializado, NO objetos anidados directamente.
         
         Devuelve ÚNICAMENTE el JSON.

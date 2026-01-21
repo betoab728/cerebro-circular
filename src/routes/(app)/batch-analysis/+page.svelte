@@ -167,7 +167,7 @@
               <th class="px-6 py-4 text-scientific-600">Material IA</th>
               <th class="px-6 py-4">Clasificación</th>
               <th class="px-6 py-4 text-right">Cantidad</th>
-              <th class="px-6 py-4 text-right">Estimados (S/)</th>
+              <th class="px-6 py-4">Oportunidades de Economía Circular</th>
               <th class="px-6 py-4 text-center">Acciones</th>
             </tr>
           </thead>
@@ -199,17 +199,17 @@
                   <div class="text-[10px] text-gray-400 font-bold uppercase">{rec.unidad_medida}</div>
                   <div class="text-[9px] text-scientific-600 font-medium italic">({rec.peso_total} kg)</div>
                 </td>
-                <td class="px-6 py-4 text-right">
-                   <div class="flex flex-col items-end gap-1">
-                      <div class="flex items-center gap-1.5">
-                         <span class="text-[9px] font-bold text-gray-400 uppercase">Disp.</span>
-                         <span class="text-xs font-black text-red-500">S/. {rec.costo_disposicion_final?.toFixed(2)}</span>
-                      </div>
-                      <div class="flex items-center gap-1.5">
-                         <span class="text-[9px] font-bold text-indigo-400 uppercase">Ing. EC</span>
-                         <span class="text-xs font-black text-green-600">S/. {rec.ingreso_economia_circular?.toFixed(2)}</span>
-                      </div>
-                   </div>
+                <td class="px-6 py-4">
+                  {#if rec.oportunidades_ec}
+                    <div class="bg-scientific-50 border border-scientific-100 p-2 rounded-lg">
+                      <p class="text-[11px] font-bold text-scientific-700 leading-tight">
+                        <span class="text-scientific-400 mr-1">⚡</span>
+                        {rec.oportunidades_ec}
+                      </p>
+                    </div>
+                  {:else}
+                    <span class="text-gray-300 italic text-xs">Cargando...</span>
+                  {/if}
                 </td>
                 <td class="px-6 py-4 text-center">
                   <button on:click={() => removeRecord(i)} class="p-2 text-gray-300 hover:text-red-500 transition-colors">
