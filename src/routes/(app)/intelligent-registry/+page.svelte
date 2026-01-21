@@ -104,13 +104,17 @@
     try {
       const payload = {
         ...formData,
-        // Include Analysis Data if available
+        // Analysis Data
         analysis_material_name: analysisResult?.materialName,
         analysis_physicochemical: JSON.stringify(analysisResult?.physicochemical),
         analysis_elemental: JSON.stringify(analysisResult?.elemental),
         analysis_engineering: JSON.stringify(analysisResult?.engineeringContext),
         analysis_valorization: JSON.stringify(analysisResult?.valorizationRoutes),
         
+        // New Summarized Fields
+        oportunidades_ec: analysisResult?.valorizationRoutes?.[0]?.output || 'No especificado',
+        viabilidad_ec: analysisResult?.valorizationRoutes?.[0]?.score || 0,
+
         // Financials (Now hidden/zeroed)
         costo_disposicion_final: 0,
         ingreso_economia_circular: 0
