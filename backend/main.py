@@ -156,10 +156,10 @@ async def analyze_waste(
     
     INSTRUCTIONS:
     1. SCALING SENSITIVITY: Assess technical properties and valorization based on quantity.
-    2. BASEL CONVENTION (CRITICAL): Assign the correct 'baselCode' from the Basel Convention Annexes.
-       - Use List A (e.g., A1010, A1180) for hazardous waste.
-       - Use List B (e.g., B1010, B3010) for non-hazardous/recyclable waste.
-       - If unclear, use the most specific code applicable to the material's chemical nature.
+    2. BASEL CONVENTION (CRITICAL): Assign the correct 'baselCode' from the Basel Convention Annexes (I, II, VIII, or IX).
+       - Examples: A1180 (E-waste), B3010 (Plastic waste), A1010 (Lead batteries), Y46 (Household waste).
+       - ALWAYS provide the most specific code. If the material is a common recyclable, use the 'B' series. If hazardous, use 'A' or 'Y'.
+       - THIS FIELD IS MANDATORY.
     3. MATERIAL ID: Use user description and visual cues to identify the material.
     4. VALORIZATION: Focus on high-impact circular alternatives.
     5. Translate all string values to Spanish (except baselCode).
