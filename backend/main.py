@@ -136,7 +136,7 @@ async def analyze_waste(
     {{
         "materialName": "String",
         "category": "String (Peligroso / No Peligroso / Especial)",
-        "baselCode": "String (e.g., A1180, Y46, etc.)",
+        "baselCode": "String (MANDATORY: Basel Convention code, e.g., A1180, B3010, Y46)",
         "confidence": Number (0-100),
         "physicochemical": [ {{"name": "String", "value": "String", "method": "String"}} ],
         "elemental": [ {{"label": "String (e.g., 'C (Carbono)')", "value": Number, "description": "String", "trace": Boolean}} ],
@@ -155,10 +155,14 @@ async def analyze_waste(
     }}
     
     INSTRUCTIONS:
-    1. SCALING SENSITIVITY: Assess the technical properties and valorization routes based on the provided quantity and context.
-    2. MATERIAL ID: Use the user description and visual cues to identify the material and its corresponding Basel Convention Code (baselCode).
-    3. VALORIZATION: In the 'method' or 'output' of valorizationRoutes, focus on high-impact alternatives.
-    4. Translate all string values to Spanish (except codes like baselCode).
+    1. SCALING SENSITIVITY: Assess technical properties and valorization based on quantity.
+    2. BASEL CONVENTION (CRITICAL): Assign the correct 'baselCode' from the Basel Convention Annexes.
+       - Use List A (e.g., A1010, A1180) for hazardous waste.
+       - Use List B (e.g., B1010, B3010) for non-hazardous/recyclable waste.
+       - If unclear, use the most specific code applicable to the material's chemical nature.
+    3. MATERIAL ID: Use user description and visual cues to identify the material.
+    4. VALORIZATION: Focus on high-impact circular alternatives.
+    5. Translate all string values to Spanish (except baselCode).
     """
 
     generation_parts = [prompt_text]
