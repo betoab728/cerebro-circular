@@ -608,7 +608,8 @@ async def characterize_rows(batch: list[dict]):
                             "analysis_valorization": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"role": {"type": "STRING"}, "method": {"type": "STRING"}, "output": {"type": "STRING"}, "score": {"type": "NUMBER"}}}},
                             "proceso_valorizacion": {"type": "STRING"},
                             "proceso_reclasificacion": {"type": "STRING"},
-                            "viabilidad_ec": {"type": "NUMBER"}
+                            "viabilidad_ec": {"type": "NUMBER"},
+                            "viabilidad_reclasificacion": {"type": "NUMBER"}
                         }
                     }
                 }
@@ -620,6 +621,8 @@ async def characterize_rows(batch: list[dict]):
         Eres un experto en ingeniería ambiental. Caracteriza técnicamente estos residuos.
         'proceso_valorizacion': Ruta técnica detallada para ganar dinero/valor con el residuo.
         'proceso_reclasificacion': Pasos técnicos (lavado, neutralización) para que no sea peligroso.
+        'viabilidad_ec': Porcentaje de éxito de la valorización.
+        'viabilidad_reclasificacion': Porcentaje de probabilidad de éxito técnico para la reclasificación a no peligroso.
         MANTEN EL MISMO 'item_num' para cada registro.
         """
 
@@ -641,6 +644,7 @@ async def characterize_rows(batch: list[dict]):
                 # Map fields to DB format
                 record["oportunidades_ec"] = record.pop("proceso_valorizacion", "No especificado")
                 record["recla_no_peligroso"] = record.pop("proceso_reclasificacion", "No aplica")
+                record.setdefault("viabilidad_reclasificacion", 0)
                 record.setdefault("analysis_material_name", "Material no identificado")
                 
                 for field in ["analysis_physicochemical", "analysis_elemental", "analysis_engineering", "analysis_valorization"]:

@@ -265,6 +265,10 @@
                       <p class="text-[11px] font-bold text-amber-700 leading-tight">
                         {rec.recla_no_peligroso}
                       </p>
+                      <div class="mt-2 text-right border-t border-amber-100 pt-1">
+                        <span class="text-base font-black text-amber-600">{rec.viabilidad_reclasificacion || 0}%</span>
+                        <span class="text-[8px] font-bold text-amber-400 uppercase tracking-tighter italic ml-1">Probabilidad</span>
+                      </div>
                     </div>
                   {:else}
                     <span class="text-[10px] font-bold {rec.recla_no_peligroso === 'No aplica' ? 'text-green-500 bg-green-50' : 'text-gray-400 italic'} px-2 py-0.5 rounded">
