@@ -527,11 +527,13 @@ async def analyze_batch(file: UploadFile = File(...)):
 
         # Common Prompt Config
         prompt_text = """
-        Eres un experto en valorización de residuos y economía circular.
+        Eres un experto en ingeniería ambiental y economía circular.
         TU MISIÓN: Extraer TODAS las filas del PDF. El documento incluye una COLUMNA DE NUMERACIÓN (Item #). 
-        REGLA DE ORO: No te saltes ningún número correlativo. Si la página tiene del ítem 1 al 20, debes generar exactamente 20 objetos JSON en el array 'records'.
-        SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "proceso_tratamiento": str, "viabilidad_ec": int}]}
-        IMPORTANTE: Usa la numeración para asegurar que tu lista sea completa. En 'proceso_tratamiento', propone rutas de VALORIZACIÓN técnica.
+        REGLA DE ORO: No te saltes ningún número correlativo.
+        SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "proceso_valorizacion": str, "proceso_reclasificacion": str, "viabilidad_ec": int}]}
+        IMPORTANTE: 
+        1. 'proceso_valorizacion': Describe una ruta técnica para obtener valor/ganancia del residuo.
+        2. 'proceso_reclasificacion': Describe los pasos técnicos (neutralización, lavado, etc.) para que el residuo deje de ser peligroso.
         """
 
         batch_analysis_schema = {
@@ -556,7 +558,8 @@ async def analyze_batch(file: UploadFile = File(...)):
                             "analysis_elemental": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"label": {"type": "STRING"}, "value": {"type": "NUMBER"}, "description": {"type": "STRING"}, "trace": {"type": "BOOLEAN"}}}},
                             "analysis_engineering": {"type": "OBJECT", "properties": {"structure": {"type": "STRING"}, "processability": {"type": "STRING"}, "impurities": {"type": "STRING"}}},
                             "analysis_valorization": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"role": {"type": "STRING"}, "method": {"type": "STRING"}, "output": {"type": "STRING"}, "score": {"type": "NUMBER"}}}},
-                            "proceso_tratamiento": {"type": "STRING"},
+                            "proceso_valorizacion": {"type": "STRING"},
+                            "proceso_reclasificacion": {"type": "STRING"},
                             "viabilidad_ec": {"type": "NUMBER"}
                         },
                         "required": ["tipo_residuo", "peso_total"]
@@ -654,10 +657,11 @@ async def analyze_batch(file: UploadFile = File(...)):
                 if success and "records" in parsed_json and isinstance(parsed_json["records"], list):
                     for record in parsed_json["records"]:
                         record.setdefault("analysis_material_name", "Material no identificado")
-                        if "proceso_tratamiento" in record:
-                            record["oportunidades_ec"] = record.pop("proceso_tratamiento")
-                        else:
-                            record.setdefault("oportunidades_ec", "Tratamiento no especificado")
+                        
+                        # Map fields to DB
+                        record["oportunidades_ec"] = record.pop("proceso_valorizacion", "No especificado")
+                        record["recla_no_peligroso"] = record.pop("proceso_reclasificacion", "No aplica")
+                        
                         record.setdefault("viabilidad_ec", 0)
                         
                         for field in ["analysis_physicochemical", "analysis_elemental", "analysis_engineering", "analysis_valorization"]:

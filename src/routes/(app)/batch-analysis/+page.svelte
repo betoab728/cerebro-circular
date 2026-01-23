@@ -167,7 +167,8 @@
               <th class="px-6 py-4 text-scientific-600">Material IA</th>
               <th class="px-6 py-4">Clasificación</th>
               <th class="px-6 py-4 text-right">Cantidad</th>
-              <th class="px-6 py-4">Tratamiento para Valorización</th>
+              <th class="px-6 py-4">Proceso de Tratamiento para Valorización</th>
+              <th class="px-6 py-4">Proceso de Tratamiento para Reclasificación</th>
               <th class="px-6 py-4 text-center">Acciones</th>
             </tr>
           </thead>
@@ -201,24 +202,33 @@
                 </td>
                 <td class="px-6 py-4">
                   {#if rec.oportunidades_ec && rec.oportunidades_ec !== 'Análisis no disponible'}
-                    <div class="flex items-center gap-4 bg-scientific-50 border border-scientific-100 p-3 rounded-xl hover:border-scientific-200 transition-all group">
+                    <div class="flex items-center gap-4 bg-scientific-50 border border-scientific-100 p-2.5 rounded-xl hover:border-scientific-200 transition-all">
                       <div class="flex-1">
                         <p class="text-[11px] font-bold text-scientific-700 leading-tight">
-                          <span class="text-scientific-400 mr-1">⚡</span>
                           {rec.oportunidades_ec}
                         </p>
                       </div>
-                      <div class="text-right border-l border-scientific-100 pl-4 min-w-[80px]">
-                        <span class="block text-lg font-black text-scientific-600 leading-none">{rec.viabilidad_ec || 0}%</span>
+                      <div class="text-right border-l border-scientific-100 pl-4 min-w-[70px]">
+                        <span class="block text-base font-black text-scientific-600 leading-none">{rec.viabilidad_ec || 0}%</span>
                         <span class="text-[9px] font-bold text-scientific-400 uppercase tracking-tighter italic">Efectividad</span>
                       </div>
                     </div>
                   {:else}
-                    <div class="bg-gray-50 border border-dashed border-gray-200 p-3 rounded-xl text-center">
-                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        {rec.oportunidades_ec === 'Análisis no disponible' ? 'No disponible' : 'Pendiente'}
-                      </span>
+                    <div class="text-[10px] text-gray-400 italic">Pendiente caracterización</div>
+                  {/if}
+                </td>
+
+                <td class="px-6 py-4">
+                  {#if rec.recla_no_peligroso && rec.recla_no_peligroso !== 'No aplica'}
+                    <div class="bg-amber-50/50 border border-amber-100 p-2.5 rounded-xl">
+                      <p class="text-[11px] font-bold text-amber-700 leading-tight">
+                        {rec.recla_no_peligroso}
+                      </p>
                     </div>
+                  {:else}
+                    <span class="text-[10px] font-bold {rec.recla_no_peligroso === 'No aplica' ? 'text-green-500 bg-green-50' : 'text-gray-400 italic'} px-2 py-0.5 rounded">
+                      {rec.recla_no_peligroso === 'No aplica' ? 'No requiere' : 'Peligroso'}
+                    </span>
                   {/if}
                 </td>
                 <td class="px-6 py-4 text-center">
