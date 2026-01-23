@@ -517,15 +517,14 @@ async def analyze_batch(file: UploadFile = File(...)):
     content = await file.read()
     
     try:
-        # Read PDF
+        # Read PDF and Split into Chunks (e.g., 4 pages at a time)
         pdf_file = io.BytesIO(content)
         reader = pypdf.PdfReader(pdf_file)
-        extracted_text = ""
-        for page in reader.pages:
-            extracted_text += page.extract_text() + "\n"
-        
-        print(f"DEBUG: Extracted Text Length: {len(extracted_text)}")
+        all_records = []
+        chunk_size = 4  # Process 4 pages at a time
+        total_pages = len(reader.pages)
 
+        # Common Prompt Config
         prompt_text = """
         Eres un experto en caracterización de residuos.
         TAREA: 1. Extrae cada fila de residuos del PDF. 2. Caracteriza técnicamente cada uno.
@@ -533,9 +532,6 @@ async def analyze_batch(file: UploadFile = File(...)):
         IMPORTANTE: Sé conciso para que quepan todos los registros. Usa JSON nativo.
         """
 
-        generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
-
-        # Define Schema for Strict JSON Output
         batch_analysis_schema = {
             "type": "OBJECT",
             "properties": {
@@ -554,154 +550,97 @@ async def analyze_batch(file: UploadFile = File(...)):
                             "unidad_medida": {"type": "STRING"},
                             "peso_total": {"type": "NUMBER"},
                             "analysis_material_name": {"type": "STRING"},
-                            "analysis_physicochemical": {
-                                "type": "ARRAY",
-                                "items": {
-                                    "type": "OBJECT",
-                                    "properties": {
-                                        "name": {"type": "STRING"},
-                                        "value": {"type": "STRING"},
-                                        "method": {"type": "STRING"}
-                                    }
-                                }
-                            },
-                            "analysis_elemental": {
-                                "type": "ARRAY",
-                                "items": {
-                                    "type": "OBJECT",
-                                    "properties": {
-                                        "label": {"type": "STRING"},
-                                        "value": {"type": "NUMBER"},
-                                        "description": {"type": "STRING"},
-                                        "trace": {"type": "BOOLEAN"}
-                                    }
-                                }
-                            },
-                            "analysis_engineering": {
-                                "type": "OBJECT",
-                                "properties": {
-                                    "structure": {"type": "STRING"},
-                                    "processability": {"type": "STRING"},
-                                    "impurities": {"type": "STRING"}
-                                }
-                            },
-                            "analysis_valorization": {
-                                "type": "ARRAY",
-                                "items": {
-                                    "type": "OBJECT",
-                                    "properties": {
-                                        "role": {"type": "STRING"},
-                                        "method": {"type": "STRING"},
-                                        "output": {"type": "STRING"},
-                                        "score": {"type": "NUMBER"}
-                                    }
-                                }
-                            },
+                            "analysis_physicochemical": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"name": {"type": "STRING"}, "value": {"type": "STRING"}, "method": {"type": "STRING"}}}},
+                            "analysis_elemental": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"label": {"type": "STRING"}, "value": {"type": "NUMBER"}, "description": {"type": "STRING"}, "trace": {"type": "BOOLEAN"}}}},
+                            "analysis_engineering": {"type": "OBJECT", "properties": {"structure": {"type": "STRING"}, "processability": {"type": "STRING"}, "impurities": {"type": "STRING"}}},
+                            "analysis_valorization": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"role": {"type": "STRING"}, "method": {"type": "STRING"}, "output": {"type": "STRING"}, "score": {"type": "NUMBER"}}}},
                             "oportunidades_ec": {"type": "STRING"},
                             "viabilidad_ec": {"type": "NUMBER"}
                         },
-                        "required": ["tipo_residuo", "peso_total"] # Relaxed requirements
+                        "required": ["tipo_residuo", "peso_total"]
                     }
                 }
             },
             "required": ["records"]
         }
 
-        schema_error = None
-        try:
-            print("Attempting Strict Schema Generation...")
-            response = model.generate_content(
-                generation_parts,
-                generation_config=genai.types.GenerationConfig(
-                    response_mime_type="application/json",
-                    response_schema=batch_analysis_schema,
-                    max_output_tokens=8192
-                )
-            )
+        for i in range(0, total_pages, chunk_size):
+            chunk_pages = reader.pages[i : i + chunk_size]
+            extracted_text = ""
+            for page in chunk_pages:
+                extracted_text += page.extract_text() + "\n"
             
-            # Check for safety blocks or empty responses
-            if not response.parts and not response.candidates: # Check candidates too
-                 raise ValueError(f"Gemini blocked response. Finish Reason: {response.candidates[0].finish_reason if response.candidates else 'Unknown'}")
+            if not extracted_text.strip():
+                continue
 
-            # Safe text extraction (handles Truncation)
-            result_text = get_response_text(response)
-            
-            # response_schema guarantees valid JSON, so strictly load it.
-            # However, sometimes it wraps in a code block or has whitespace.
-            cleaned_text = result_text.strip() 
-            if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
-            if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
-            if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
+            print(f"DEBUG: Processing Chunk (Pages {i+1}-{min(i+chunk_size, total_pages)}) - Length: {len(extracted_text)}")
+            generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
 
+            parsed_json = {"records": []}
             try:
-                parsed_json = json.loads(cleaned_text.strip())
-            except json.JSONDecodeError:
-                # TRUNCATION RECOVERY (Strict Mode)
-                print("Strict JSON truncated. Attempting repair...")
-                repaired_text = repair_truncated_json(cleaned_text)
-                parsed_json = json.loads(repaired_text)
-                print("Repair successful (Strict Mode).")
-
-
-        except Exception as e:
-            schema_error = str(e)
-            print(f"Schema Generation Failed: {schema_error}. Fallback to Standard Generation + Regex Cleaning.")
-            
-            try:
-                # Fallback to standard generation
+                # 1. Main Attempt (Strict Schema)
                 response = model.generate_content(
                     generation_parts,
                     generation_config=genai.types.GenerationConfig(
                         response_mime_type="application/json",
+                        response_schema=batch_analysis_schema,
                         max_output_tokens=8192
                     )
                 )
                 
-                result_text = get_response_text(response) # Safe access
-                cleaned_text = clean_json_response(result_text)
-                
+                result_text = get_response_text(response)
+                cleaned_text = result_text.strip()
+                if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
+                if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
+                if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
+
                 try:
-                    parsed_json = json.loads(cleaned_text)
+                    parsed_json = json.loads(cleaned_text.strip())
                 except json.JSONDecodeError:
-                     # TRUNCATION RECOVERY (Fallback Mode)
-                    print("Fallback JSON truncated. Attempting repair...")
+                    print(f"Chunk {i//chunk_size} JSON truncated. Repairing...")
                     repaired_text = repair_truncated_json(cleaned_text)
                     parsed_json = json.loads(repaired_text)
-                    print("Repair successful (Fallback Mode).")
 
-            except Exception as fallback_e:
-                error_msg = f"Analysis Failed. Strict Error: {schema_error}. Fallback Error: {str(fallback_e)}"
-                print(error_msg)
-                raise HTTPException(status_code=500, detail=error_msg)
+            except Exception as e:
+                print(f"Chunk {i//chunk_size} Schema Failed: {e}. Falling back...")
+                try:
+                    response = model.generate_content(
+                        generation_parts,
+                        generation_config=genai.types.GenerationConfig(
+                            response_mime_type="application/json",
+                            max_output_tokens=8192
+                        )
+                    )
+                    result_text = get_response_text(response)
+                    cleaned_text = clean_json_response(result_text)
+                    try:
+                        parsed_json = json.loads(cleaned_text)
+                    except json.JSONDecodeError:
+                        repaired_text = repair_truncated_json(cleaned_text)
+                        parsed_json = json.loads(repaired_text)
+                except Exception as fallback_e:
+                    print(f"Chunk {i//chunk_size} Fallback Failed: {fallback_e}")
+                    continue # Skip this chunk if both fail
 
-        # Post-process: Stringify complex fields for the DB
-        if "records" in parsed_json and isinstance(parsed_json["records"], list):
-            for record in parsed_json["records"]:
-                if "analysis_physicochemical" in record:
-                    record["analysis_physicochemical"] = json.dumps(record["analysis_physicochemical"])
-                if "analysis_elemental" in record:
-                    record["analysis_elemental"] = json.dumps(record["analysis_elemental"])
-                if "analysis_engineering" in record:
-                    record["analysis_engineering"] = json.dumps(record["analysis_engineering"])
-                if "analysis_valorization" in record:
-                    record["analysis_valorization"] = json.dumps(record["analysis_valorization"])
-        return parsed_json
+            # Consolidate and Post-process
+            if "records" in parsed_json and isinstance(parsed_json["records"], list):
+                for record in parsed_json["records"]:
+                    # Ensure default values for analysis fields to fix UI "Cargando..."
+                    record.setdefault("analysis_material_name", "Material no identificado")
+                    record.setdefault("oportunidades_ec", "Análisis no disponible")
+                    record.setdefault("viabilidad_ec", 0)
+                    
+                    # Stringify for DB
+                    for field in ["analysis_physicochemical", "analysis_elemental", "analysis_engineering", "analysis_valorization"]:
+                        if field in record:
+                            record[field] = json.dumps(record[field])
+                    all_records.append(record)
 
-    except json.JSONDecodeError as e:
-        print(f"JSON Parsing Error: {str(e)}")
-        print(f"Truncated Response Tail: {result_text[-500:]}")
-        raise HTTPException(status_code=500, detail=f"Analysis Response Truncated or Invalid: {str(e)}")
+        return {"records": all_records}
+
     except Exception as e:
-        # Surface response tail for debugging if it's a JSON/Truncation error
-        tail = ""
-        try:
-             # Try to get whatever sparked the error
-             if 'result_text' in locals():
-                 tail = f" | Tail: {locals()['result_text'][-200:]}"
-        except: pass
-        
-        print(f"Batch Analysis Failed: {str(e)}{tail}")
-        raise HTTPException(status_code=500, detail=f"Batch Analysis Failed: {str(e)}{tail}")
+        print(f"Batch Analysis System Failure: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Batch Analysis Failed: {str(e)}")
 
 @app.post("/save-batch")
 async def save_batch(records: list[Residuo], session: Session = Depends(waste.get_session)):

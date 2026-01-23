@@ -200,7 +200,7 @@
                   <div class="text-[9px] text-scientific-600 font-medium italic">({rec.peso_total ?? 0} kg)</div>
                 </td>
                 <td class="px-6 py-4">
-                  {#if rec.oportunidades_ec}
+                  {#if rec.oportunidades_ec && rec.oportunidades_ec !== 'Análisis no disponible'}
                     <div class="flex items-center gap-4 bg-scientific-50 border border-scientific-100 p-3 rounded-xl hover:border-scientific-200 transition-all group">
                       <div class="flex-1">
                         <p class="text-[11px] font-bold text-scientific-700 leading-tight">
@@ -214,7 +214,11 @@
                       </div>
                     </div>
                   {:else}
-                    <span class="text-gray-300 italic text-xs">Cargando...</span>
+                    <div class="bg-gray-50 border border-dashed border-gray-200 p-3 rounded-xl text-center">
+                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        {rec.oportunidades_ec === 'Análisis no disponible' ? 'No disponible' : 'Pendiente'}
+                      </span>
+                    </div>
                   {/if}
                 </td>
                 <td class="px-6 py-4 text-center">
