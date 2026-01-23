@@ -113,6 +113,7 @@ class ValorizationRoute(BaseModel):
 class AnalysisResult(BaseModel):
     materialName: str
     category: str
+    baselCode: Optional[str] = None
     confidence: float
     physicochemical: List[PhysicochemicalProp]
     elemental: List[ElementalComp]
