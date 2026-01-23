@@ -167,7 +167,7 @@
               <th class="px-6 py-4 text-scientific-600">Material IA</th>
               <th class="px-6 py-4">Clasificación</th>
               <th class="px-6 py-4 text-right">Cantidad</th>
-              <th class="px-6 py-4">Oportunidades de Economía Circular</th>
+              <th class="px-6 py-4">Proceso de Tratamiento</th>
               <th class="px-6 py-4 text-center">Acciones</th>
             </tr>
           </thead>
@@ -210,7 +210,7 @@
                       </div>
                       <div class="text-right border-l border-scientific-100 pl-4 min-w-[80px]">
                         <span class="block text-lg font-black text-scientific-600 leading-none">{rec.viabilidad_ec || 0}%</span>
-                        <span class="text-[9px] font-bold text-scientific-400 uppercase tracking-tighter italic">Viabilidad</span>
+                        <span class="text-[9px] font-bold text-scientific-400 uppercase tracking-tighter italic">Efectividad</span>
                       </div>
                     </div>
                   {:else}

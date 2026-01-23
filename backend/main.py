@@ -527,11 +527,11 @@ async def analyze_batch(file: UploadFile = File(...)):
 
         # Common Prompt Config
         prompt_text = """
-        Eres un experto en caracterización de residuos industriales.
+        Eres un experto en caracterización y tratamiento de residuos industriales.
         TU MISIÓN: Extraer TODAS Y CADA UNA de las filas de residuos de la tabla del PDF sin omitir ninguna.
         REGLA DE ORO: Si hay 20 filas en el texto, debes generar 20 objetos JSON en el array 'records'. No agrupes ni resumas.
-        SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "oportunidades_ec": str, "viabilidad_ec": int}]}
-        IMPORTANTE: Sé preciso en la extracción de 'cantidad' y 'caracteristica'.
+        SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "proceso_tratamiento": str, "viabilidad_ec": int}]}
+        IMPORTANTE: En 'proceso_tratamiento', describe brevemente el método técnico de tratamiento recomendado (ej: Incineración, Relleno de Seguridad, Reciclaje Mecánico, etc.).
         """
 
         batch_analysis_schema = {
@@ -556,7 +556,7 @@ async def analyze_batch(file: UploadFile = File(...)):
                             "analysis_elemental": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"label": {"type": "STRING"}, "value": {"type": "NUMBER"}, "description": {"type": "STRING"}, "trace": {"type": "BOOLEAN"}}}},
                             "analysis_engineering": {"type": "OBJECT", "properties": {"structure": {"type": "STRING"}, "processability": {"type": "STRING"}, "impurities": {"type": "STRING"}}},
                             "analysis_valorization": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"role": {"type": "STRING"}, "method": {"type": "STRING"}, "output": {"type": "STRING"}, "score": {"type": "NUMBER"}}}},
-                            "oportunidades_ec": {"type": "STRING"},
+                            "proceso_tratamiento": {"type": "STRING"},
                             "viabilidad_ec": {"type": "NUMBER"}
                         },
                         "required": ["tipo_residuo", "peso_total"]
@@ -638,10 +638,15 @@ async def analyze_batch(file: UploadFile = File(...)):
             # Consolidate results if we got anything
             if success and "records" in parsed_json and isinstance(parsed_json["records"], list):
                 chunk_records = 0
-                for record in parsed_json["records"]:
                     # Ensure default values
                     record.setdefault("analysis_material_name", "Material no identificado")
-                    record.setdefault("oportunidades_ec", "Análisis no disponible")
+                    
+                    # Map 'proceso_tratamiento' to 'oportunidades_ec' (existing DB field)
+                    if "proceso_tratamiento" in record:
+                        record["oportunidades_ec"] = record.pop("proceso_tratamiento")
+                    else:
+                        record.setdefault("oportunidades_ec", "Tratamiento no especificado")
+                        
                     record.setdefault("viabilidad_ec", 0)
                     
                     # Stringify for DB
