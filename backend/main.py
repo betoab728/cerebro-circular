@@ -4,6 +4,7 @@ from fastapi.responses import StreamingResponse
 import os
 import io
 import json
+import re
 import google.generativeai as genai
 from dotenv import load_dotenv
 import pypdf
@@ -33,6 +34,60 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def clean_json_response(response_text: str) -> str:
+    """
+    Robust cleaning of JSON response from LLM.
+    - Extracts distinct JSON block
+    - Removes markdown
+    - Removes trailing commas which break json.loads
+    """
+    # 1. Remove markdown code blocks
+    text = response_text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
+
+    # 2. Extract JSON object/list if there's extra text
+    # Find the first { or [ and the last } or ]
+    start_brace = text.find('{')
+    start_bracket = text.find('[')
+    
+    start_idx = -1
+    end_idx = -1
+
+    # Determine start
+    if start_brace != -1 and start_bracket != -1:
+        start_idx = min(start_brace, start_bracket)
+    elif start_brace != -1:
+        start_idx = start_brace
+    elif start_bracket != -1:
+        start_idx = start_bracket
+    
+    # Determine end (search from right)
+    end_brace = text.rfind('}')
+    end_bracket = text.rfind(']')
+    
+    if end_brace != -1 and end_bracket != -1:
+        end_idx = max(end_brace, end_bracket)
+    elif end_brace != -1:
+        end_idx = end_brace
+    elif end_bracket != -1:
+        end_idx = end_bracket
+
+    if start_idx != -1 and end_idx != -1:
+        text = text[start_idx : end_idx + 1]
+
+    # 3. Regex to remove trailing commas
+    # Removes , followed by newline/space and } or ]
+    text = re.sub(r',\s*}', '}', text)
+    text = re.sub(r',\s*]', ']', text)
+    
+    return text
 
 @app.post("/predictive-registry")
 async def create_predictive_registry(registry: PredictiveRegistration):
@@ -254,15 +309,10 @@ async def analyze_waste(
         )
         
         result_text = response.text
-        # Cleanup markdown code blocks if present (common with LLMs)
-        if result_text.startswith("```json"):
-            result_text = result_text[7:]
-        if result_text.startswith("```"):
-            result_text = result_text[3:]
-        if result_text.endswith("```"):
-            result_text = result_text[:-3]
+        # Clean response with helper
+        cleaned_text = clean_json_response(result_text)
         
-        result_json = json.loads(result_text.strip())
+        result_json = json.loads(cleaned_text)
         return result_json
 
     except Exception as e:
@@ -402,11 +452,9 @@ async def predictive_analysis(
         print(f"Gemini Predictive Response: {result_text}")
 
         # Cleanup
-        if result_text.startswith("```json"): result_text = result_text[7:]
-        if result_text.startswith("```"): result_text = result_text[3:]
-        if result_text.endswith("```"): result_text = result_text[:-3]
+        cleaned_text = clean_json_response(result_text)
 
-        parsed_json = json.loads(result_text.strip())
+        parsed_json = json.loads(cleaned_text)
         return parsed_json
 
     except Exception as e:
@@ -487,11 +535,9 @@ async def analyze_batch(file: UploadFile = File(...)):
         )
         
         result_text = response.text
-        if result_text.startswith("```json"): result_text = result_text[7:]
-        if result_text.startswith("```"): result_text = result_text[3:]
-        if result_text.endswith("```"): result_text = result_text[:-3]
+        cleaned_text = clean_json_response(result_text)
 
-        parsed_json = json.loads(result_text.strip())
+        parsed_json = json.loads(cleaned_text)
 
         # Post-process: Stringify complex fields for the DB
         if "records" in parsed_json and isinstance(parsed_json["records"], list):
