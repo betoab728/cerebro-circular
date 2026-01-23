@@ -481,7 +481,8 @@ async def analyze_batch(file: UploadFile = File(...)):
         response = model.generate_content(
             generation_parts,
             generation_config=genai.types.GenerationConfig(
-                response_mime_type="application/json"
+                response_mime_type="application/json",
+                max_output_tokens=8192
             )
         )
         
@@ -505,6 +506,10 @@ async def analyze_batch(file: UploadFile = File(...)):
                     record["analysis_valorization"] = json.dumps(record["analysis_valorization"])
         return parsed_json
 
+    except json.JSONDecodeError as e:
+        print(f"JSON Parsing Error: {str(e)}")
+        print(f"Truncated Response Tail: {result_text[-500:]}")
+        raise HTTPException(status_code=500, detail=f"Analysis Response Truncated or Invalid: {str(e)}")
     except Exception as e:
         print(f"Batch Analysis Failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Batch Analysis Failed: {str(e)}")
