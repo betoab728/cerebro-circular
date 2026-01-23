@@ -455,10 +455,10 @@ async def analyze_batch(file: UploadFile = File(...)):
                     "peso_total": Number (En KILOGRAMOS - calcula segun cantidad/unidad),
                     
                     "analysis_material_name": "Nombre científico/claro del material",
-                    "analysis_physicochemical": "JSON String (List of {name, value, method})",
-                    "analysis_elemental": "JSON String (List of {label, value, description, trace})",
-                    "analysis_engineering": "JSON String ({structure, processability, impurities})",
-                    "analysis_valorization": "JSON String (List of {role, method, output, score})",
+                    "analysis_physicochemical": [ {"name": "String", "value": "String", "method": "String"} ],
+                    "analysis_elemental": [ {"label": "String", "value": Number, "description": "String", "trace": Boolean} ],
+                    "analysis_engineering": { "structure": "String", "processability": "String", "impurities": "String" },
+                    "analysis_valorization": [ {"role": "String", "method": "String", "output": "String", "score": Number} ],
                     "oportunidades_ec": "String (Resumen corto de max 15 palabras sobre la mejor oportunidad de EC)",
                     "viabilidad_ec": Number (Porcentaje 0-100 de viabilidad de la oportunidad)
                 }
@@ -471,7 +471,7 @@ async def analyze_batch(file: UploadFile = File(...)):
         - En 'analysis_valorization', propón rutas de economía circular con puntajes de viabilidad realistas según normativa peruana.
         - En 'oportunidades_ec', redacta un resumen ejecutivo y persuasivo (máximo 15 palabras) de la oportunidad de valorización más rentable.
         - En 'viabilidad_ec', asigna un puntaje de viabilidad (0-100) coherente con el análisis técnico.
-        - MUY IMPORTANTE: Los campos que dicen "JSON String" deben ser cadenas de texto que contengan el JSON serializado, NO objetos anidados directamente.
+        - IMPORTANTE: Devuelve objetos JSON nativos para los campos de análisis, NO cadenas de texto.
         
         Devuelve ÚNICAMENTE el JSON.
         """
@@ -491,6 +491,18 @@ async def analyze_batch(file: UploadFile = File(...)):
         if result_text.endswith("```"): result_text = result_text[:-3]
 
         parsed_json = json.loads(result_text.strip())
+
+        # Post-process: Stringify complex fields for the DB
+        if "records" in parsed_json and isinstance(parsed_json["records"], list):
+            for record in parsed_json["records"]:
+                if "analysis_physicochemical" in record:
+                    record["analysis_physicochemical"] = json.dumps(record["analysis_physicochemical"])
+                if "analysis_elemental" in record:
+                    record["analysis_elemental"] = json.dumps(record["analysis_elemental"])
+                if "analysis_engineering" in record:
+                    record["analysis_engineering"] = json.dumps(record["analysis_engineering"])
+                if "analysis_valorization" in record:
+                    record["analysis_valorization"] = json.dumps(record["analysis_valorization"])
         return parsed_json
 
     except Exception as e:
