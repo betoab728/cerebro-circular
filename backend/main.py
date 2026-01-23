@@ -89,6 +89,52 @@ def clean_json_response(response_text: str) -> str:
     
     return text
 
+def get_response_text(response) -> str:
+    """Safely extracts text from response, handling quick accessor errors on truncation."""
+    try:
+        return response.text
+    except Exception:
+        # Fallback for when 'finish_reason' is MAX_TOKENS (2) or SAFETY (3)
+        if response.candidates and response.candidates[0].content.parts:
+            return response.candidates[0].content.parts[0].text
+        return ""
+
+def repair_truncated_json(text: str) -> str:
+    """
+    Aggressively attempts to repair a truncated JSON string for a 'records' list.
+    """
+    try:
+        # 1. Basic cleanup
+        text = text.strip()
+        
+        # 2. If it's empty, we can't do much
+        if not text: return text
+
+        # 3. Find the last "}," which signifies a complete object in the list
+        last_item_end = text.rfind("},")
+        if last_item_end != -1:
+            return text[:last_item_end + 1] + "]}"
+        
+        # 4. If no "}," maybe it cut off during the very first record? 
+        # Or at the end of the last record without a comma?
+        last_brace = text.rfind("}")
+        if last_brace != -1:
+            # Check if this brace is after the "records": [ part
+            records_start = text.find('"records"')
+            if records_start != -1 and last_brace > records_start:
+                return text[:last_brace + 1] + "]}"
+        
+        # 5. Fallback: just try to close everything if we have the start
+        if '"records"' in text and "[" in text:
+            # If we don't even have a closing brace, it's very badly truncated
+            # but we can try to close the current object if it has some fields.
+            return text + '}]}' 
+            
+        return text
+    except Exception as e:
+        print(f"JSON Repair Failed: {e}")
+        return text
+
 @app.post("/predictive-registry")
 async def create_predictive_registry(registry: PredictiveRegistration):
     try:
@@ -478,50 +524,13 @@ async def analyze_batch(file: UploadFile = File(...)):
         for page in reader.pages:
             extracted_text += page.extract_text() + "\n"
         
-        extracted_text = extracted_text[:40000] # Cap for context window
+        print(f"DEBUG: Extracted Text Length: {len(extracted_text)}")
 
         prompt_text = """
-        Eres un experto Científico de Materiales y Consultor de Economía Circular.
-        Tu tarea es doble:
-        1. EXTRAER: Identifica cada fila de la tabla de residuos en el texto del reporte PDF.
-        2. CARACTERIZAR: Para CADA residuo extraído, realiza un análisis técnico profundo (como si estuvieras analizando una ficha técnica individual).
-        
-        Tu objetivo es devolver una lista de objetos JSON. Cada objeto debe ser un registro completo compatible con la base de datos (Modelo Residuo).
-        
-        ESQUEMA REQUERIDO:
-        {
-            "records": [
-                {
-                    "razon_social": "String",
-                    "planta": "String",
-                    "departamento": "String",
-                    "tipo_residuo": "String (PELIGROSO / NO PELIGROSO / ESPECIAL / NFU / RAEE / OTROS)",
-                    "codigo_basilea": "String",
-                    "caracteristica": "String (Descripción original)",
-                    "cantidad": Number,
-                    "unidad_medida": "String (TONELADAS / KILOGRAMOS / ETC)",
-                    "peso_total": Number (En KILOGRAMOS - calcula segun cantidad/unidad),
-                    
-                    "analysis_material_name": "Nombre científico/claro del material",
-                    "analysis_physicochemical": [ {"name": "String", "value": "String", "method": "String"} ],
-                    "analysis_elemental": [ {"label": "String", "value": Number, "description": "String", "trace": Boolean} ],
-                    "analysis_engineering": { "structure": "String", "processability": "String", "impurities": "String" },
-                    "analysis_valorization": [ {"role": "String", "method": "String", "output": "String", "score": Number} ],
-                    "oportunidades_ec": "String (Resumen corto de max 15 palabras sobre la mejor oportunidad de EC)",
-                    "viabilidad_ec": Number (Porcentaje 0-100 de viabilidad de la oportunidad)
-                }
-            ]
-        }
-        
-        INSTRUCCIONES DE ANÁLISIS TÉCNICO:
-        - Para cada residuo, infiere sus propiedades físico-químicas y composición elemental basándote en su descripción y contexto industrial.
-        - En 'analysis_engineering.processability', evalúa específicamente cómo manejar el volumen extraído (peso_total).
-        - En 'analysis_valorization', propón rutas de economía circular con puntajes de viabilidad realistas según normativa peruana.
-        - En 'oportunidades_ec', redacta un resumen ejecutivo y persuasivo (máximo 15 palabras) de la oportunidad de valorización más rentable.
-        - En 'viabilidad_ec', asigna un puntaje de viabilidad (0-100) coherente con el análisis técnico.
-        - IMPORTANTE: Devuelve objetos JSON nativos para los campos de análisis, NO cadenas de texto.
-        
-        Devuelve ÚNICAMENTE el JSON.
+        Eres un experto en caracterización de residuos.
+        TAREA: 1. Extrae cada fila de residuos del PDF. 2. Caracteriza técnicamente cada uno.
+        SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "oportunidades_ec": str, "viabilidad_ec": int}]}
+        IMPORTANTE: Sé conciso para que quepan todos los registros. Usa JSON nativo.
         """
 
         generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
@@ -611,10 +620,12 @@ async def analyze_batch(file: UploadFile = File(...)):
             )
             
             # Check for safety blocks or empty responses
-            if not response.parts:
+            if not response.parts and not response.candidates: # Check candidates too
                  raise ValueError(f"Gemini blocked response. Finish Reason: {response.candidates[0].finish_reason if response.candidates else 'Unknown'}")
 
-            result_text = response.text
+            # Safe text extraction (handles Truncation)
+            result_text = get_response_text(response)
+            
             # response_schema guarantees valid JSON, so strictly load it.
             # However, sometimes it wraps in a code block or has whitespace.
             cleaned_text = result_text.strip() 
@@ -622,7 +633,15 @@ async def analyze_batch(file: UploadFile = File(...)):
             if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
             if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
 
-            parsed_json = json.loads(cleaned_text.strip())
+            try:
+                parsed_json = json.loads(cleaned_text.strip())
+            except json.JSONDecodeError:
+                # TRUNCATION RECOVERY (Strict Mode)
+                print("Strict JSON truncated. Attempting repair...")
+                repaired_text = repair_truncated_json(cleaned_text)
+                parsed_json = json.loads(repaired_text)
+                print("Repair successful (Strict Mode).")
+
 
         except Exception as e:
             schema_error = str(e)
@@ -638,9 +657,18 @@ async def analyze_batch(file: UploadFile = File(...)):
                     )
                 )
                 
-                result_text = response.text
+                result_text = get_response_text(response) # Safe access
                 cleaned_text = clean_json_response(result_text)
-                parsed_json = json.loads(cleaned_text)
+                
+                try:
+                    parsed_json = json.loads(cleaned_text)
+                except json.JSONDecodeError:
+                     # TRUNCATION RECOVERY (Fallback Mode)
+                    print("Fallback JSON truncated. Attempting repair...")
+                    repaired_text = repair_truncated_json(cleaned_text)
+                    parsed_json = json.loads(repaired_text)
+                    print("Repair successful (Fallback Mode).")
+
             except Exception as fallback_e:
                 error_msg = f"Analysis Failed. Strict Error: {schema_error}. Fallback Error: {str(fallback_e)}"
                 print(error_msg)
@@ -664,8 +692,16 @@ async def analyze_batch(file: UploadFile = File(...)):
         print(f"Truncated Response Tail: {result_text[-500:]}")
         raise HTTPException(status_code=500, detail=f"Analysis Response Truncated or Invalid: {str(e)}")
     except Exception as e:
-        print(f"Batch Analysis Failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Batch Analysis Failed: {str(e)}")
+        # Surface response tail for debugging if it's a JSON/Truncation error
+        tail = ""
+        try:
+             # Try to get whatever sparked the error
+             if 'result_text' in locals():
+                 tail = f" | Tail: {locals()['result_text'][-200:]}"
+        except: pass
+        
+        print(f"Batch Analysis Failed: {str(e)}{tail}")
+        raise HTTPException(status_code=500, detail=f"Batch Analysis Failed: {str(e)}{tail}")
 
 @app.post("/save-batch")
 async def save_batch(records: list[Residuo], session: Session = Depends(waste.get_session)):
