@@ -521,16 +521,17 @@ async def analyze_batch(file: UploadFile = File(...)):
         pdf_file = io.BytesIO(content)
         reader = pypdf.PdfReader(pdf_file)
         all_records = []
-        chunk_size = 2  # Process 2 pages at a time to be safer
+        chunk_size = 1  # Process 1 page at a time for maximum accuracy and token space
         total_pages = len(reader.pages)
         print(f"DEBUG: Total PDF Pages: {total_pages}")
 
         # Common Prompt Config
         prompt_text = """
-        Eres un experto en caracterización de residuos.
-        TAREA: 1. Extrae cada fila de residuos del PDF. 2. Caracteriza técnicamente cada uno.
+        Eres un experto en caracterización de residuos industriales.
+        TU MISIÓN: Extraer TODAS Y CADA UNA de las filas de residuos de la tabla del PDF sin omitir ninguna.
+        REGLA DE ORO: Si hay 20 filas en el texto, debes generar 20 objetos JSON en el array 'records'. No agrupes ni resumas.
         SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "oportunidades_ec": str, "viabilidad_ec": int}]}
-        IMPORTANTE: Sé conciso para que quepan todos los registros. Usa JSON nativo.
+        IMPORTANTE: Sé preciso en la extracción de 'cantidad' y 'caracteristica'.
         """
 
         batch_analysis_schema = {
