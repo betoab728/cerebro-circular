@@ -159,7 +159,7 @@
       </div>
 
       <div class="overflow-x-auto bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <table class="w-full text-left text-sm">
+        <table class="w-full text-left text-sm min-w-[1200px]">
           <thead>
             <tr class="bg-gray-50/50 text-gray-400 font-bold text-[10px] uppercase tracking-widest border-b border-gray-100">
               <th class="px-6 py-4">Entidad / Planta</th>
@@ -167,8 +167,8 @@
               <th class="px-6 py-4 text-scientific-600">Material IA</th>
               <th class="px-6 py-4">Clasificación</th>
               <th class="px-6 py-4 text-right">Cantidad</th>
-              <th class="px-6 py-4">Proceso de Tratamiento para Valorización</th>
-              <th class="px-6 py-4">Proceso de Tratamiento para Reclasificación</th>
+              <th class="px-6 py-4">Proceso de tratamiento para valorización</th>
+              <th class="px-6 py-4">Proceso de tratamiento para reclasificación a no peligroso</th>
               <th class="px-6 py-4 text-center">Acciones</th>
             </tr>
           </thead>
@@ -200,25 +200,22 @@
                   <div class="text-[10px] text-gray-400 font-bold uppercase">{rec.unidad_medida ?? 'UNID'}</div>
                   <div class="text-[9px] text-scientific-600 font-medium italic">({rec.peso_total ?? 0} kg)</div>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 max-w-[300px]">
                   {#if rec.oportunidades_ec && rec.oportunidades_ec !== 'Análisis no disponible'}
-                    <div class="flex items-center gap-4 bg-scientific-50 border border-scientific-100 p-2.5 rounded-xl hover:border-scientific-200 transition-all">
-                      <div class="flex-1">
-                        <p class="text-[11px] font-bold text-scientific-700 leading-tight">
-                          {rec.oportunidades_ec}
-                        </p>
-                      </div>
-                      <div class="text-right border-l border-scientific-100 pl-4 min-w-[70px]">
-                        <span class="block text-base font-black text-scientific-600 leading-none">{rec.viabilidad_ec || 0}%</span>
-                        <span class="text-[9px] font-bold text-scientific-400 uppercase tracking-tighter italic">Efectividad</span>
+                    <div class="bg-scientific-50 border border-scientific-100 p-2.5 rounded-xl">
+                      <p class="text-[11px] font-bold text-scientific-700 leading-tight">
+                        {rec.oportunidades_ec}
+                      </p>
+                      <div class="mt-2 text-right border-t border-scientific-100 pt-1">
+                        <span class="text-base font-black text-scientific-600">{rec.viabilidad_ec || 0}%</span>
+                        <span class="text-[8px] font-bold text-scientific-400 uppercase tracking-tighter italic ml-1">Efectividad</span>
                       </div>
                     </div>
                   {:else}
-                    <div class="text-[10px] text-gray-400 italic">Pendiente caracterización</div>
+                    <div class="text-[10px] text-gray-400 italic">Analizando...</div>
                   {/if}
                 </td>
-
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 max-w-[300px]">
                   {#if rec.recla_no_peligroso && rec.recla_no_peligroso !== 'No aplica'}
                     <div class="bg-amber-50/50 border border-amber-100 p-2.5 rounded-xl">
                       <p class="text-[11px] font-bold text-amber-700 leading-tight">
@@ -227,7 +224,7 @@
                     </div>
                   {:else}
                     <span class="text-[10px] font-bold {rec.recla_no_peligroso === 'No aplica' ? 'text-green-500 bg-green-50' : 'text-gray-400 italic'} px-2 py-0.5 rounded">
-                      {rec.recla_no_peligroso === 'No aplica' ? 'No requiere' : 'Peligroso'}
+                      {rec.recla_no_peligroso === 'No aplica' ? 'No requiere' : 'Cargando...'}
                     </span>
                   {/if}
                 </td>
