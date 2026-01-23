@@ -638,6 +638,7 @@ async def analyze_batch(file: UploadFile = File(...)):
             # Consolidate results if we got anything
             if success and "records" in parsed_json and isinstance(parsed_json["records"], list):
                 chunk_records = 0
+                for record in parsed_json["records"]:
                     # Ensure default values
                     record.setdefault("analysis_material_name", "Material no identificado")
                     
