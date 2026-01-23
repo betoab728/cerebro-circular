@@ -566,70 +566,80 @@ async def analyze_batch(file: UploadFile = File(...)):
             "required": ["records"]
         }
 
+        import time
+
         for i in range(0, total_pages, chunk_size):
             chunk_pages = reader.pages[i : i + chunk_size]
             extracted_text = ""
+            current_chunk_label = f"Pages {i+1}-{min(i+chunk_size, total_pages)}"
+            
             for page_idx, page in enumerate(chunk_pages):
                 text = page.extract_text() or ""
                 extracted_text += text + "\n"
                 print(f"DEBUG: Page {i + page_idx + 1} extracted length: {len(text)}")
             
             if not extracted_text.strip():
+                print(f"DEBUG: Skipping {current_chunk_label} - No text found.")
                 continue
 
-            print(f"DEBUG: Processing Chunk (Pages {i+1}-{min(i+chunk_size, total_pages)}) - Length: {len(extracted_text)}")
-            generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
-
+            # NEW: Retry loop for each chunk
+            max_retries = 3
             parsed_json = {"records": []}
-            try:
-                # 1. Main Attempt (Strict Schema)
-                response = model.generate_content(
-                    generation_parts,
-                    generation_config=genai.types.GenerationConfig(
-                        response_mime_type="application/json",
-                        response_schema=batch_analysis_schema,
-                        max_output_tokens=8192
-                    )
-                )
-                
-                result_text = get_response_text(response)
-                cleaned_text = result_text.strip()
-                if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
-                if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
-                if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
+            success = False
 
+            for attempt in range(max_retries):
                 try:
-                    parsed_json = json.loads(cleaned_text.strip())
-                except json.JSONDecodeError:
-                    print(f"Chunk {i//chunk_size} JSON truncated. Repairing...")
-                    repaired_text = repair_truncated_json(cleaned_text)
-                    parsed_json = json.loads(repaired_text)
+                    print(f"DEBUG: Processing {current_chunk_label} (Attempt {attempt+1}/{max_retries})")
+                    generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
 
-            except Exception as e:
-                print(f"Chunk {i//chunk_size} Schema Failed: {e}. Falling back...")
-                try:
+                    # Attempt 1: Strict Schema
                     response = model.generate_content(
                         generation_parts,
                         generation_config=genai.types.GenerationConfig(
                             response_mime_type="application/json",
+                            response_schema=batch_analysis_schema,
                             max_output_tokens=8192
                         )
                     )
+                    
+                    # Check for safety blocks
+                    if not response.parts and not response.candidates:
+                         raise ValueError("Gemini blocked response (Safety/Other)")
+
                     result_text = get_response_text(response)
-                    cleaned_text = clean_json_response(result_text)
+                    cleaned_text = result_text.strip()
+                    if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
+                    if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
+                    if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
+
                     try:
-                        parsed_json = json.loads(cleaned_text)
+                        parsed_json = json.loads(cleaned_text.strip())
                     except json.JSONDecodeError:
+                        print(f"DEBUG: {current_chunk_label} JSON truncated. Repairing...")
                         repaired_text = repair_truncated_json(cleaned_text)
                         parsed_json = json.loads(repaired_text)
-                except Exception as fallback_e:
-                    print(f"Chunk {i//chunk_size} Fallback Failed: {fallback_e}")
-                    continue # Skip this chunk if both fail
+                    
+                    success = True
+                    break # Exit retry loop on success
 
-            # Consolidate and Post-process
-            if "records" in parsed_json and isinstance(parsed_json["records"], list):
+                except Exception as e:
+                    error_str = str(e)
+                    print(f"DEBUG: Error in {current_chunk_label} (Attempt {attempt+1}): {error_str}")
+                    
+                    if "429" in error_str or "quota" in error_str.lower():
+                        wait_time = (attempt + 1) * 2
+                        print(f"DEBUG: Rate limit hit. Waiting {wait_time}s...")
+                        time.sleep(wait_time)
+                    elif attempt == max_retries - 1:
+                        print(f"DEBUG: Max retries reached for {current_chunk_label}. Skipping data.")
+                    else:
+                        time.sleep(1) # General small wait
+
+            # Consolidate results if we got anything
+            if success and "records" in parsed_json and isinstance(parsed_json["records"], list):
+                chunk_records = 0
                 for record in parsed_json["records"]:
-                    # Ensure default values for analysis fields to fix UI "Cargando..."
+                    # Ensure default values
                     record.setdefault("analysis_material_name", "Material no identificado")
                     record.setdefault("oportunidades_ec", "Análisis no disponible")
                     record.setdefault("viabilidad_ec", 0)
@@ -639,14 +649,14 @@ async def analyze_batch(file: UploadFile = File(...)):
                         if field in record:
                             record[field] = json.dumps(record[field])
                     all_records.append(record)
-                
-                print(f"DEBUG: Chunk Success. Records found in this chunk: {len(parsed_json['records'])}")
+                    chunk_records += 1
+                print(f"DEBUG: Success for {current_chunk_label}. Records found: {chunk_records}")
 
-        print(f"DEBUG: Analysis Complete. Total records found: {len(all_records)}")
+        print(f"DEBUG: Final Count: {len(all_records)} records from {total_pages} pages.")
         return {"records": all_records}
 
     except Exception as e:
-        print(f"Batch Analysis System Failure: {str(e)}")
+        print(f"Batch Analysis CRITICAL Failure: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Batch Analysis Failed: {str(e)}")
 
 @app.post("/save-batch")
