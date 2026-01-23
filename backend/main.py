@@ -527,11 +527,11 @@ async def analyze_batch(file: UploadFile = File(...)):
 
         # Common Prompt Config
         prompt_text = """
-        Eres un experto en caracterización y tratamiento de residuos industriales.
-        TU MISIÓN: Extraer TODAS Y CADA UNA de las filas de residuos de la tabla del PDF sin omitir ninguna.
-        REGLA DE ORO: Si hay 20 filas en el texto, debes generar 20 objetos JSON en el array 'records'. No agrupes ni resumas.
+        Eres un experto en valorización de residuos y economía circular.
+        TU MISIÓN: Extraer todas las filas de residuos del PDF y proponer rutas de VALORIZACIÓN (ganancia/reaprovechamiento).
+        REGLA DE ORO: Si hay 20 filas en el texto, genera 20 objetos JSON.
         SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "proceso_tratamiento": str, "viabilidad_ec": int}]}
-        IMPORTANTE: En 'proceso_tratamiento', describe brevemente el método técnico de tratamiento recomendado (ej: Incineración, Relleno de Seguridad, Reciclaje Mecánico, etc.).
+        IMPORTANTE: En 'proceso_tratamiento', describe una ruta de VALORIZACIÓN técnica para obtener valor del residuo (ej: Transformación en pellets, Recuperación energética, Refinado de metales, etc.). No te limites a 'Desechar'.
         """
 
         batch_analysis_schema = {

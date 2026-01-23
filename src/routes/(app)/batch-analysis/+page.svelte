@@ -167,7 +167,7 @@
               <th class="px-6 py-4 text-scientific-600">Material IA</th>
               <th class="px-6 py-4">Clasificación</th>
               <th class="px-6 py-4 text-right">Cantidad</th>
-              <th class="px-6 py-4">Proceso de Tratamiento</th>
+              <th class="px-6 py-4">Tratamiento para Valorización</th>
               <th class="px-6 py-4 text-center">Acciones</th>
             </tr>
           </thead>
