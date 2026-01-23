@@ -571,95 +571,101 @@ async def analyze_batch(file: UploadFile = File(...)):
         for i in range(0, total_pages, chunk_size):
             chunk_pages = reader.pages[i : i + chunk_size]
             extracted_text = ""
-            current_chunk_label = f"Pages {i+1}-{min(i+chunk_size, total_pages)}"
+            current_chunk_label = f"Page {i+1}"
             
             for page_idx, page in enumerate(chunk_pages):
-                text = page.extract_text() or ""
-                extracted_text += text + "\n"
-                print(f"DEBUG: Page {i + page_idx + 1} extracted length: {len(text)}")
+                extracted_text += (page.extract_text() or "") + "\n"
             
             if not extracted_text.strip():
                 print(f"DEBUG: Skipping {current_chunk_label} - No text found.")
                 continue
 
-            # NEW: Retry loop for each chunk
-            max_retries = 3
-            parsed_json = {"records": []}
-            success = False
+            # NEW: Micro-chunking logic. Split the page text by item numbers (e.g. 1, 2, 3...)
+            # We look for lines starting with a number followed by a space or tab.
+            import re
+            lines = extracted_text.split('\n')
+            item_blocks = []
+            current_block = []
+            items_in_block = 0
+            
+            for line in lines:
+                # Check if line starts with a number (Item #)
+                if re.match(r'^\s*\d+\s+', line):
+                    if items_in_block >= 10: # Block size of 10 items
+                        item_blocks.append("\n".join(current_block))
+                        current_block = [line]
+                        items_in_block = 1
+                    else:
+                        current_block.append(line)
+                        items_in_block += 1
+                else:
+                    current_block.append(line)
+            
+            if current_block:
+                item_blocks.append("\n".join(current_block))
 
-            for attempt in range(max_retries):
-                try:
-                    print(f"DEBUG: Processing {current_chunk_label} (Attempt {attempt+1}/{max_retries})")
-                    generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
+            print(f"DEBUG: {current_chunk_label} split into {len(item_blocks)} micro-chunks.")
 
-                    # Attempt 1: Strict Schema
-                    response = model.generate_content(
-                        generation_parts,
-                        generation_config=genai.types.GenerationConfig(
-                            response_mime_type="application/json",
-                            response_schema=batch_analysis_schema,
-                            max_output_tokens=8192
-                        )
-                    )
-                    
-                    # Check for safety blocks
-                    if not response.parts and not response.candidates:
-                         raise ValueError("Gemini blocked response (Safety/Other)")
+            for sub_idx, sub_text in enumerate(item_blocks):
+                max_retries = 3
+                parsed_json = {"records": []}
+                success = False
 
-                    result_text = get_response_text(response)
-                    cleaned_text = result_text.strip()
-                    if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
-                    if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
-                    if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
-
+                for attempt in range(max_retries):
                     try:
-                        parsed_json = json.loads(cleaned_text.strip())
-                    except json.JSONDecodeError:
-                        print(f"DEBUG: {current_chunk_label} JSON truncated. Repairing...")
-                        repaired_text = repair_truncated_json(cleaned_text)
-                        parsed_json = json.loads(repaired_text)
-                    
-                    success = True
-                    time.sleep(1) # Extra safety delay between successful page calls
-                    break # Exit retry loop on success
+                        print(f"DEBUG: {current_chunk_label} Sub-{sub_idx+1}/{len(item_blocks)} (Attempt {attempt+1})")
+                        generation_parts = [prompt_text, f"TEXTO DEL REPORTE (FRAGMENTO):\n{sub_text}"]
 
-                except Exception as e:
-                    error_str = str(e)
-                    print(f"DEBUG: Error in {current_chunk_label} (Attempt {attempt+1}): {error_str}")
-                    
-                    if "429" in error_str or "quota" in error_str.lower():
-                        wait_time = (attempt + 1) * 2
-                        print(f"DEBUG: Rate limit hit. Waiting {wait_time}s...")
-                        time.sleep(wait_time)
-                    elif attempt == max_retries - 1:
-                        print(f"DEBUG: Max retries reached for {current_chunk_label}. Skipping data.")
-                    else:
-                        time.sleep(1) # General small wait
-
-            # Consolidate results if we got anything
-            if success and "records" in parsed_json and isinstance(parsed_json["records"], list):
-                chunk_records = 0
-                for record in parsed_json["records"]:
-                    # Ensure default values
-                    record.setdefault("analysis_material_name", "Material no identificado")
-                    
-                    # Map 'proceso_tratamiento' to 'oportunidades_ec' (existing DB field)
-                    if "proceso_tratamiento" in record:
-                        record["oportunidades_ec"] = record.pop("proceso_tratamiento")
-                    else:
-                        record.setdefault("oportunidades_ec", "Tratamiento no especificado")
+                        response = model.generate_content(
+                            generation_parts,
+                            generation_config=genai.types.GenerationConfig(
+                                response_mime_type="application/json",
+                                response_schema=batch_analysis_schema,
+                                max_output_tokens=8192
+                            )
+                        )
                         
-                    record.setdefault("viabilidad_ec", 0)
-                    
-                    # Stringify for DB
-                    for field in ["analysis_physicochemical", "analysis_elemental", "analysis_engineering", "analysis_valorization"]:
-                        if field in record:
-                            record[field] = json.dumps(record[field])
-                    all_records.append(record)
-                    chunk_records += 1
-                print(f"DEBUG: Success for {current_chunk_label}. Records found: {chunk_records}")
+                        if not response.parts and not response.candidates:
+                             raise ValueError("Gemini blocked response")
 
-        print(f"DEBUG: Final Count: {len(all_records)} records from {total_pages} pages.")
+                        result_text = get_response_text(response)
+                        cleaned_text = result_text.strip()
+                        if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
+                        if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
+                        if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
+
+                        try:
+                            parsed_json = json.loads(cleaned_text.strip())
+                        except json.JSONDecodeError:
+                            repaired_text = repair_truncated_json(cleaned_text)
+                            parsed_json = json.loads(repaired_text)
+                        
+                        success = True
+                        time.sleep(0.5) # Small safety delay
+                        break
+
+                    except Exception as e:
+                        print(f"DEBUG: Error in {current_chunk_label} Sub-{sub_idx+1}: {str(e)}")
+                        if "429" in str(e) or "quota" in str(e).lower():
+                            time.sleep((attempt + 1) * 3)
+                        else:
+                            time.sleep(1)
+
+                if success and "records" in parsed_json and isinstance(parsed_json["records"], list):
+                    for record in parsed_json["records"]:
+                        record.setdefault("analysis_material_name", "Material no identificado")
+                        if "proceso_tratamiento" in record:
+                            record["oportunidades_ec"] = record.pop("proceso_tratamiento")
+                        else:
+                            record.setdefault("oportunidades_ec", "Tratamiento no especificado")
+                        record.setdefault("viabilidad_ec", 0)
+                        
+                        for field in ["analysis_physicochemical", "analysis_elemental", "analysis_engineering", "analysis_valorization"]:
+                            if field in record:
+                                record[field] = json.dumps(record[field])
+                        all_records.append(record)
+
+        print(f"DEBUG: Final Count: {len(all_records)} records.")
         return {"records": all_records}
 
     except Exception as e:
