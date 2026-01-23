@@ -591,13 +591,14 @@ async def analyze_batch(file: UploadFile = File(...)):
                             "oportunidades_ec": {"type": "STRING"},
                             "viabilidad_ec": {"type": "NUMBER"}
                         },
-                        "required": ["tipo_residuo", "codigo_basilea", "peso_total", "analysis_material_name", "oportunidades_ec", "viabilidad_ec"]
+                        "required": ["tipo_residuo", "peso_total"] # Relaxed requirements
                     }
                 }
             },
             "required": ["records"]
         }
 
+        schema_error = None
         try:
             print("Attempting Strict Schema Generation...")
             response = model.generate_content(
@@ -609,6 +610,10 @@ async def analyze_batch(file: UploadFile = File(...)):
                 )
             )
             
+            # Check for safety blocks or empty responses
+            if not response.parts:
+                 raise ValueError(f"Gemini blocked response. Finish Reason: {response.candidates[0].finish_reason if response.candidates else 'Unknown'}")
+
             result_text = response.text
             # response_schema guarantees valid JSON, so strictly load it.
             # However, sometimes it wraps in a code block or has whitespace.
@@ -620,20 +625,26 @@ async def analyze_batch(file: UploadFile = File(...)):
             parsed_json = json.loads(cleaned_text.strip())
 
         except Exception as e:
-            print(f"Schema Generation Failed: {str(e)}. Fallback to Standard Generation + Regex Cleaning.")
+            schema_error = str(e)
+            print(f"Schema Generation Failed: {schema_error}. Fallback to Standard Generation + Regex Cleaning.")
             
-            # Fallback to standard generation
-            response = model.generate_content(
-                generation_parts,
-                generation_config=genai.types.GenerationConfig(
-                    response_mime_type="application/json",
-                    max_output_tokens=8192
+            try:
+                # Fallback to standard generation
+                response = model.generate_content(
+                    generation_parts,
+                    generation_config=genai.types.GenerationConfig(
+                        response_mime_type="application/json",
+                        max_output_tokens=8192
+                    )
                 )
-            )
-            
-            result_text = response.text
-            cleaned_text = clean_json_response(result_text)
-            parsed_json = json.loads(cleaned_text)
+                
+                result_text = response.text
+                cleaned_text = clean_json_response(result_text)
+                parsed_json = json.loads(cleaned_text)
+            except Exception as fallback_e:
+                error_msg = f"Analysis Failed. Strict Error: {schema_error}. Fallback Error: {str(fallback_e)}"
+                print(error_msg)
+                raise HTTPException(status_code=500, detail=error_msg)
 
         # Post-process: Stringify complex fields for the DB
         if "records" in parsed_json and isinstance(parsed_json["records"], list):
