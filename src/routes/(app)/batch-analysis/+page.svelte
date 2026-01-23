@@ -175,12 +175,12 @@
             {#each records as rec, i}
               <tr class="group hover:bg-gray-50/50 transition-colors">
                 <td class="px-6 py-4">
-                  <div class="font-bold text-gray-900 leading-tight">{rec.razon_social}</div>
-                  <div class="text-[10px] text-gray-400 uppercase font-medium">{rec.planta} - {rec.departamento}</div>
+                  <div class="font-bold text-gray-900 leading-tight">{rec.razon_social ?? 'No especificado'}</div>
+                  <div class="text-[10px] text-gray-400 uppercase font-medium">{rec.planta ?? '---'} - {rec.departamento ?? '---'}</div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="font-medium text-gray-700">{rec.caracteristica}</div>
-                  <div class="text-[10px] font-bold text-gray-400 bg-gray-50 inline-block px-1.5 rounded uppercase mt-0.5">{rec.codigo_basilea}</div>
+                  <div class="font-medium text-gray-700">{rec.caracteristica ?? 'Sin descripción'}</div>
+                  <div class="text-[10px] font-bold text-gray-400 bg-gray-50 inline-block px-1.5 rounded uppercase mt-0.5">{rec.codigo_basilea ?? 'N/A'}</div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="font-black text-scientific-700 leading-tight uppercase text-xs">{rec.analysis_material_name || 'Pendiente'}</div>
@@ -195,9 +195,9 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 text-right">
-                  <div class="font-black text-gray-900">{rec.cantidad.toLocaleString()}</div>
-                  <div class="text-[10px] text-gray-400 font-bold uppercase">{rec.unidad_medida}</div>
-                  <div class="text-[9px] text-scientific-600 font-medium italic">({rec.peso_total} kg)</div>
+                  <div class="font-black text-gray-900">{rec.cantidad?.toLocaleString() ?? '0'}</div>
+                  <div class="text-[10px] text-gray-400 font-bold uppercase">{rec.unidad_medida ?? 'UNID'}</div>
+                  <div class="text-[9px] text-scientific-600 font-medium italic">({rec.peso_total ?? 0} kg)</div>
                 </td>
                 <td class="px-6 py-4">
                   {#if rec.oportunidades_ec}
