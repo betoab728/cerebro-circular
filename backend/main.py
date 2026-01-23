@@ -507,36 +507,21 @@ async def predictive_analysis(
         print(f"Predictive Analysis Failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Analysis Failed: {str(e)}")
 
-@app.post("/analyze-batch")
-async def analyze_batch(file: UploadFile = File(...)):
-    print(f"Processing Batch PDF: {file.filename}")
-    
-    if not os.getenv("GOOGLE_API_KEY"):
-         raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not configured on server.")
-
+@app.post("/extract-rows")
+async def extract_rows(file: UploadFile = File(...)):
+    print(f"Extracting Skeleton Rows from PDF: {file.filename}")
     content = await file.read()
     
     try:
-        # Read PDF and Split into Chunks (e.g., 4 pages at a time)
         pdf_file = io.BytesIO(content)
         reader = pypdf.PdfReader(pdf_file)
-        all_records = []
-        chunk_size = 1  # Process 1 page at a time for maximum accuracy and token space
+        all_skeletons = []
+        
+        # We can process more pages at once for extraction as it's less token-heavy
+        chunk_size = 2 
         total_pages = len(reader.pages)
-        print(f"DEBUG: Total PDF Pages: {total_pages}")
-
-        # Common Prompt Config
-        prompt_text = """
-        Eres un experto en ingeniería ambiental y economía circular.
-        TU MISIÓN: Extraer TODAS las filas del PDF. El documento incluye una COLUMNA DE NUMERACIÓN (Item #). 
-        REGLA DE ORO: No te saltes ningún número correlativo.
-        SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "proceso_valorizacion": str, "proceso_reclasificacion": str, "viabilidad_ec": int}]}
-        IMPORTANTE: 
-        1. 'proceso_valorizacion': Describe una ruta técnica para obtener valor/ganancia del residuo.
-        2. 'proceso_reclasificacion': Describe los pasos técnicos (neutralización, lavado, etc.) para que el residuo deje de ser peligroso.
-        """
-
-        batch_analysis_schema = {
+        
+        extract_schema = {
             "type": "OBJECT",
             "properties": {
                 "records": {
@@ -544,14 +529,77 @@ async def analyze_batch(file: UploadFile = File(...)):
                     "items": {
                         "type": "OBJECT",
                         "properties": {
+                            "item_num": {"type": "NUMBER"},
                             "razon_social": {"type": "STRING"},
-                            "planta": {"type": "STRING"},
-                            "departamento": {"type": "STRING"},
                             "tipo_residuo": {"type": "STRING"},
-                            "codigo_basilea": {"type": "STRING"},
-                            "caracteristica": {"type": "STRING"},
                             "cantidad": {"type": "NUMBER"},
                             "unidad_medida": {"type": "STRING"},
+                            "peso_total": {"type": "NUMBER"}
+                        },
+                        "required": ["tipo_residuo", "peso_total"]
+                    }
+                }
+            },
+            "required": ["records"]
+        }
+
+        extract_prompt = """
+        Extrae los datos básicos de TODAS las filas del PDF. 
+        Solo necesitamos el esqueleto (Skeleton) de la tabla.
+        IMPORTANTE: No te saltes ningún item. Si hay 153 items, debes extraer los 153.
+        """
+
+        for i in range(0, total_pages, chunk_size):
+            chunk_pages = reader.pages[i : i + chunk_size]
+            extracted_text = ""
+            for page in chunk_pages:
+                extracted_text += (page.extract_text() or "") + "\n"
+            
+            if not extracted_text.strip(): continue
+
+            response = model.generate_content(
+                [extract_prompt, extracted_text],
+                generation_config=genai.types.GenerationConfig(
+                    response_mime_type="application/json",
+                    response_schema=extract_schema
+                )
+            )
+            
+            result_text = get_response_text(response)
+            try:
+                parsed = json.loads(result_text)
+            except:
+                parsed = json.loads(repair_truncated_json(result_text))
+            
+            if "records" in parsed:
+                all_skeletons.extend(parsed["records"])
+        
+        return {"records": all_skeletons}
+
+    except Exception as e:
+        print(f"Extraction Failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Extraction Failed: {str(e)}")
+
+@app.post("/characterize-rows")
+async def characterize_rows(batch: list[dict]):
+    """
+    Perform deep characterization on a small batch of records.
+    Input: List of skeleton records (dict).
+    Output: List of fully enriched records.
+    """
+    try:
+        char_schema = {
+            "type": "OBJECT",
+            "properties": {
+                "records": {
+                    "type": "ARRAY",
+                    "items": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "item_num": {"type": "NUMBER"},
+                            "razon_social": {"type": "STRING"},
+                            "tipo_residuo": {"type": "STRING"},
+                            "codigo_basilea": {"type": "STRING"},
                             "peso_total": {"type": "NUMBER"},
                             "analysis_material_name": {"type": "STRING"},
                             "analysis_physicochemical": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"name": {"type": "STRING"}, "value": {"type": "STRING"}, "method": {"type": "STRING"}}}},
@@ -561,120 +609,50 @@ async def analyze_batch(file: UploadFile = File(...)):
                             "proceso_valorizacion": {"type": "STRING"},
                             "proceso_reclasificacion": {"type": "STRING"},
                             "viabilidad_ec": {"type": "NUMBER"}
-                        },
-                        "required": ["tipo_residuo", "peso_total"]
+                        }
                     }
                 }
             },
             "required": ["records"]
         }
 
-        import time
+        prompt = """
+        Eres un experto en ingeniería ambiental. Caracteriza técnicamente estos residuos.
+        'proceso_valorizacion': Ruta técnica detallada para ganar dinero/valor con el residuo.
+        'proceso_reclasificacion': Pasos técnicos (lavado, neutralización) para que no sea peligroso.
+        MANTEN EL MISMO 'item_num' para cada registro.
+        """
 
-        for i in range(0, total_pages, chunk_size):
-            chunk_pages = reader.pages[i : i + chunk_size]
-            extracted_text = ""
-            current_chunk_label = f"Page {i+1}"
-            
-            for page_idx, page in enumerate(chunk_pages):
-                extracted_text += (page.extract_text() or "") + "\n"
-            
-            if not extracted_text.strip():
-                print(f"DEBUG: Skipping {current_chunk_label} - No text found.")
-                continue
-
-            # NEW: Micro-chunking logic. Split the page text by item numbers (e.g. 1, 2, 3...)
-            # We look for lines starting with a number followed by a space or tab.
-            import re
-            lines = extracted_text.split('\n')
-            item_blocks = []
-            current_block = []
-            items_in_block = 0
-            
-            for line in lines:
-                # Check if line starts with a number (Item #)
-                if re.match(r'^\s*\d+\s+', line):
-                    if items_in_block >= 10: # Block size of 10 items
-                        item_blocks.append("\n".join(current_block))
-                        current_block = [line]
-                        items_in_block = 1
-                    else:
-                        current_block.append(line)
-                        items_in_block += 1
-                else:
-                    current_block.append(line)
-            
-            if current_block:
-                item_blocks.append("\n".join(current_block))
-
-            print(f"DEBUG: {current_chunk_label} split into {len(item_blocks)} micro-chunks.")
-
-            for sub_idx, sub_text in enumerate(item_blocks):
-                max_retries = 3
-                parsed_json = {"records": []}
-                success = False
-
-                for attempt in range(max_retries):
-                    try:
-                        print(f"DEBUG: {current_chunk_label} Sub-{sub_idx+1}/{len(item_blocks)} (Attempt {attempt+1})")
-                        generation_parts = [prompt_text, f"TEXTO DEL REPORTE (FRAGMENTO):\n{sub_text}"]
-
-                        response = model.generate_content(
-                            generation_parts,
-                            generation_config=genai.types.GenerationConfig(
-                                response_mime_type="application/json",
-                                response_schema=batch_analysis_schema,
-                                max_output_tokens=8192
-                            )
-                        )
-                        
-                        if not response.parts and not response.candidates:
-                             raise ValueError("Gemini blocked response")
-
-                        result_text = get_response_text(response)
-                        cleaned_text = result_text.strip()
-                        if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
-                        if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
-                        if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
-
-                        try:
-                            parsed_json = json.loads(cleaned_text.strip())
-                        except json.JSONDecodeError:
-                            repaired_text = repair_truncated_json(cleaned_text)
-                            parsed_json = json.loads(repaired_text)
-                        
-                        success = True
-                        time.sleep(0.5) # Small safety delay
-                        break
-
-                    except Exception as e:
-                        print(f"DEBUG: Error in {current_chunk_label} Sub-{sub_idx+1}: {str(e)}")
-                        if "429" in str(e) or "quota" in str(e).lower():
-                            time.sleep((attempt + 1) * 3)
-                        else:
-                            time.sleep(1)
-
-                if success and "records" in parsed_json and isinstance(parsed_json["records"], list):
-                    for record in parsed_json["records"]:
-                        record.setdefault("analysis_material_name", "Material no identificado")
-                        
-                        # Map fields to DB
-                        record["oportunidades_ec"] = record.pop("proceso_valorizacion", "No especificado")
-                        record["recla_no_peligroso"] = record.pop("proceso_reclasificacion", "No aplica")
-                        
-                        record.setdefault("viabilidad_ec", 0)
-                        
-                        for field in ["analysis_physicochemical", "analysis_elemental", "analysis_engineering", "analysis_valorization"]:
-                            if field in record:
-                                record[field] = json.dumps(record[field])
-                        all_records.append(record)
-
-        print(f"DEBUG: Final Count: {len(all_records)} records.")
-        return {"records": all_records}
+        input_data = json.dumps(batch)
+        response = model.generate_content(
+            [prompt, f"REGISTROS A CARACTERIZAR:\n{input_data}"],
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json",
+                response_schema=char_schema
+            )
+        )
+        
+        result_text = get_response_text(response)
+        parsed = json.loads(result_text)
+        
+        enriched_records = []
+        if "records" in parsed:
+            for record in parsed["records"]:
+                # Map fields to DB format
+                record["oportunidades_ec"] = record.pop("proceso_valorizacion", "No especificado")
+                record["recla_no_peligroso"] = record.pop("proceso_reclasificacion", "No aplica")
+                record.setdefault("analysis_material_name", "Material no identificado")
+                
+                for field in ["analysis_physicochemical", "analysis_elemental", "analysis_engineering", "analysis_valorization"]:
+                    if field in record:
+                        record[field] = json.dumps(record[field])
+                enriched_records.append(record)
+        
+        return {"records": enriched_records}
 
     except Exception as e:
-        print(f"Batch Analysis CRITICAL Failure: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Batch Analysis Failed: {str(e)}")
+        print(f"Characterization Failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Characterization Failed: {str(e)}")
 
 @app.post("/save-batch")
 async def save_batch(records: list[Residuo], session: Session = Depends(waste.get_session)):

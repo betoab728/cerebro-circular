@@ -27,24 +27,68 @@
     successMessage = '';
 
     try {
+      // PHASE 1: Rapid Skeleton Extraction
       const data = new FormData();
       data.append('file', file);
 
-      const response = await fetch(`${API_BASE_URL}/analyze-batch`, {
+      const extractResponse = await fetch(`${API_BASE_URL}/extract-rows`, {
         method: 'POST',
         body: data
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.detail || 'Error en el análisis masivo');
+      if (!extractResponse.ok) {
+        const err = await extractResponse.json();
+        throw new Error(err.detail || 'Error en la extracción de filas');
       }
 
-      const result = await response.json();
-      records = result.records || [];
+      const extractResult = await extractResponse.json();
+      records = (extractResult.records || []).map(r => ({
+        ...r,
+        _isCharacterizing: true, // Internal flag to show loading state in individual rows
+        oportunidades_ec: 'Analizando...',
+        recla_no_peligroso: 'Analizando...'
+      }));
+      
+      isAnalyzing = false; // Hide global spinner, show table
+
+      // PHASE 2: Iterative Deep Characterization
+      const chunkSize = 5;
+      for (let i = 0; i < records.length; i += chunkSize) {
+        const chunk = records.slice(i, i + chunkSize);
+        
+        try {
+          const charResponse = await fetch(`${API_BASE_URL}/characterize-rows`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(chunk)
+          });
+
+          if (charResponse.ok) {
+            const charResult = await charResponse.json();
+            const enriched = charResult.records || [];
+            
+            // Update the records reactively
+            records = records.map(r => {
+              const matched = enriched.find(e => e.item_num === r.item_num);
+              if (matched) {
+                return { ...matched, _isCharacterizing: false };
+              }
+              return r;
+            });
+          }
+        } catch (charErr) {
+          console.error(`Error characterizing chunk ${i}:`, charErr);
+          // We don't stop the whole process if one chunk fails
+          records = records.map((r, idx) => {
+             if (idx >= i && idx < i + chunkSize) {
+               return { ...r, _isCharacterizing: false, oportunidades_ec: 'Error', recla_no_peligroso: 'Error' };
+             }
+             return r;
+          });
+        }
+      }
     } catch (err) {
       errorMessage = err.message;
-    } finally {
       isAnalyzing = false;
     }
   }
