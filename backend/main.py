@@ -526,18 +526,96 @@ async def analyze_batch(file: UploadFile = File(...)):
 
         generation_parts = [prompt_text, f"TEXTO DEL REPORTE:\n{extracted_text}"]
 
+        # Define Schema for Strict JSON Output
+        batch_analysis_schema = {
+            "type": "OBJECT",
+            "properties": {
+                "records": {
+                    "type": "ARRAY",
+                    "items": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "razon_social": {"type": "STRING"},
+                            "planta": {"type": "STRING"},
+                            "departamento": {"type": "STRING"},
+                            "tipo_residuo": {"type": "STRING"},
+                            "codigo_basilea": {"type": "STRING"},
+                            "caracteristica": {"type": "STRING"},
+                            "cantidad": {"type": "NUMBER"},
+                            "unidad_medida": {"type": "STRING"},
+                            "peso_total": {"type": "NUMBER"},
+                            "analysis_material_name": {"type": "STRING"},
+                            "analysis_physicochemical": {
+                                "type": "ARRAY",
+                                "items": {
+                                    "type": "OBJECT",
+                                    "properties": {
+                                        "name": {"type": "STRING"},
+                                        "value": {"type": "STRING"},
+                                        "method": {"type": "STRING"}
+                                    }
+                                }
+                            },
+                            "analysis_elemental": {
+                                "type": "ARRAY",
+                                "items": {
+                                    "type": "OBJECT",
+                                    "properties": {
+                                        "label": {"type": "STRING"},
+                                        "value": {"type": "NUMBER"},
+                                        "description": {"type": "STRING"},
+                                        "trace": {"type": "BOOLEAN"}
+                                    }
+                                }
+                            },
+                            "analysis_engineering": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "structure": {"type": "STRING"},
+                                    "processability": {"type": "STRING"},
+                                    "impurities": {"type": "STRING"}
+                                }
+                            },
+                            "analysis_valorization": {
+                                "type": "ARRAY",
+                                "items": {
+                                    "type": "OBJECT",
+                                    "properties": {
+                                        "role": {"type": "STRING"},
+                                        "method": {"type": "STRING"},
+                                        "output": {"type": "STRING"},
+                                        "score": {"type": "NUMBER"}
+                                    }
+                                }
+                            },
+                            "oportunidades_ec": {"type": "STRING"},
+                            "viabilidad_ec": {"type": "NUMBER"}
+                        },
+                        "required": ["tipo_residuo", "codigo_basilea", "peso_total", "analysis_material_name", "oportunidades_ec", "viabilidad_ec"]
+                    }
+                }
+            },
+            "required": ["records"]
+        }
+
         response = model.generate_content(
             generation_parts,
             generation_config=genai.types.GenerationConfig(
                 response_mime_type="application/json",
+                response_schema=batch_analysis_schema,
                 max_output_tokens=8192
             )
         )
         
         result_text = response.text
-        cleaned_text = clean_json_response(result_text)
+        # response_schema guarantees valid JSON, so strictly load it.
+        # However, sometimes it wraps in a code block or has whitespace.
+        cleaned_text = result_text.strip() 
+        if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
+        if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
+        if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
 
-        parsed_json = json.loads(cleaned_text)
+        parsed_json = json.loads(cleaned_text.strip())
 
         # Post-process: Stringify complex fields for the DB
         if "records" in parsed_json and isinstance(parsed_json["records"], list):
