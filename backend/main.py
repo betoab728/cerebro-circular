@@ -598,24 +598,42 @@ async def analyze_batch(file: UploadFile = File(...)):
             "required": ["records"]
         }
 
-        response = model.generate_content(
-            generation_parts,
-            generation_config=genai.types.GenerationConfig(
-                response_mime_type="application/json",
-                response_schema=batch_analysis_schema,
-                max_output_tokens=8192
+        try:
+            print("Attempting Strict Schema Generation...")
+            response = model.generate_content(
+                generation_parts,
+                generation_config=genai.types.GenerationConfig(
+                    response_mime_type="application/json",
+                    response_schema=batch_analysis_schema,
+                    max_output_tokens=8192
+                )
             )
-        )
-        
-        result_text = response.text
-        # response_schema guarantees valid JSON, so strictly load it.
-        # However, sometimes it wraps in a code block or has whitespace.
-        cleaned_text = result_text.strip() 
-        if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
-        if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
-        if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
+            
+            result_text = response.text
+            # response_schema guarantees valid JSON, so strictly load it.
+            # However, sometimes it wraps in a code block or has whitespace.
+            cleaned_text = result_text.strip() 
+            if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
+            if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
+            if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
 
-        parsed_json = json.loads(cleaned_text.strip())
+            parsed_json = json.loads(cleaned_text.strip())
+
+        except Exception as e:
+            print(f"Schema Generation Failed: {str(e)}. Fallback to Standard Generation + Regex Cleaning.")
+            
+            # Fallback to standard generation
+            response = model.generate_content(
+                generation_parts,
+                generation_config=genai.types.GenerationConfig(
+                    response_mime_type="application/json",
+                    max_output_tokens=8192
+                )
+            )
+            
+            result_text = response.text
+            cleaned_text = clean_json_response(result_text)
+            parsed_json = json.loads(cleaned_text)
 
         # Post-process: Stringify complex fields for the DB
         if "records" in parsed_json and isinstance(parsed_json["records"], list):
