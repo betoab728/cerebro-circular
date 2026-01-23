@@ -1,20 +1,16 @@
 import json
-from sqlmodel import Session, create_engine, select
+from sqlmodel import Session, select
 from models import BaselCatalog
+from database import engine
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
-engine = create_engine(DATABASE_URL)
 
 def populate():
     # Ensure table exists
     from sqlmodel import SQLModel
     SQLModel.metadata.create_all(engine)
     
-    with open("backend/basel_catalog.json", "r", encoding="utf-8") as f:
+    json_path = os.path.join(os.path.dirname(__file__), "basel_catalog.json")
+    with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     
     with Session(engine) as session:

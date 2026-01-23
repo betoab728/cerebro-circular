@@ -83,6 +83,7 @@ class PredictiveRegistration(SQLModel, table=True):
 
 # Analysis Models
 class BaselCatalog(SQLModel, table=True):
+    __tablename__ = "codigo_basilea"
     id: int | None = Field(default=None, primary_key=True)
     codigo: str = Field(index=True, unique=True)
     descripcion: str = Field(sa_column=Column(Text))

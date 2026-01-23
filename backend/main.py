@@ -210,13 +210,16 @@ async def analyze_waste(
         # 2. Search Basel Catalog
         potential_codes = []
         with Session(engine) as session:
-            # Search by name or description
+            # Search by name or description using SQL ILIKE if possible, or simple filter
             words = material_name.split()
             keywords = [w for w in words if len(w) > 3]
-            query = select(BaselCatalog)
             
-            # Simple keyword search
-            catalog_items = session.exec(query).all()
+            # For simplicity and cross-DB compatibility, we can still do some filtering in Python 
+            # but let's at least try to be more efficient.
+            # Actually, with 124 rows, the issue isn't the data size, it's the connection stability.
+            # I'll add a retry logic if needed, but pool_pre_ping should help.
+            
+            catalog_items = session.exec(select(BaselCatalog)).all()
             scored_items = []
             for item in catalog_items:
                 score = 0
@@ -510,14 +513,3 @@ async def save_batch(records: list[Residuo], session: Session = Depends(waste.ge
         print(f"Save Batch Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to save batch: {str(e)}")
 
-async def get_report(data: AnalysisResult):
-    try:
-        pdf_buffer = generate_pdf_report(data)
-        return StreamingResponse(
-            pdf_buffer, 
-            media_type="application/pdf", 
-            headers={"Content-Disposition": f"attachment; filename=technical_report_{data.materialName}.pdf"}
-        )
-    except Exception as e:
-        print(f"Report Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Report Generation Failed: {str(e)}")

@@ -14,7 +14,7 @@ if database_url:
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     
-    engine = create_engine(database_url, echo=True)
+    engine = create_engine(database_url, echo=True, pool_pre_ping=True)
     print(f"--- DATABASE CONNECTION: POSTGRESQL ({database_url.split('@')[0]}...) ---")
 else:
     # Local SQLite connection
