@@ -528,10 +528,10 @@ async def analyze_batch(file: UploadFile = File(...)):
         # Common Prompt Config
         prompt_text = """
         Eres un experto en valorización de residuos y economía circular.
-        TU MISIÓN: Extraer todas las filas de residuos del PDF y proponer rutas de VALORIZACIÓN (ganancia/reaprovechamiento).
-        REGLA DE ORO: Si hay 20 filas en el texto, genera 20 objetos JSON.
+        TU MISIÓN: Extraer TODAS las filas del PDF. El documento incluye una COLUMNA DE NUMERACIÓN (Item #). 
+        REGLA DE ORO: No te saltes ningún número correlativo. Si la página tiene del ítem 1 al 20, debes generar exactamente 20 objetos JSON en el array 'records'.
         SCHEMA: {"records": [{"razon_social": str, "planta": str, "departamento": str, "tipo_residuo": str, "codigo_basilea": str, "caracteristica": str, "cantidad": float, "unidad_medida": str, "peso_total": float, "analysis_material_name": str, "analysis_physicochemical": list, "analysis_elemental": list, "analysis_engineering": dict, "analysis_valorization": list, "proceso_tratamiento": str, "viabilidad_ec": int}]}
-        IMPORTANTE: En 'proceso_tratamiento', describe una ruta de VALORIZACIÓN técnica para obtener valor del residuo (ej: Transformación en pellets, Recuperación energética, Refinado de metales, etc.). No te limites a 'Desechar'.
+        IMPORTANTE: Usa la numeración para asegurar que tu lista sea completa. En 'proceso_tratamiento', propone rutas de VALORIZACIÓN técnica.
         """
 
         batch_analysis_schema = {
@@ -620,6 +620,7 @@ async def analyze_batch(file: UploadFile = File(...)):
                         parsed_json = json.loads(repaired_text)
                     
                     success = True
+                    time.sleep(1) # Extra safety delay between successful page calls
                     break # Exit retry loop on success
 
                 except Exception as e:
