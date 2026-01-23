@@ -521,8 +521,9 @@ async def analyze_batch(file: UploadFile = File(...)):
         pdf_file = io.BytesIO(content)
         reader = pypdf.PdfReader(pdf_file)
         all_records = []
-        chunk_size = 4  # Process 4 pages at a time
+        chunk_size = 2  # Process 2 pages at a time to be safer
         total_pages = len(reader.pages)
+        print(f"DEBUG: Total PDF Pages: {total_pages}")
 
         # Common Prompt Config
         prompt_text = """
@@ -567,8 +568,10 @@ async def analyze_batch(file: UploadFile = File(...)):
         for i in range(0, total_pages, chunk_size):
             chunk_pages = reader.pages[i : i + chunk_size]
             extracted_text = ""
-            for page in chunk_pages:
-                extracted_text += page.extract_text() + "\n"
+            for page_idx, page in enumerate(chunk_pages):
+                text = page.extract_text() or ""
+                extracted_text += text + "\n"
+                print(f"DEBUG: Page {i + page_idx + 1} extracted length: {len(text)}")
             
             if not extracted_text.strip():
                 continue
@@ -635,7 +638,10 @@ async def analyze_batch(file: UploadFile = File(...)):
                         if field in record:
                             record[field] = json.dumps(record[field])
                     all_records.append(record)
+                
+                print(f"DEBUG: Chunk Success. Records found in this chunk: {len(parsed_json['records'])}")
 
+        print(f"DEBUG: Analysis Complete. Total records found: {len(all_records)}")
         return {"records": all_records}
 
     except Exception as e:
