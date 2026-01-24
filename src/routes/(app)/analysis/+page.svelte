@@ -330,15 +330,13 @@
 
 <!-- Upload Modal -->
 <Modal isOpen={showModal} title={uploadOptions.find(o => o.id === currentUploadType)?.title || 'Cargar Archivo'} onClose={() => showModal = false}>
-  <div 
-    class="border-2 border-dashed rounded-xl h-48 flex flex-col items-center justify-center transition-all duration-200 cursor-pointer
+  <label 
+    for="fileInput"
+    class="border-2 border-dashed rounded-xl h-48 flex flex-col items-center justify-center transition-all duration-200 cursor-pointer block
     {dragging ? 'border-scientific-500 bg-scientific-50' : 'border-gray-300 hover:border-scientific-400 hover:bg-gray-50'}"
-    role="button"
-    tabindex="0"
     on:drop={handleDrop}
     on:dragover={(e) => { e.preventDefault(); dragging = true; }}
     on:dragleave={() => dragging = false}
-    on:click={() => document.getElementById('fileInput')?.click()}
   >
     <input 
       type="file" 
@@ -364,6 +362,6 @@
         <p class="text-xs text-scientific-500 mt-2 font-medium">Compatible: {uploadOptions.find(o => o.id === currentUploadType)?.accept}</p>
       </div>
     {/if}
-  </div>
+  </label>
 </Modal>
 

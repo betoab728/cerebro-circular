@@ -349,10 +349,10 @@
 </div>
 
 <Modal isOpen={showModal} title="Cargar para Análisis" onClose={() => showModal = false}>
-  <div class="p-8 border-2 border-dashed border-gray-200 rounded-xl text-center hover:border-scientific-400 transition-colors cursor-pointer" on:click={() => document.getElementById('fileIn')?.click()}>
+  <label for="fileIn" class="block p-8 border-2 border-dashed border-gray-200 rounded-xl text-center hover:border-scientific-400 transition-colors cursor-pointer">
     <input type="file" id="fileIn" class="hidden" accept={uploadOptions.find(o => o.id === currentUploadType)?.accept} on:change={handleFileSelect} />
     <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
     <p class="text-sm font-bold text-gray-700">Selecciona o arrastra el archivo</p>
     <p class="text-xs text-gray-400 mt-1">El análisis se iniciará automáticamente al cargar.</p>
-  </div>
+  </label>
 </Modal>
