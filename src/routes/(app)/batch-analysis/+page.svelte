@@ -10,6 +10,7 @@
   let file: File | null = $state(null);
   let successMessage = $state('');
   let errorMessage = $state('');
+  let unidadMinera = $state('');
 
   async function handleFileUpload(e: Event) {
     const input = e.target as HTMLInputElement;
@@ -42,6 +43,7 @@
       }
 
       const extractResult = await extractResponse.json();
+      unidadMinera = extractResult.unidad_minera || 'UNIDAD MINERA NO DETECTADA';
       records = (extractResult.records || []).map(r => ({
         ...r,
         _isCharacterizing: true, // Internal flag to show loading state in individual rows
@@ -205,6 +207,13 @@
       <div class="overflow-x-auto bg-white rounded-2xl border border-gray-100 shadow-sm">
         <table class="w-full text-left text-sm min-w-[1200px]">
           <thead>
+            {#if unidadMinera}
+              <tr class="bg-scientific-600 text-white font-black text-xs uppercase tracking-widest text-center border-b border-scientific-700">
+                <th colspan="9" class="px-6 py-4">
+                  {unidadMinera}
+                </th>
+              </tr>
+            {/if}
             <tr class="bg-gray-50/50 text-gray-400 font-bold text-[10px] uppercase tracking-widest border-b border-gray-100">
               <th class="px-6 py-4 text-center">N</th>
               <th class="px-6 py-4">Clasificación</th>

@@ -524,6 +524,7 @@ async def extract_rows(file: UploadFile = File(...)):
         extract_schema = {
             "type": "OBJECT",
             "properties": {
+                "unidad_minera": {"type": "STRING"},
                 "records": {
                     "type": "ARRAY",
                     "items": {
@@ -531,10 +532,13 @@ async def extract_rows(file: UploadFile = File(...)):
                         "properties": {
                             "item_num": {"type": "NUMBER"},
                             "razon_social": {"type": "STRING"},
+                            "planta": {"type": "STRING"},
+                            "departamento": {"type": "STRING"},
                             "tipo_residuo": {"type": "STRING"},
                             "cantidad": {"type": "NUMBER"},
                             "unidad_medida": {"type": "STRING"},
-                            "peso_total": {"type": "NUMBER"}
+                            "peso_total": {"type": "NUMBER"},
+                            "caracteristica": {"type": "STRING"}
                         },
                         "required": ["tipo_residuo", "peso_total"]
                     }
@@ -546,9 +550,11 @@ async def extract_rows(file: UploadFile = File(...)):
         extract_prompt = """
         Extrae los datos básicos de TODAS las filas del PDF. 
         Solo necesitamos el esqueleto (Skeleton) de la tabla.
-        IMPORTANTE: No te saltes ningún item. Si hay 153 items, debes extraer los 153.
+        IMPORTANTE: Identifica la 'unidad_minera' de la cabecera del reporte (ej: 'UNIDAD MINERA BUENAVENTURA').
+        No te saltes ningún item. Si hay 153 items, debes extraer los 153.
         """
 
+        unidad_minera_found = "No detectada"
         for i in range(0, total_pages, chunk_size):
             chunk_pages = reader.pages[i : i + chunk_size]
             extracted_text = ""
@@ -573,8 +579,15 @@ async def extract_rows(file: UploadFile = File(...)):
             
             if "records" in parsed:
                 all_skeletons.extend(parsed["records"])
+            
+            # Use the first valid unit found
+            if "unidad_minera" in parsed and parsed["unidad_minera"] and unidad_minera_found == "No detectada":
+                unidad_minera_found = parsed["unidad_minera"]
         
-        return {"records": all_skeletons}
+        return {
+            "unidad_minera": unidad_minera_found,
+            "records": all_skeletons
+        }
 
     except Exception as e:
         print(f"Extraction Failed: {str(e)}")
