@@ -538,7 +538,8 @@ async def extract_rows(file: UploadFile = File(...)):
                             "cantidad": {"type": "NUMBER"},
                             "unidad_medida": {"type": "STRING"},
                             "peso_total": {"type": "NUMBER"},
-                            "caracteristica": {"type": "STRING"}
+                            "caracteristica": {"type": "STRING"},
+                            "codigo_basilea": {"type": "STRING"}
                         },
                         "required": ["tipo_residuo", "peso_total"]
                     }
@@ -550,8 +551,11 @@ async def extract_rows(file: UploadFile = File(...)):
         extract_prompt = """
         Extrae los datos básicos de TODAS las filas del PDF. 
         Solo necesitamos el esqueleto (Skeleton) de la tabla.
-        IMPORTANTE: Identifica la 'unidad_minera' de la cabecera del reporte (ej: 'UNIDAD MINERA BUENAVENTURA').
-        No te saltes ningún item. Si hay 153 items, debes extraer los 153.
+        IMPORTANTE: 
+        1. Identifica la 'unidad_minera' de la cabecera del reporte (ej: 'UNIDAD MINERA BUENAVENTURA').
+        2. Para cada fila, extrae la descripción del residuo en el campo 'caracteristica'.
+        3. Extrae el peso total numérico en 'peso_total' (asegúrate de que sea un número puro).
+        4. No te saltes ningún item. Si hay 153 items, debes extraer los 153.
         """
 
         unidad_minera_found = "No detectada"

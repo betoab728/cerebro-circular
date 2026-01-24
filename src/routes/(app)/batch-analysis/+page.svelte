@@ -69,11 +69,11 @@
             const charResult = await charResponse.json();
             const enriched = charResult.records || [];
             
-            // Update the records reactively
+            // Update the records reactively (MERGE logic to prevent data loss)
             records = records.map(r => {
               const matched = enriched.find(e => e.item_num === r.item_num);
               if (matched) {
-                return { ...matched, _isCharacterizing: false };
+                return { ...r, ...matched, _isCharacterizing: false };
               }
               return r;
             });
@@ -250,7 +250,7 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 text-right">
-                  <div class="font-black text-gray-900">{(rec.peso_total / 1000).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</div>
+                  <div class="font-black text-gray-900">{(Number(rec.peso_total || 0) / 1000).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</div>
                 </td>
                 <td class="px-6 py-4 max-w-[300px]">
                   {#if rec.oportunidades_ec && rec.oportunidades_ec !== 'Análisis no disponible'}
