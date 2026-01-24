@@ -557,7 +557,7 @@ async def extract_rows(file: UploadFile = File(...)):
                             "caracteristica": {"type": "STRING"},
                             "codigo_basilea": {"type": "STRING"}
                         },
-                        "required": ["tipo_residuo", "peso_total"]
+                        "required": ["tipo_residuo", "peso_total", "caracteristica", "cantidad", "unidad_medida"]
                     }
                 }
             },
@@ -701,6 +701,10 @@ async def save_batch(records: list[Residuo], session: Session = Depends(waste.ge
     try:
         saved_count = 0
         for record in records:
+            # Ensure mandatory fields have values if they arrived as None/empty
+            if not record.responsable: record.responsable = "Sistema IA"
+            if not record.unidad_generadora: record.unidad_generadora = "NO ESPECIFICADO"
+            
             record.id = None
             session.add(record)
             saved_count += 1
@@ -709,6 +713,9 @@ async def save_batch(records: list[Residuo], session: Session = Depends(waste.ge
         return {"message": f"Successfully saved {saved_count} records", "count": saved_count}
     except Exception as e:
         session.rollback()
-        print(f"Save Batch Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to save batch: {str(e)}")
+        # Log detailed info for debugging
+        print(f"CRITICAL: Save Batch Failed.")
+        print(f"Error Type: {type(e).__name__}")
+        print(f"Error Details: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database Save Failed: {str(e)}")
 

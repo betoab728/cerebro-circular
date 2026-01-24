@@ -11,6 +11,7 @@
   let successMessage = $state('');
   let errorMessage = $state('');
   let unidadMinera = $state('');
+  let globalResponsable = $state('');
 
   async function handleFileUpload(e: Event) {
     const input = e.target as HTMLInputElement;
@@ -46,7 +47,11 @@
       unidadMinera = extractResult.unidad_minera || 'UNIDAD MINERA NO DETECTADA';
       records = (extractResult.records || []).map(r => ({
         ...r,
-        _isCharacterizing: true, // Internal flag to show loading state in individual rows
+        responsable: globalResponsable || 'Sistema IA',
+        unidad_generadora: unidadMinera,
+        cantidad: r.cantidad || 0,
+        unidad_medida: r.unidad_medida || 'OTRO',
+        _isCharacterizing: true, 
         oportunidades_ec: 'Analizando...',
         recla_no_peligroso: 'Analizando...'
       }));
@@ -102,10 +107,16 @@
     successMessage = '';
 
     try {
+      const payload = records.map(r => ({
+        ...r,
+        responsable: globalResponsable || r.responsable || 'Sistema IA',
+        unidad_generadora: unidadMinera || r.unidad_generadora || 'NO ESPECIFICADO'
+      }));
+
       const response = await fetch(`${API_BASE_URL}/save-batch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(records)
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) throw new Error('Error al guardar los registros');
@@ -150,6 +161,25 @@
       <span class="font-medium">{errorMessage}</span>
     </div>
   {/if}
+
+  <!-- GLOBAL CONFIG -->
+  <section class="bg-scientific-50/30 p-6 rounded-2xl border border-scientific-100 flex flex-col md:flex-row items-center gap-6">
+    <div class="flex-1 space-y-1">
+      <label class="block text-[10px] font-black uppercase tracking-widest text-scientific-600">Responsable del Lote</label>
+      <input 
+        type="text" 
+        bind:value={globalResponsable} 
+        placeholder="Ingrese el nombre del responsable..." 
+        class="w-full h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-scientific-50/50 focus:border-scientific-400 transition-all px-4 font-bold text-gray-700"
+      />
+    </div>
+    <div class="flex-1 space-y-1">
+      <label class="block text-[10px] font-black uppercase tracking-widest text-scientific-600">Unidad Generadora (Detectada)</label>
+      <div class="h-12 flex items-center px-4 bg-white border border-gray-200 rounded-xl font-black text-xs text-scientific-800 uppercase italic">
+        {unidadMinera || 'Esperando carga...'}
+      </div>
+    </div>
+  </section>
 
   <!-- UPLOAD SECTION -->
   <section class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center space-y-4">
