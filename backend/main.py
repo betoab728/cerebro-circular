@@ -99,6 +99,22 @@ def get_response_text(response) -> str:
             return response.candidates[0].content.parts[0].text
         return ""
 
+def parse_latam_number(val) -> float:
+    """Robust parsing for numbers with potential decimal commas."""
+    if val is None: return 0.0
+    if isinstance(val, (int, float)): return float(val)
+    # Remove whitespace and units
+    s = str(val).strip().lower()
+    s = re.sub(r'[^\d,.-]', '', s)
+    if not s: return 0.0
+    # If there's a comma and no dot, assume comma is decimal
+    if ',' in s and '.' not in s:
+        s = s.replace(',', '.')
+    try:
+        return float(s)
+    except:
+        return 0.0
+
 def repair_truncated_json(text: str) -> str:
     """
     Aggressively attempts to repair a truncated JSON string for a 'records' list.
@@ -582,7 +598,12 @@ async def extract_rows(file: UploadFile = File(...)):
                 parsed = json.loads(repair_truncated_json(result_text))
             
             if "records" in parsed:
-                all_skeletons.extend(parsed["records"])
+                for idx, r in enumerate(parsed["records"]):
+                    # Ensure numeric peso_total
+                    r["peso_total"] = parse_latam_number(r.get("peso_total", 0))
+                    # Assign a stable item_num based on loop index if missing
+                    r["item_num"] = r.get("item_num", len(all_skeletons) + idx + 1)
+                    all_skeletons.append(r)
             
             # Use the first valid unit found
             if "unidad_minera" in parsed and parsed["unidad_minera"] and unidad_minera_found == "No detectada":
