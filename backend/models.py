@@ -45,7 +45,7 @@ class Residuo(SQLModel, table=True):
     planta: Optional[str] = Field(default=None)
     departamento: Optional[str] = Field(default=None)
     codigo_basilea: Optional[str] = Field(default=None)
-    caracteristica: str
+    caracteristica: str = Field(sa_column=Column(Text))
     cantidad: float
     unidad_medida: str
     volumen: Optional[float] = Field(default=None)
@@ -54,7 +54,7 @@ class Residuo(SQLModel, table=True):
     fecha_registro: datetime = Field(default_factory=datetime.now)
     
     # AI Analysis Fields - Using Text for long content
-    analysis_material_name: Optional[str] = Field(default=None)
+    analysis_material_name: Optional[str] = Field(default=None, sa_column=Column(Text))
     analysis_physicochemical: Optional[str] = Field(default=None, sa_column=Column(Text))
     analysis_elemental: Optional[str] = Field(default=None, sa_column=Column(Text))
     analysis_engineering: Optional[str] = Field(default=None, sa_column=Column(Text))
