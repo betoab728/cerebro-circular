@@ -4,6 +4,9 @@
   import { API_BASE_URL } from '$lib/config';
   import { fade, slide } from 'svelte/transition';
 
+  // --- EXCEL EXPORT (Lazy Load) ---
+  let xlsxLoaded = $state(false);
+
   let isAnalyzing = $state(false);
   let isSaving = $state(false);
   let records = $state([]);
@@ -107,11 +110,15 @@
     successMessage = '';
 
     try {
-      const payload = records.map(r => ({
-        ...r,
-        responsable: globalResponsable || r.responsable || 'Sistema IA',
-        unidad_generadora: unidadMinera || r.unidad_generadora || 'NO ESPECIFICADO'
-      }));
+      // Clean records before sending (optimize payload)
+      const payload = records.map(r => {
+        const { _isCharacterizing, ...clean } = r;
+        return {
+          ...clean,
+          responsable: globalResponsable || clean.responsable || 'Sistema IA',
+          unidad_generadora: unidadMinera || clean.unidad_generadora || 'NO ESPECIFICADO'
+        };
+      });
 
       const response = await fetch(`${API_BASE_URL}/save-batch`, {
         method: 'POST',
@@ -119,7 +126,10 @@
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error('Error al guardar los registros');
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || 'Error al guardar los registros');
+      }
 
       const result = await response.json();
       successMessage = `Se han guardado ${result.count} registros exitosamente.`;
@@ -132,10 +142,41 @@
     }
   }
 
+  function exportToExcel() {
+    if (!browser || !window.XLSX) return;
+    
+    // Format data for Excel
+    const data = records.map((r, i) => ({
+      'N': i + 1,
+      'Descripción': r.caracteristica,
+      'Basel': r.codigo_basilea || '-',
+      'Peso (kg)': r.peso_total,
+      'Peso (Ton)': (Number(r.peso_total || 0) / 1000).toFixed(3),
+      'Material': r.analysis_material_name || '-',
+      'Economía Circular': r.oportunidades_ec || '-',
+      'Viabilidad EC (%)': r.viabilidad_ec || 0,
+      'Reclasificación': r.recla_no_peligroso || '-',
+      'Viabilidad Recla (%)': r.viabilidad_reclasificacion || 0,
+      'Unidad Minera': unidadMinera
+    }));
+
+    const ws = window.XLSX.utils.json_to_sheet(data);
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, ws, "Residuos");
+    
+    // Generate filename
+    const date = new Date().toISOString().split('T')[0];
+    window.XLSX.writeFile(wb, `Reporte_Residuos_${unidadMinera}_${date}.xlsx`);
+  }
+
   function removeRecord(index: number) {
     records = records.filter((_, i) => i !== index);
   }
 </script>
+
+<svelte:head>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" onload={() => xlsxLoaded = true}></script>
+</svelte:head>
 
 <Navbar title="Carga Masiva de Reportes" />
 
@@ -220,11 +261,19 @@
           <span class="w-6 h-6 bg-scientific-600 text-white rounded-full flex items-center justify-center text-xs">{records.length}</span>
           Registros Detectados
         </h3>
-        <button 
-          on:click={saveBatch}
-          disabled={isSaving}
-          class="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2 disabled:opacity-50"
-        >
+        <div class="flex gap-3">
+          <button 
+            on:click={exportToExcel}
+            class="px-5 py-2.5 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-all flex items-center gap-2 shadow-lg shadow-green-100"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Exportar a Excel
+          </button>
+          <button 
+            on:click={saveBatch}
+            disabled={isSaving}
+            class="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2 disabled:opacity-50"
+          >
           {#if isSaving}
             <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             Guardando Lote...

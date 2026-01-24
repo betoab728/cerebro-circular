@@ -698,24 +698,44 @@ async def characterize_rows(batch: list[dict]):
 
 @app.post("/save-batch")
 async def save_batch(records: list[Residuo], session: Session = Depends(waste.get_session)):
+    print(f"DEBUG: Processing save-batch with {len(records)} records")
+    saved_count = 0
+    errors = []
+    
     try:
-        saved_count = 0
-        for record in records:
-            # Ensure mandatory fields have values if they arrived as None/empty
-            if not record.responsable: record.responsable = "Sistema IA"
-            if not record.unidad_generadora: record.unidad_generadora = "NO ESPECIFICADO"
-            
-            record.id = None
-            session.add(record)
-            saved_count += 1
-        
+        for idx, record in enumerate(records):
+            try:
+                # Basic normalization
+                if not record.responsable: record.responsable = "Sistema IA"
+                if not record.unidad_generadora: record.unidad_generadora = "NO ESPECIFICADO"
+                
+                # Force ID to None to ensure insertion
+                record.id = None
+                
+                # Add to session
+                session.add(record)
+                # Flush to check for immediate constraints (like length/type)
+                session.flush()
+                saved_count += 1
+            except Exception as inner_e:
+                error_msg = f"Item {idx+1} failed: {str(inner_e)}"
+                print(f"ERROR: {error_msg}")
+                errors.append(error_msg)
+                # We don't rollback the whole session yet, just skip this one if possible
+                # But SQLModel/SQLAlchemy sessions might be tainted on flush error
+                session.rollback() 
+                # Re-add previous successful ones? No, safer to just stop or use a more complex pattern
+                # For now, let's try a safer approach: commit every N records or just try-catch the whole block 
+                # and report the first failing row.
+                raise HTTPException(status_code=400, detail=f"Error en registro {idx+1}: {str(inner_e)}")
+
         session.commit()
         return {"message": f"Successfully saved {saved_count} records", "count": saved_count}
+        
+    except HTTPException:
+        raise
     except Exception as e:
         session.rollback()
-        # Log detailed info for debugging
-        print(f"CRITICAL: Save Batch Failed.")
-        print(f"Error Type: {type(e).__name__}")
-        print(f"Error Details: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Database Save Failed: {str(e)}")
+        print(f"CRITICAL: Save Batch failed at top level: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error general de base de datos: {str(e)}")
 
