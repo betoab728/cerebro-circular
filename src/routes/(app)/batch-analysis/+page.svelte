@@ -206,11 +206,12 @@
         <table class="w-full text-left text-sm min-w-[1200px]">
           <thead>
             <tr class="bg-gray-50/50 text-gray-400 font-bold text-[10px] uppercase tracking-widest border-b border-gray-100">
-              <th class="px-6 py-4">Entidad / Planta</th>
-              <th class="px-6 py-4">Residuo (Reporte)</th>
-              <th class="px-6 py-4 text-scientific-600">Material IA</th>
+              <th class="px-6 py-4 text-center">N</th>
               <th class="px-6 py-4">Clasificación</th>
-              <th class="px-6 py-4 text-right">Cantidad</th>
+              <th class="px-6 py-4">Código de Basilea</th>
+              <th class="px-6 py-4">Descripción</th>
+              <th class="px-6 py-4 text-scientific-600">Material IA</th>
+              <th class="px-6 py-4 text-right">Total en Toneladas</th>
               <th class="px-6 py-4">Proceso de tratamiento para valorización</th>
               <th class="px-6 py-4">Proceso de tratamiento para reclasificación a no peligroso</th>
               <th class="px-6 py-4 text-center">Acciones</th>
@@ -219,13 +220,18 @@
           <tbody class="divide-y divide-gray-50">
             {#each records as rec, i}
               <tr class="group hover:bg-gray-50/50 transition-colors">
-                <td class="px-6 py-4">
-                  <div class="font-bold text-gray-900 leading-tight">{rec.razon_social ?? 'No especificado'}</div>
-                  <div class="text-[10px] text-gray-400 uppercase font-medium">{rec.planta ?? '---'} - {rec.departamento ?? '---'}</div>
+                <td class="px-6 py-4 text-center font-bold text-gray-900">{i + 1}</td>
+                <td class="px-6 py-4 text-center">
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase {rec.tipo_residuo === 'PELIGROSO' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}">
+                    {rec.tipo_residuo}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <div class="text-[10px] font-bold text-gray-700 bg-gray-50 inline-block px-1.5 rounded uppercase">{rec.codigo_basilea ?? 'N/A'}</div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="font-medium text-gray-700">{rec.caracteristica ?? 'Sin descripción'}</div>
-                  <div class="text-[10px] font-bold text-gray-400 bg-gray-50 inline-block px-1.5 rounded uppercase mt-0.5">{rec.codigo_basilea ?? 'N/A'}</div>
+                  <div class="text-[9px] text-gray-400 uppercase mt-1 italic">{rec.razon_social ?? ''} {rec.planta ? `- ${rec.planta}` : ''}</div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="font-black text-scientific-700 leading-tight uppercase text-xs">{rec.analysis_material_name || 'Pendiente'}</div>
@@ -234,15 +240,8 @@
                     <span class="text-[9px] font-bold text-scientific-500 uppercase tracking-tighter">Caracterizado</span>
                   </div>
                 </td>
-                <td class="px-6 py-4">
-                  <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase {rec.tipo_residuo === 'PELIGROSO' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}">
-                    {rec.tipo_residuo}
-                  </span>
-                </td>
                 <td class="px-6 py-4 text-right">
-                  <div class="font-black text-gray-900">{rec.cantidad?.toLocaleString() ?? '0'}</div>
-                  <div class="text-[10px] text-gray-400 font-bold uppercase">{rec.unidad_medida ?? 'UNID'}</div>
-                  <div class="text-[9px] text-scientific-600 font-medium italic">({rec.peso_total ?? 0} kg)</div>
+                  <div class="font-black text-gray-900">{(rec.peso_total / 1000).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</div>
                 </td>
                 <td class="px-6 py-4 max-w-[300px]">
                   {#if rec.oportunidades_ec && rec.oportunidades_ec !== 'Análisis no disponible'}
