@@ -7,7 +7,7 @@
 
   // --- EXPORT LIBS (Lazy Load) ---
   let xlsxLoaded = $state(false);
-  let pdfLoaded = $state(false);
+
 
   let isAnalyzing = $state(false);
   let isSaving = $state(false);
@@ -180,58 +180,6 @@
     window.XLSX.writeFile(wb, `Analisis_IA_${unidadMinera}_${date}.xlsx`);
   }
 
-  function exportToPDF() {
-    if (!browser || !window.jspdf) {
-      errorMessage = "La librería de PDF aún no ha cargado. Reintente en unos segundos.";
-      return;
-    }
-    if (records.length === 0) {
-      errorMessage = "No hay registros cargados para exportar.";
-      return;
-    }
-    
-    const doc = new window.jspdf.jsPDF('l', 'mm', 'a4');
-    
-    // Header
-    doc.setFontSize(18);
-    doc.setTextColor(48, 102, 190);
-    doc.text("Reporte de Análisis IA - Cargas Masivas", 14, 22);
-    
-    doc.setFontSize(11);
-    doc.setTextColor(100);
-    doc.text(`Unidad Minera: ${unidadMinera}`, 14, 30);
-    doc.text(`Responsable del Lote: ${globalResponsable || 'Sistema IA'}`, 14, 35);
-    doc.text(`Fecha de Generación: ${new Date().toLocaleString()}`, 14, 40);
-
-    const tableData = records.map((r, i) => [
-      i + 1,
-      r.tipo_residuo || '-',
-      r.caracteristica || '-',
-      r.analysis_material_name || 'Pendiente',
-      (Number(r.peso_total || 0) / 1000).toFixed(3),
-      r.oportunidades_ec && r.oportunidades_ec !== 'Análisis no disponible' 
-        ? `${r.oportunidades_ec}\n(${r.viabilidad_ec}% viab.)` 
-        : 'Analizando...',
-      r.recla_no_peligroso === 'No aplica' ? 'No requiere' : (r.recla_no_peligroso || 'Analizando...')
-    ]);
-
-    window.jspdf.autoTable(doc, {
-      startY: 45,
-      head: [['N', 'Clasif.', 'Descripción de Origen', 'Material IA', 'Ton', 'Oportunidades EC', 'Reclasificación']],
-      body: tableData,
-      theme: 'grid',
-      headStyles: { fillColor: [48, 102, 190], fontSize: 9, halign: 'center' },
-      bodyStyles: { fontSize: 7, valign: 'middle' },
-      columnStyles: {
-        2: { cellWidth: 40 },
-        5: { cellWidth: 50 },
-        6: { cellWidth: 40 }
-      }
-    });
-
-    const date = new Date().toISOString().split('T')[0];
-    doc.save(`Analisis_IA_${unidadMinera}_${date}.pdf`);
-  }
 
   function removeRecord(index: number) {
     records = records.filter((_, i) => i !== index);
@@ -240,8 +188,7 @@
 
 <svelte:head>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" onload={() => xlsxLoaded = true}></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onload={() => pdfLoaded = true}></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
 </svelte:head>
 
 <Navbar title="Carga Masiva de Reportes" />
@@ -341,13 +288,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             EXCEL
           </button>
-          <button 
-            onclick={exportToPDF}
-            class="px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg shadow-red-100"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9h1a1 1 0 110 2H9V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h1a1 1 0 110 2H9v-2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h1a1 1 0 110 2H9v-2z" /></svg>
-            PDF
-          </button>
+
           <div class="w-px h-8 bg-gray-200 mx-2 hidden md:block"></div>
           <button 
             onclick={saveBatch}
