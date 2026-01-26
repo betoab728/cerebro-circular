@@ -8,5 +8,5 @@
 </script>
 
 <div class="h-full flex items-center justify-center p-1">
-  <p class="text-gray-500">Redirigiendo a CEREBRO CIRCULAR...</p>
+  <p class="text-gray-500">Redirigiendo a CEREBRO CIRCULAR.....</p>
 </div>

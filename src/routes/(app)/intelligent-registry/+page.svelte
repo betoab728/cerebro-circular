@@ -25,6 +25,7 @@
     cantidad: null,
     unidad_medida: '',
     volumen: null,
+    max_volumen: null,
     peso_total: null,
     frecuencia: ''
   });
@@ -257,16 +258,16 @@
 
        {#if !analysisResult && !isAnalyzing}
          <div in:fade class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-           {#each uploadOptions as opt}
-             <button on:click={() => openUpload(opt.id)} class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-2xl hover:border-scientific-400 hover:shadow-md transition-all group scale-100 hover:scale-[1.02] active:scale-95">
-               <div class={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${opt.color} group-hover:scale-110 transition-transform`}>
-                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={opt.icon} /></svg>
-               </div>
-               <span class="text-sm font-bold text-gray-700">{opt.title}</span>
-               <span class="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">{opt.desc}</span>
-             </button>
-           {/each}
-         </div>
+            {#each uploadOptions as opt}
+              <button onclick={() => openUpload(opt.id)} class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-2xl hover:border-scientific-400 hover:shadow-md transition-all group scale-100 hover:scale-[1.02] active:scale-95">
+                <div class={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${opt.color} group-hover:scale-110 transition-transform`}>
+                   <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={opt.icon} /></svg>
+                </div>
+                <span class="text-sm font-bold text-gray-700">{opt.title}</span>
+                <span class="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">{opt.desc}</span>
+              </button>
+            {/each}
+          </div>
        {:else if isAnalyzing}
          <div in:fade class="py-12 flex flex-col items-center justify-center text-center space-y-5 bg-white rounded-2xl border border-dashed border-scientific-200">
            <svg class="animate-spin h-12 w-12 text-scientific-600" viewBox="0 0 24 24">
@@ -282,7 +283,7 @@
          <div in:slide class="space-y-6">
            <!-- AI RESULTS BANNER -->
            <div class="bg-white p-6 rounded-2xl border border-scientific-200 shadow-sm relative overflow-hidden">
-              <div class="absolute top-0 right-0 p-3"><button on:click={() => { analysisResult = null; file = null; }} class="text-red-500 hover:text-red-700 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+              <div class="absolute top-0 right-0 p-3"><button onclick={() => { analysisResult = null; file = null; }} class="text-red-500 hover:text-red-700 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
               <div class="flex flex-col md:flex-row gap-6 items-start">
                  <div class="flex-1 space-y-1">
                     <span class="text-[10px] font-bold uppercase tracking-widest text-scientific-600">Material Detectado</span>
@@ -330,7 +331,7 @@
     <!-- STEP 3: Final Registration -->
     <section class="space-y-4">
        <button 
-         on:click={handleRegister}
+         onclick={handleRegister}
          disabled={isSaving || isAnalyzing}
          class="w-full h-16 bg-scientific-600 hover:bg-scientific-700 text-white font-black text-lg rounded-2xl shadow-xl shadow-scientific-200 transition-all flex items-center justify-center gap-4 group disabled:opacity-50"
        >
@@ -350,7 +351,7 @@
 
 <Modal isOpen={showModal} title="Cargar para Análisis" onClose={() => showModal = false}>
   <label for="fileIn" class="block p-8 border-2 border-dashed border-gray-200 rounded-xl text-center hover:border-scientific-400 transition-colors cursor-pointer">
-    <input type="file" id="fileIn" class="hidden" accept={uploadOptions.find(o => o.id === currentUploadType)?.accept} on:change={handleFileSelect} />
+    <input type="file" id="fileIn" class="hidden" accept={uploadOptions.find(o => o.id === currentUploadType)?.accept} onchange={handleFileSelect} />
     <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
     <p class="text-sm font-bold text-gray-700">Selecciona o arrastra el archivo</p>
     <p class="text-xs text-gray-400 mt-1">El análisis se iniciará automáticamente al cargar.</p>

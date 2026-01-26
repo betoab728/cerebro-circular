@@ -245,14 +245,14 @@
     
     <div class="flex items-center gap-3">
       <button 
-        on:click={exportToExcel}
+        onclick={exportToExcel}
         class="px-5 py-2.5 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-all flex items-center gap-2 shadow-lg shadow-green-100"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
         EXPORTAR EXCEL
       </button>
       <button 
-        on:click={exportToPDF}
+        onclick={exportToPDF}
         class="px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg shadow-red-100"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9h1a1 1 0 110 2H9V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h1a1 1 0 110 2H9v-2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h1a1 1 0 110 2H9v-2z" /></svg>
@@ -309,7 +309,7 @@
       <p class="text-sm text-gray-400">Formatos soportados: .pdf (con tablas de datos)</p>
     </div>
     <label class="cursor-pointer group">
-      <input type="file" accept=".pdf" class="hidden" on:change={handleFileUpload} disabled={isAnalyzing} />
+      <input type="file" accept=".pdf" class="hidden" onchange={handleFileUpload} disabled={isAnalyzing} />
       <div class="px-8 py-3 bg-scientific-600 hover:bg-scientific-700 text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-scientific-100 flex items-center gap-2">
         {isAnalyzing ? 'Procesando...' : 'Elegir Archivo'}
       </div>
@@ -338,7 +338,7 @@
         </h3>
         <div class="flex flex-wrap items-center gap-3">
           <button 
-            on:click={saveBatch}
+            onclick={saveBatch}
             disabled={isSaving}
             class="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2 disabled:opacity-50 shadow-lg"
           >
@@ -351,6 +351,7 @@
             {/if}
           </button>
         </div>
+      </div>
 
       <div class="overflow-x-auto bg-white rounded-2xl border border-gray-100 shadow-sm">
         <table class="w-full text-left text-sm min-w-[1200px]">
@@ -438,7 +439,7 @@
                   {/if}
                 </td>
                 <td class="px-6 py-4 text-center">
-                  <button on:click={() => removeRecord(i)} class="p-2 text-gray-300 hover:text-red-500 transition-colors">
+                  <button onclick={() => removeRecord(i)} class="p-2 text-gray-300 hover:text-red-500 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                   </button>
                 </td>
