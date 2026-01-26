@@ -243,21 +243,8 @@
       <p class="text-gray-500 text-sm">Procesamiento por lote de informes técnicos PDF.</p>
     </div>
     
-    <div class="flex items-center gap-3">
-      <button 
-        onclick={exportToExcel}
-        class="px-5 py-2.5 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-all flex items-center gap-2 shadow-lg shadow-green-100"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-        EXPORTAR EXCEL
-      </button>
-      <button 
-        onclick={exportToPDF}
-        class="px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg shadow-red-100"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9h1a1 1 0 110 2H9V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h1a1 1 0 110 2H9v-2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h1a1 1 0 110 2H9v-2z" /></svg>
-        EXPORTAR PDF
-      </button>
+    <div class="hidden md:block">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-lg border border-gray-100 italic">Pre-procesamiento con Gemini 2.0</span>
     </div>
   </header>
 
@@ -338,6 +325,21 @@
         </h3>
         <div class="flex flex-wrap items-center gap-3">
           <button 
+            onclick={exportToExcel}
+            class="px-5 py-2.5 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 transition-all flex items-center gap-2 shadow-lg shadow-green-100"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            EXCEL
+          </button>
+          <button 
+            onclick={exportToPDF}
+            class="px-5 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg shadow-red-100"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9h1a1 1 0 110 2H9V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h1a1 1 0 110 2H9v-2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h1a1 1 0 110 2H9v-2z" /></svg>
+            PDF
+          </button>
+          <div class="w-px h-8 bg-gray-200 mx-2 hidden md:block"></div>
+          <button 
             onclick={saveBatch}
             disabled={isSaving}
             class="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-all flex items-center gap-2 disabled:opacity-50 shadow-lg"
@@ -347,7 +349,7 @@
               Guardando Lote...
             {:else}
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
-              GUARDAR TODO EN BASE DE DATOS
+              GUARDAR REGISTROS
             {/if}
           </button>
         </div>
