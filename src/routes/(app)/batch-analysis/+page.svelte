@@ -152,25 +152,32 @@
     }
     const data = records.map((r, i) => ({
       'N': i + 1,
-      'Descripción': r.caracteristica,
-      'Basel': r.codigo_basilea || '-',
-      'Peso (kg)': r.peso_total,
-      'Peso (Ton)': (Number(r.peso_total || 0) / 1000).toFixed(3),
-      'Material': r.analysis_material_name || '-',
-      'Economía Circular': r.oportunidades_ec || '-',
-      'Viabilidad EC (%)': r.viabilidad_ec || 0,
-      'Reclasificación': r.recla_no_peligroso || '-',
-      'Viabilidad Recla (%)': r.viabilidad_reclasificacion || 0,
+      'Clasificación': r.tipo_residuo || '-',
+      'Código de Basilea': r.codigo_basilea || 'N/A',
+      'Descripción': r.caracteristica || 'Sin descripción',
+      'Material IA': r.analysis_material_name || 'Pendiente',
+      'Total en Toneladas': (Number(r.peso_total || 0) / 1000).toFixed(3),
+      'Proceso de Valorización': r.oportunidades_ec && r.oportunidades_ec !== 'Análisis no disponible' 
+        ? `${r.oportunidades_ec} (Efectividad: ${r.viabilidad_ec || 0}%)` 
+        : 'Analizando...',
+      'Proceso de Reclasificación': r.recla_no_peligroso && r.recla_no_peligroso !== 'No aplica'
+        ? `${r.recla_no_peligroso} (Probabilidad: ${r.viabilidad_reclasificacion || 0}%)`
+        : (r.recla_no_peligroso === 'No aplica' ? 'No requiere' : 'Analizando...'),
       'Unidad Minera': unidadMinera
     }));
 
     const ws = window.XLSX.utils.json_to_sheet(data);
     const wb = window.XLSX.utils.book_new();
-    window.XLSX.utils.book_append_sheet(wb, ws, "Residuos");
+    window.XLSX.utils.book_append_sheet(wb, ws, "Resultados IA");
     
-    // Generate filename
+    // Auto-size columns (basic attempt)
+    const wscols = [
+      {wch: 5}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 15}, {wch: 50}, {wch: 50}, {wch: 20}
+    ];
+    ws['!cols'] = wscols;
+
     const date = new Date().toISOString().split('T')[0];
-    window.XLSX.writeFile(wb, `Reporte_Residuos_${unidadMinera}_${date}.xlsx`);
+    window.XLSX.writeFile(wb, `Analisis_IA_${unidadMinera}_${date}.xlsx`);
   }
 
   function exportToPDF() {
@@ -187,40 +194,43 @@
     
     // Header
     doc.setFontSize(18);
-    doc.text("Reporte de Caracterización de Residuos", 14, 22);
+    doc.setTextColor(48, 102, 190);
+    doc.text("Reporte de Análisis IA - Cargas Masivas", 14, 22);
+    
     doc.setFontSize(11);
     doc.setTextColor(100);
     doc.text(`Unidad Minera: ${unidadMinera}`, 14, 30);
-    doc.text(`Responsable: ${globalResponsable || 'No especificado'}`, 14, 35);
-    doc.text(`Fecha: ${new Date().toLocaleString()}`, 14, 40);
+    doc.text(`Responsable del Lote: ${globalResponsable || 'Sistema IA'}`, 14, 35);
+    doc.text(`Fecha de Generación: ${new Date().toLocaleString()}`, 14, 40);
 
     const tableData = records.map((r, i) => [
       i + 1,
+      r.tipo_residuo || '-',
       r.caracteristica || '-',
-      r.codigo_basilea || '-',
+      r.analysis_material_name || 'Pendiente',
       (Number(r.peso_total || 0) / 1000).toFixed(3),
-      r.analysis_material_name || '-',
-      r.oportunidades_ec || '-',
-      `${r.viabilidad_ec || 0}%`,
-      r.recla_no_peligroso || '-'
+      r.oportunidades_ec && r.oportunidades_ec !== 'Análisis no disponible' 
+        ? `${r.oportunidades_ec}\n(${r.viabilidad_ec}% viab.)` 
+        : 'Analizando...',
+      r.recla_no_peligroso === 'No aplica' ? 'No requiere' : (r.recla_no_peligroso || 'Analizando...')
     ]);
 
     window.jspdf.autoTable(doc, {
       startY: 45,
-      head: [['N', 'Descripción', 'Basel', 'Ton', 'Material', 'Oportunidades EC', 'Viab', 'Reclasificación']],
+      head: [['N', 'Clasif.', 'Descripción de Origen', 'Material IA', 'Ton', 'Oportunidades EC', 'Reclasificación']],
       body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [48, 102, 190], fontSize: 9 },
-      bodyStyles: { fontSize: 8 },
+      theme: 'grid',
+      headStyles: { fillColor: [48, 102, 190], fontSize: 9, halign: 'center' },
+      bodyStyles: { fontSize: 7, valign: 'middle' },
       columnStyles: {
-        1: { cellWidth: 50 },
-        5: { cellWidth: 40 },
-        7: { cellWidth: 40 }
+        2: { cellWidth: 40 },
+        5: { cellWidth: 50 },
+        6: { cellWidth: 40 }
       }
     });
 
     const date = new Date().toISOString().split('T')[0];
-    doc.save(`Reporte_Residuos_${unidadMinera}_${date}.pdf`);
+    doc.save(`Analisis_IA_${unidadMinera}_${date}.pdf`);
   }
 
   function removeRecord(index: number) {
