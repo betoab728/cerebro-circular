@@ -125,12 +125,19 @@ def parse_latam_number(val) -> float:
     except:
         return 0.0
 
-def normalize_weight(val) -> float:
+def normalize_weight(val, unit_hint=None) -> float:
     """Detects units (Tons, KG) and normalizes strictly to KILOGRAMOS (KG)."""
     if val is None: return 0.0
-    if isinstance(val, (int, float)): return float(val)
+    if isinstance(val, (int, float)): 
+        num = float(val)
+        # If it's a small number and unit_hint says Toneladas, normalize
+        if unit_hint and any(u in str(unit_hint).lower() for u in ['ton', 'tn']):
+            return num * 1000.0
+        return num
     
     s = str(val).lower().strip()
+    u_hint = str(unit_hint).lower() if unit_hint else ""
+    
     # Extract only the numeric part for parsing
     num_match = re.search(r'[\d,.]+', s)
     if not num_match: return 0.0
@@ -138,9 +145,12 @@ def normalize_weight(val) -> float:
     num_str = num_match.group()
     num = parse_latam_number(num_str)
     
-    # Detect if it's Tons/Toneladas
-    # TN, Tons, Toneladas, t. (be careful with t as just a letter)
+    # Detect if it's Tons/Toneladas in the value string itself
     is_ton = any(u in s for u in ['ton', 'tn', 'tonelada']) or re.search(r'\b[tT]\b', s)
+    
+    # Also check if the unit_hint suggests it's Tons
+    if not is_ton and u_hint:
+        is_ton = any(u in u_hint for u in ['ton', 'tn', 'tonelada'])
     
     if is_ton:
         return num * 1000.0
@@ -633,8 +643,14 @@ async def extract_rows(file: UploadFile = File(...)):
             
             if "records" in parsed:
                 for idx, r in enumerate(parsed["records"]):
-                    # Robust Weight Normalization to KG
-                    r["peso_total"] = normalize_weight(r.get("peso_total", "0"))
+                    # Robust Weight Normalization to KG with unit hint
+                    raw_val = r.get("peso_total", "0")
+                    unit_hint = r.get("unidad_medida", "")
+                    normalized = normalize_weight(raw_val, unit_hint)
+                    r["peso_total"] = normalized
+                    
+                    print(f"Item {idx+1}: Raw={raw_val}, UnitHint={unit_hint} -> Normalized={normalized} KG")
+                    
                     # Assign a stable item_num based on loop index if missing
                     r["item_num"] = r.get("item_num", len(all_skeletons) + idx + 1)
                     all_skeletons.append(r)
