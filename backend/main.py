@@ -103,17 +103,50 @@ def parse_latam_number(val) -> float:
     """Robust parsing for numbers with potential decimal commas."""
     if val is None: return 0.0
     if isinstance(val, (int, float)): return float(val)
-    # Remove whitespace and units
+    # Remove whitespace and characters that aren't numbers, dots or commas
     s = str(val).strip().lower()
+    # Keep digits, dot, comma and minus
     s = re.sub(r'[^\d,.-]', '', s)
     if not s: return 0.0
     # If there's a comma and no dot, assume comma is decimal
     if ',' in s and '.' not in s:
         s = s.replace(',', '.')
+    # If there's a dot and then a comma like 1.400,00 -> 1400.00
+    if '.' in s and ',' in s:
+        # Check which one is last
+        if s.rfind(',') > s.rfind('.'):
+            # 1.400,00 structure -> Remove dot, replace comma with dot
+            s = s.replace('.', '').replace(',', '.')
+        else:
+            # 1,400.00 structure -> Remove comma
+            s = s.replace(',', '')
     try:
         return float(s)
     except:
         return 0.0
+
+def normalize_weight(val) -> float:
+    """Detects units (Tons, KG) and normalizes strictly to KILOGRAMOS (KG)."""
+    if val is None: return 0.0
+    if isinstance(val, (int, float)): return float(val)
+    
+    s = str(val).lower().strip()
+    # Extract only the numeric part for parsing
+    num_match = re.search(r'[\d,.]+', s)
+    if not num_match: return 0.0
+    
+    num_str = num_match.group()
+    num = parse_latam_number(num_str)
+    
+    # Detect if it's Tons/Toneladas
+    # TN, Tons, Toneladas, t. (be careful with t as just a letter)
+    is_ton = any(u in s for u in ['ton', 'tn', 'tonelada']) or re.search(r'\b[tT]\b', s)
+    
+    if is_ton:
+        return num * 1000.0
+    
+    # Default is KG
+    return num
 
 def repair_truncated_json(text: str) -> str:
     """
@@ -553,7 +586,7 @@ async def extract_rows(file: UploadFile = File(...)):
                             "tipo_residuo": {"type": "STRING"},
                             "cantidad": {"type": "NUMBER"},
                             "unidad_medida": {"type": "STRING"},
-                            "peso_total": {"type": "NUMBER"},
+                            "peso_total": {"type": "STRING"},
                             "caracteristica": {"type": "STRING"},
                             "codigo_basilea": {"type": "STRING"}
                         },
@@ -570,10 +603,8 @@ async def extract_rows(file: UploadFile = File(...)):
         IMPORTANTE: 
         1. Identifica la 'unidad_minera' de la cabecera del reporte (ej: 'UNIDAD MINERA BUENAVENTURA').
         2. Para cada fila, extrae la descripción del residuo en el campo 'caracteristica'.
-        3. Extrae el peso total numérico en 'peso_total'. 
-           - SIEMPRE normaliza a KILOGRAMOS (KG). 
-           - Si el documento dice 'Tons' o 'Toneladas', multiplica por 1000.
-           - Si dice 'KG' o está implícito en una tabla de KG, mantenlo igual.
+        3. Para 'peso_total', extrae el valor EXACTO como aparece en el documento (ej: '1.4 Tons', '500 KG', '0.005').
+           - No intentes convertirlo, extráelo como texto.
         4. No te saltes ningún item. Si hay 153 items, debes extraer los 153.
         """
 
@@ -602,8 +633,8 @@ async def extract_rows(file: UploadFile = File(...)):
             
             if "records" in parsed:
                 for idx, r in enumerate(parsed["records"]):
-                    # Ensure numeric peso_total
-                    r["peso_total"] = parse_latam_number(r.get("peso_total", 0))
+                    # Robust Weight Normalization to KG
+                    r["peso_total"] = normalize_weight(r.get("peso_total", "0"))
                     # Assign a stable item_num based on loop index if missing
                     r["item_num"] = r.get("item_num", len(all_skeletons) + idx + 1)
                     all_skeletons.append(r)
