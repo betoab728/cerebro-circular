@@ -131,7 +131,7 @@ def normalize_weight(val, unit_hint=None) -> float:
     if isinstance(val, (int, float)): 
         num = float(val)
         # If it's a small number and unit_hint says Toneladas, normalize
-        if unit_hint and any(u in str(unit_hint).lower() for u in ['ton', 'tn']):
+        if unit_hint and any(u in str(unit_hint).lower() for u in ['ton', 'tn', 't.n']):
             return num * 1000.0
         return num
     
@@ -146,11 +146,12 @@ def normalize_weight(val, unit_hint=None) -> float:
     num = parse_latam_number(num_str)
     
     # Detect if it's Tons/Toneladas in the value string itself
-    is_ton = any(u in s for u in ['ton', 'tn', 'tonelada']) or re.search(r'\b[tT]\b', s)
+    # Check for tons, tn, t.n, t., tonelada, toneladas
+    is_ton = any(u in s for u in ['ton', 'tn', 't.n', 'tonelada']) or re.search(r'\b[tT]\b', s)
     
     # Also check if the unit_hint suggests it's Tons
     if not is_ton and u_hint:
-        is_ton = any(u in u_hint for u in ['ton', 'tn', 'tonelada'])
+        is_ton = any(u in u_hint for u in ['ton', 'tn', 't.n', 'tonelada'])
     
     if is_ton:
         return num * 1000.0
@@ -613,8 +614,9 @@ async def extract_rows(file: UploadFile = File(...)):
         IMPORTANTE: 
         1. Identifica la 'unidad_minera' de la cabecera del reporte (ej: 'UNIDAD MINERA BUENAVENTURA').
         2. Para cada fila, extrae la descripción del residuo en el campo 'caracteristica'.
-        3. Para 'peso_total', extrae el valor EXACTO como aparece en el documento (ej: '1.4 Tons', '500 KG', '0.005').
-           - No intentes convertirlo, extráelo como texto.
+        3. Para 'peso_total', extrae el valor EXACTO. 
+           CRUCIAL: Si los valores están bajo una columna que indica unidades (ej. Toneladas, KG, TN), DEBES incluir esas unidades en el campo 'peso_total' (ej. '1.4 Toneladas', '500 KG').
+           NO hagas cálculos. Solo LEE lo que dice la tabla.
         4. No te saltes ningún item. Si hay 153 items, debes extraer los 153.
         """
 
