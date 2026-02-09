@@ -158,11 +158,11 @@
       'Material IA': r.analysis_material_name || 'Pendiente',
       'Total en Toneladas': (Number(r.peso_total || 0) / 1000).toFixed(3),
       'Proceso de Valorización': r.oportunidades_ec && r.oportunidades_ec !== 'Análisis no disponible' 
-        ? `${r.oportunidades_ec} (Efectividad: ${r.viabilidad_ec || 0}%)` 
-        : 'Analizando...',
+        ? r.oportunidades_ec : 'Analizando...',
+      '% Éxito Valorización': r.viabilidad_ec ? `${r.viabilidad_ec}%` : (r.oportunidades_ec === 'Análisis no disponible' ? 'N/A' : '0%'),
       'Proceso de Reclasificación': r.recla_no_peligroso && r.recla_no_peligroso !== 'No aplica'
-        ? `${r.recla_no_peligroso} (Probabilidad: ${r.viabilidad_reclasificacion || 0}%)`
-        : (r.recla_no_peligroso === 'No aplica' ? 'No requiere' : 'Analizando...'),
+        ? r.recla_no_peligroso : (r.recla_no_peligroso === 'No aplica' ? 'No requiere' : 'Analizando...'),
+      '% Prob. Reclasificación': r.viabilidad_reclasificacion ? `${r.viabilidad_reclasificacion}%` : (r.recla_no_peligroso === 'No aplica' ? 'N/A' : '0%'),
       'Unidad Minera': unidadMinera
     }));
 
@@ -172,7 +172,7 @@
     
     // Auto-size columns (basic attempt)
     const wscols = [
-      {wch: 5}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 15}, {wch: 50}, {wch: 50}, {wch: 20}
+      {wch: 5}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 15}, {wch: 50}, {wch: 10}, {wch: 50}, {wch: 10}, {wch: 20}
     ];
     ws['!cols'] = wscols;
 
@@ -323,8 +323,10 @@
               <th class="px-6 py-4">Descripción</th>
               <th class="px-6 py-4 text-scientific-600">Material IA</th>
               <th class="px-6 py-4 text-right">Total en Toneladas</th>
-              <th class="px-6 py-4">Proceso de tratamiento para valorización</th>
-              <th class="px-6 py-4">Proceso de tratamiento para reclasificación a no peligroso</th>
+              <th class="px-6 py-4">Proceso Valorización</th>
+              <th class="px-6 py-4 text-center border-l border-gray-100 bg-scientific-50/50">% Éxito</th>
+              <th class="px-6 py-4">Proceso Reclasificación</th>
+              <th class="px-6 py-4 text-center border-l border-gray-100 bg-amber-50/50">% Prob.</th>
               <th class="px-6 py-4 text-center">Acciones</th>
             </tr>
           </thead>
@@ -355,41 +357,36 @@
                       <span class="text-[9px] font-bold text-scientific-500 uppercase tracking-tighter">Caracterizado</span>
                     {/if}
                   </div>
-                </td>
                 <td class="px-6 py-4 text-right">
                   <div class="font-black text-gray-900">{(Number(rec.peso_total || 0) / 1000).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</div>
                 </td>
-                <td class="px-6 py-4 max-w-[300px]">
+                <td class="px-6 py-4 max-w-[250px]">
                   {#if rec.oportunidades_ec && rec.oportunidades_ec !== 'Análisis no disponible'}
-                    <div class="bg-scientific-50 border border-scientific-100 p-2.5 rounded-xl">
-                      <p class="text-[11px] font-bold text-scientific-700 leading-tight">
-                        {rec.oportunidades_ec}
-                      </p>
-                      <div class="mt-2 text-right border-t border-scientific-100 pt-1">
-                        <span class="text-base font-black text-scientific-600">{rec.viabilidad_ec || 0}%</span>
-                        <span class="text-[8px] font-bold text-scientific-400 uppercase tracking-tighter italic ml-1">Efectividad</span>
-                      </div>
-                    </div>
+                    <p class="text-[11px] font-bold text-gray-700 leading-tight">
+                      {rec.oportunidades_ec}
+                    </p>
                   {:else}
                     <div class="text-[10px] text-gray-400 italic">Analizando...</div>
                   {/if}
                 </td>
-                <td class="px-6 py-4 max-w-[300px]">
+                <td class="px-6 py-4 text-center border-l border-gray-50 bg-scientific-50/30">
+                   <div class="text-xl font-black text-scientific-600">{rec.viabilidad_ec || 0}%</div>
+                   <div class="text-[8px] font-bold text-scientific-400 uppercase tracking-tighter">Efectividad</div>
+                </td>
+                <td class="px-6 py-4 max-w-[250px]">
                   {#if rec.recla_no_peligroso && rec.recla_no_peligroso !== 'No aplica'}
-                    <div class="bg-amber-50/50 border border-amber-100 p-2.5 rounded-xl">
-                      <p class="text-[11px] font-bold text-amber-700 leading-tight">
-                        {rec.recla_no_peligroso}
-                      </p>
-                      <div class="mt-2 text-right border-t border-amber-100 pt-1">
-                        <span class="text-base font-black text-amber-600">{rec.viabilidad_reclasificacion || 0}%</span>
-                        <span class="text-[8px] font-bold text-amber-400 uppercase tracking-tighter italic ml-1">Probabilidad</span>
-                      </div>
-                    </div>
+                    <p class="text-[11px] font-bold text-gray-700 leading-tight">
+                      {rec.recla_no_peligroso}
+                    </p>
                   {:else}
                     <span class="text-[10px] font-bold {rec.recla_no_peligroso === 'No aplica' ? 'text-green-500 bg-green-50' : 'text-gray-400 italic'} px-2 py-0.5 rounded">
                       {rec.recla_no_peligroso === 'No aplica' ? 'No requiere' : 'Cargando...'}
                     </span>
                   {/if}
+                </td>
+                <td class="px-6 py-4 text-center border-l border-gray-50 bg-amber-50/30">
+                   <div class="text-xl font-black text-amber-600">{rec.viabilidad_reclasificacion || 0}%</div>
+                   <div class="text-[8px] font-bold text-amber-400 uppercase tracking-tighter">Probabilidad</div>
                 </td>
                 <td class="px-6 py-4 text-center">
                   <button onclick={() => removeRecord(i)} class="p-2 text-gray-300 hover:text-red-500 transition-colors">

@@ -570,7 +570,10 @@ async def extract_rows(file: UploadFile = File(...)):
         IMPORTANTE: 
         1. Identifica la 'unidad_minera' de la cabecera del reporte (ej: 'UNIDAD MINERA BUENAVENTURA').
         2. Para cada fila, extrae la descripción del residuo en el campo 'caracteristica'.
-        3. Extrae el peso total numérico en 'peso_total' (asegúrate de que sea un número puro).
+        3. Extrae el peso total numérico en 'peso_total'. 
+           - SIEMPRE normaliza a KILOGRAMOS (KG). 
+           - Si el documento dice 'Tons' o 'Toneladas', multiplica por 1000.
+           - Si dice 'KG' o está implícito en una tabla de KG, mantenlo igual.
         4. No te saltes ningún item. Si hay 153 items, debes extraer los 153.
         """
 
@@ -659,8 +662,8 @@ async def characterize_rows(batch: list[dict]):
         Eres un experto en ingeniería ambiental. Caracteriza técnicamente estos residuos.
         'proceso_valorizacion': Ruta técnica detallada para ganar dinero/valor con el residuo.
         'proceso_reclasificacion': Pasos técnicos (lavado, neutralización) para que no sea peligroso.
-        'viabilidad_ec': Porcentaje de éxito de la valorización.
-        'viabilidad_reclasificacion': Porcentaje de probabilidad de éxito técnico para la reclasificación a no peligroso.
+        'viabilidad_ec': Porcentaje de éxito de la valorización (NÚMERO ENTERO de 0 a 100).
+        'viabilidad_reclasificacion': Porcentaje de probabilidad de éxito técnico para la reclasificación a no peligroso (NÚMERO ENTERO de 0 a 100).
         MANTEN EL MISMO 'item_num' para cada registro.
         """
 
