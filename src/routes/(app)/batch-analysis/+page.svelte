@@ -58,7 +58,8 @@
         unidad_medida: r.unidad_medida || 'OTRO',
         _isCharacterizing: true, 
         oportunidades_ec: 'Analizando...',
-        recla_no_peligroso: 'Analizando...'
+        recla_no_peligroso: 'Analizando...',
+        tratamiento: 'Analizando...'
       }));
       
       isAnalyzing = false; // Hide global spinner, show table
@@ -160,6 +161,7 @@
       'Proceso de Valorización': r.oportunidades_ec && r.oportunidades_ec !== 'Análisis no disponible' 
         ? r.oportunidades_ec : 'Analizando...',
       '% Éxito Valorización': r.viabilidad_ec ? `${r.viabilidad_ec}%` : (r.oportunidades_ec === 'Análisis no disponible' ? 'N/A' : '0%'),
+      'Proceso de Tratamiento': r.tratamiento || 'Analizando...',
       'Proceso de Reclasificación': r.recla_no_peligroso && r.recla_no_peligroso !== 'No aplica'
         ? r.recla_no_peligroso : (r.recla_no_peligroso === 'No aplica' ? 'No requiere' : 'Analizando...'),
       '% Prob. Reclasificación': r.viabilidad_reclasificacion ? `${r.viabilidad_reclasificacion}%` : (r.recla_no_peligroso === 'No aplica' ? 'N/A' : '0%'),
@@ -172,7 +174,7 @@
     
     // Auto-size columns (basic attempt)
     const wscols = [
-      {wch: 5}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 15}, {wch: 50}, {wch: 10}, {wch: 50}, {wch: 10}, {wch: 20}
+      {wch: 5}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 25}, {wch: 15}, {wch: 50}, {wch: 10}, {wch: 50}, {wch: 50}, {wch: 10}, {wch: 20}
     ];
     ws['!cols'] = wscols;
 
@@ -311,7 +313,7 @@
           <thead>
             {#if unidadMinera}
               <tr class="bg-scientific-600 text-white font-black text-xs uppercase tracking-widest text-center border-b border-scientific-700">
-                <th colspan="9" class="px-6 py-4">
+                <th colspan="10" class="px-6 py-4">
                   {unidadMinera}
                 </th>
               </tr>
@@ -325,6 +327,7 @@
               <th class="px-6 py-4 text-right">Total en Toneladas</th>
               <th class="px-6 py-4">Proceso Valorización</th>
               <th class="px-6 py-4 text-center border-l border-gray-100 bg-scientific-50/50">% Éxito</th>
+              <th class="px-6 py-4">Tratamiento (IA)</th>
               <th class="px-6 py-4">Proceso Reclasificación</th>
               <th class="px-6 py-4 text-center border-l border-gray-100 bg-amber-50/50">% Prob.</th>
               <th class="px-6 py-4 text-center">Acciones</th>
@@ -372,6 +375,15 @@
                 <td class="px-6 py-4 text-center border-l border-gray-50 bg-scientific-50/30">
                    <div class="text-xl font-black text-scientific-600">{rec.viabilidad_ec || 0}%</div>
                    <div class="text-[8px] font-bold text-scientific-400 uppercase tracking-tighter">Efectividad</div>
+                </td>
+                <td class="px-6 py-4 max-w-[250px]">
+                  {#if rec.tratamiento}
+                    <p class="text-[11px] font-bold text-scientific-600 leading-tight">
+                      {rec.tratamiento}
+                    </p>
+                  {:else}
+                    <div class="text-[10px] text-gray-400 italic">Analizando...</div>
+                  {/if}
                 </td>
                 <td class="px-6 py-4 max-w-[250px]">
                   {#if rec.recla_no_peligroso && rec.recla_no_peligroso !== 'No aplica'}

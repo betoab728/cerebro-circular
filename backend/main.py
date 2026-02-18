@@ -125,18 +125,21 @@ def parse_latam_number(val) -> float:
     except:
         return 0.0
 
-def normalize_weight(val, unit_hint=None) -> float:
+def normalize_weight(val, unit_hint=None, extra_hint=None) -> float:
     """Detects units (Tons, KG) and normalizes strictly to KILOGRAMOS (KG)."""
     if val is None: return 0.0
     if isinstance(val, (int, float)): 
         num = float(val)
-        # If it's a small number and unit_hint says Toneladas, normalize
-        if unit_hint and any(u in str(unit_hint).lower() for u in ['ton', 'tn', 't.n']):
+        # In mining contexts, if the number is small and context suggests tons, it's tons
+        # e.g. 1.4 in a mining report is likely 1400 KG
+        is_mining = extra_hint and "MINERA" in str(extra_hint).upper()
+        if is_mining and num < 100: # Heuristic: if it's < 100 in mining, it's likely Tons
             return num * 1000.0
         return num
     
     s = str(val).lower().strip()
     u_hint = str(unit_hint).lower() if unit_hint else ""
+    is_mining_context = extra_hint and "MINERA" in str(extra_hint).upper()
     
     # Extract only the numeric part for parsing
     num_match = re.search(r'[\d,.]+', s)
@@ -145,18 +148,19 @@ def normalize_weight(val, unit_hint=None) -> float:
     num_str = num_match.group()
     num = parse_latam_number(num_str)
     
-    # Detect if it's Tons/Toneladas in the value string itself
-    # Check for tons, tn, t.n, t., tonelada, toneladas
+    # Detect if it's Tons/Toneladas
     is_ton = any(u in s for u in ['ton', 'tn', 't.n', 'tonelada']) or re.search(r'\b[tT]\b', s)
-    
-    # Also check if the unit_hint suggests it's Tons
     if not is_ton and u_hint:
         is_ton = any(u in u_hint for u in ['ton', 'tn', 't.n', 'tonelada'])
     
+    # HEURISTIC: If we are in a mining report and no unit is specified, assume Tons
+    # unless it's a clearly large number (e.g. 1500 might be KG already)
+    if not is_ton and is_mining_context and num < 500:
+        is_ton = True
+
     if is_ton:
         return num * 1000.0
     
-    # Default is KG
     return num
 
 def repair_truncated_json(text: str) -> str:
@@ -609,15 +613,20 @@ async def extract_rows(file: UploadFile = File(...)):
         }
 
         extract_prompt = """
-        Extrae los datos básicos de TODAS las filas del PDF. 
-        Solo necesitamos el esqueleto (Skeleton) de la tabla.
-        IMPORTANTE: 
-        1. Identifica la 'unidad_minera' de la cabecera del reporte (ej: 'UNIDAD MINERA BUENAVENTURA').
-        2. Para cada fila, extrae la descripción del residuo en el campo 'caracteristica'.
-        3. Para 'peso_total', extrae el valor EXACTO. 
-           CRUCIAL: Si los valores están bajo una columna que indica unidades (ej. Toneladas, KG, TN), DEBES incluir esas unidades en el campo 'peso_total' (ej. '1.4 Toneladas', '500 KG').
-           NO hagas cálculos. Solo LEE lo que dice la tabla.
-        4. No te saltes ningún item. Si hay 153 items, debes extraer los 153.
+        EXTRAE LOS DATOS DE LA TABLA DEL PDF.
+        REGRESA UN JSON ESTRICTO.
+        
+        REGLAS PARA PESO (peso_total):
+        1. Localiza la columna de pesos (suele ser 'TOTAL' o 'CANTIDAD').
+        2. IMPORTANTE: En informes mineros, los valores suelen estar en TONELADAS (TN).
+        3. SIEMPRE incluye la unidad si está en la cabecera o al lado del número (ej: '1.4 TN', '0.5 TN').
+        4. NO hagas cálculos. Si dice '1.4', escribe '1.4'. 
+        
+        REGLAS GENERALES:
+        - Identifica la 'unidad_minera' de la cabecera del reporte.
+        - Extrae descripción en 'caracteristica'.
+        - Extrae razon_social, planta, departamento si existen.
+        - Extrae TODAS las filas (si hay 100, extrae 100).
         """
 
         unidad_minera_found = "No detectada"
@@ -645,13 +654,13 @@ async def extract_rows(file: UploadFile = File(...)):
             
             if "records" in parsed:
                 for idx, r in enumerate(parsed["records"]):
-                    # Robust Weight Normalization to KG with unit hint
+                    # Robust Weight Normalization to KG with unit hint and mining context
                     raw_val = r.get("peso_total", "0")
                     unit_hint = r.get("unidad_medida", "")
-                    normalized = normalize_weight(raw_val, unit_hint)
+                    normalized = normalize_weight(raw_val, unit_hint, unidad_minera_found)
                     r["peso_total"] = normalized
                     
-                    print(f"Item {idx+1}: Raw={raw_val}, UnitHint={unit_hint} -> Normalized={normalized} KG")
+                    print(f"Item {idx+1}: Raw={raw_val}, UnitHint={unit_hint}, Context={unidad_minera_found} -> Normalized={normalized} KG")
                     
                     # Assign a stable item_num based on loop index if missing
                     r["item_num"] = r.get("item_num", len(all_skeletons) + idx + 1)
@@ -698,6 +707,7 @@ async def characterize_rows(batch: list[dict]):
                             "analysis_valorization": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"role": {"type": "STRING"}, "method": {"type": "STRING"}, "output": {"type": "STRING"}, "score": {"type": "NUMBER"}}}},
                             "proceso_valorizacion": {"type": "STRING"},
                             "proceso_reclasificacion": {"type": "STRING"},
+                            "tratamiento": {"type": "STRING"},
                             "viabilidad_ec": {"type": "NUMBER"},
                             "viabilidad_reclasificacion": {"type": "NUMBER"}
                         }
@@ -709,8 +719,9 @@ async def characterize_rows(batch: list[dict]):
 
         prompt = """
         Eres un experto en ingeniería ambiental. Caracteriza técnicamente estos residuos.
-        'proceso_valorizacion': Ruta técnica detallada para ganar dinero/valor con el residuo.
+        'proceso_valorizacion': Ruta técnica detallada para ganar dinero/valor con el residuo. Considera Art. 65 y 67 (Reciclaje, compostaje, reutilización, recuperación de aceites, bio-conversión, coprocesamiento, coincineración, energía). Priorizar valorización frente a disposición.
         'proceso_reclasificacion': Pasos técnicos (lavado, neutralización) para que no sea peligroso.
+        'tratamiento': Proceso previo a la valorización o disposición (Art. 62). Opciones: Solidificación, Neutralización, Estabilización, Incineración, Pirólisis, Esterilización por autoclave, Pretratamiento (trituración/mezcla para CDR), u otras operaciones autorizadas.
         'viabilidad_ec': Porcentaje de éxito de la valorización (NÚMERO ENTERO de 0 a 100).
         'viabilidad_reclasificacion': Porcentaje de probabilidad de éxito técnico para la reclasificación a no peligroso (NÚMERO ENTERO de 0 a 100).
         MANTEN EL MISMO 'item_num' para cada registro.
