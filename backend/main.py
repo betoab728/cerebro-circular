@@ -530,8 +530,8 @@ async def predictive_analysis(
              "costBenefitAction": "String (e.g. 'Rentable segregar para reciclar')"
           },
           "circularStrategy": {
-             "recommendedRoute": "String (THE BEST CIRCULAR OPTION)",
-             "justification": "String (Explain HOW to achieve this legaly per NTS 144)"
+             "recommendedRoute": "String (THE BEST CIRCULAR OPTION, sin considerar la NTS 144)",
+             "justification": "String (Explain HOW to achieve this legaly. NO considerar ni mencionar NTS 144 aquí)"
           },
           "compliance": {
              "mrsp_applicability": "String",
